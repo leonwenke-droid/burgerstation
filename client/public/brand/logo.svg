@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="none">
+  <defs>
+    <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#0a1530"/>
+      <stop offset="100%" stop-color="#050918"/>
+    </radialGradient>
+    <filter id="neonPink" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2.5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="neonCyan" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <!-- Outer ring -->
+  <circle cx="200" cy="200" r="195" fill="url(#bgGrad)" stroke="#fafaf6" stroke-width="6"/>
+  <circle cx="200" cy="200" r="180" fill="none" stroke="#FF2D87" stroke-width="2.5" filter="url(#neonPink)" opacity="0.9"/>
+
+  <!-- Top star -->
+  <g filter="url(#neonPink)" transform="translate(200 50)">
+    <polygon points="0,-18 5,-6 18,-6 7,2 11,15 0,7 -11,15 -7,2 -18,-6 -5,-6" fill="#FF2D87"/>
+  </g>
+
+  <!-- EST. 2025 left/right -->
+  <text x="80" y="208" font-family="'Bebas Neue', sans-serif" font-size="22" fill="#FF2D87" letter-spacing="2" filter="url(#neonPink)">EST.</text>
+  <text x="290" y="208" font-family="'Bebas Neue', sans-serif" font-size="22" fill="#FF2D87" letter-spacing="2" filter="url(#neonPink)">2025</text>
+
+  <!-- Curved top text BURGER STATION -->
+  <path id="topArc" d="M 60 200 A 140 140 0 0 1 340 200" fill="none"/>
+  <text font-family="'Bebas Neue', sans-serif" font-size="40" fill="#FAFAF6" letter-spacing="6">
+    <textPath href="#topArc" startOffset="50%" text-anchor="middle">BURGER STATION</textPath>
+  </text>
+
+  <!-- Burger illustration center -->
+  <g transform="translate(200 215)">
+    <!-- Top bun -->
+    <path d="M -55 -5 Q -55 -45 0 -45 Q 55 -45 55 -5 Z" fill="#FFB347" stroke="#FAFAF6" stroke-width="2.5"/>
+    <!-- sesame -->
+    <ellipse cx="-25" cy="-30" rx="2" ry="1.5" fill="#FAFAF6"/>
+    <ellipse cx="0" cy="-38" rx="2" ry="1.5" fill="#FAFAF6"/>
+    <ellipse cx="22" cy="-30" rx="2" ry="1.5" fill="#FAFAF6"/>
+    <ellipse cx="-12" cy="-22" rx="2" ry="1.5" fill="#FAFAF6"/>
+    <ellipse cx="13" cy="-22" rx="2" ry="1.5" fill="#FAFAF6"/>
+    <!-- cheese (yellow) -->
+    <path d="M -58 -2 L 58 -2 L 55 8 Q 30 14 0 12 Q -30 14 -55 8 Z" fill="#FFD93D" stroke="#FAFAF6" stroke-width="2.5"/>
+    <!-- patty -->
+    <rect x="-58" y="6" width="116" height="14" rx="3" fill="#7A3B1F" stroke="#FAFAF6" stroke-width="2.5"/>
+    <!-- lettuce -->
+    <path d="M -60 16 Q -50 26 -40 18 Q -30 28 -20 18 Q -10 28 0 18 Q 10 28 20 18 Q 30 28 40 18 Q 50 26 60 16 L 60 22 L -60 22 Z" fill="#5BC474" stroke="#FAFAF6" stroke-width="2.5"/>
+    <!-- bottom bun -->
+    <path d="M -55 22 L 55 22 Q 55 42 0 42 Q -55 42 -55 22 Z" fill="#E89B4A" stroke="#FAFAF6" stroke-width="2.5"/>
+  </g>
+
+  <!-- Bottom banner -->
+  <path d="M 80 305 L 320 305 L 305 340 L 95 340 Z" fill="#FF2D87" stroke="#FAFAF6" stroke-width="2.5" filter="url(#neonPink)"/>
+  <text x="200" y="328" font-family="'Bebas Neue', sans-serif" font-size="22" fill="#FAFAF6" text-anchor="middle" letter-spacing="6">GREAT TASTE</text>
+
+  <!-- decorative side stars -->
+  <g fill="#00E0E0" filter="url(#neonCyan)">
+    <polygon points="50,200 53,194 59,193 54,189 56,183 50,186 44,183 46,189 41,193 47,194" />
+    <polygon points="350,200 353,194 359,193 354,189 356,183 350,186 344,183 346,189 341,193 347,194" />
+  </g>
+</svg>

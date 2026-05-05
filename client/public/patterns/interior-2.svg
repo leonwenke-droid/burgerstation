@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" fill="none">
+  <defs>
+    <linearGradient id="wallCyan" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7DDDD8"/>
+      <stop offset="100%" stop-color="#4FBDB8"/>
+    </linearGradient>
+    <filter id="ng2">
+      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="600" height="600" fill="url(#wallCyan)"/>
+
+  <!-- Booth / banquette -->
+  <rect x="0" y="380" width="600" height="220" fill="#FF2D87" stroke="#1a1a1a" stroke-width="3"/>
+  <!-- tufting (button pattern) -->
+  <g fill="#1a1a1a">
+    <circle cx="60" cy="430" r="4"/>
+    <circle cx="160" cy="430" r="4"/>
+    <circle cx="260" cy="430" r="4"/>
+    <circle cx="360" cy="430" r="4"/>
+    <circle cx="460" cy="430" r="4"/>
+    <circle cx="540" cy="430" r="4"/>
+    <circle cx="100" cy="490" r="4"/>
+    <circle cx="200" cy="490" r="4"/>
+    <circle cx="300" cy="490" r="4"/>
+    <circle cx="400" cy="490" r="4"/>
+    <circle cx="500" cy="490" r="4"/>
+  </g>
+  <!-- diamond stitching -->
+  <g stroke="#1a1a1a" stroke-width="1" opacity="0.3" fill="none">
+    <path d="M 60 430 L 100 490 L 160 430 L 200 490 L 260 430 L 300 490 L 360 430 L 400 490 L 460 430 L 500 490 L 540 430"/>
+    <path d="M 100 490 L 60 430 M 200 490 L 160 430 M 300 490 L 260 430 M 400 490 L 360 430 M 500 490 L 460 430"/>
+  </g>
+
+  <!-- Diner table (round) -->
+  <ellipse cx="300" cy="540" rx="180" ry="20" fill="#FAFAF6" stroke="#1a1a1a" stroke-width="3"/>
+  <rect x="290" y="555" width="20" height="45" fill="#1a1a1a"/>
+
+  <!-- Wall art: framed retro poster -->
+  <g transform="translate(150 200)">
+    <rect x="-70" y="-90" width="140" height="180" fill="#FAFAF6" stroke="#1a1a1a" stroke-width="3" rx="3"/>
+    <rect x="-60" y="-80" width="120" height="160" fill="#0a1530"/>
+    <text x="0" y="-30" font-family="'Bebas Neue', sans-serif" font-size="16" fill="#FF2D87" text-anchor="middle" letter-spacing="2" filter="url(#ng2)">RETRO</text>
+    <text x="0" y="-5" font-family="'Bebas Neue', sans-serif" font-size="22" fill="#00E0E0" text-anchor="middle" letter-spacing="2" filter="url(#ng2)">DINER</text>
+    <text x="0" y="20" font-family="'Bebas Neue', sans-serif" font-size="13" fill="#FFE15D" text-anchor="middle" letter-spacing="1" filter="url(#ng2)">EST. 2025</text>
+    <!-- mini burger -->
+    <g transform="translate(0 55)">
+      <path d="M -20 -2 Q -20 -16 0 -16 Q 20 -16 20 -2 Z" fill="#FFB347"/>
+      <rect x="-22" y="-2" width="44" height="5" fill="#FFD93D"/>
+      <rect x="-22" y="3" width="44" height="6" fill="#7A3B1F"/>
+      <path d="M -20 9 L 20 9 Q 20 18 0 18 Q -20 18 -20 9 Z" fill="#E89B4A"/>
+    </g>
+  </g>
+
+  <!-- Big neon arrow sign -->
+  <g transform="translate(420 220)">
+    <rect x="-90" y="-70" width="180" height="140" fill="#0a1530" stroke="#FAFAF6" stroke-width="3" rx="6"/>
+    <text x="0" y="-25" font-family="'Bebas Neue', sans-serif" font-size="22" fill="#FFE15D" text-anchor="middle" letter-spacing="2" filter="url(#ng2)">EAT</text>
+    <text x="0" y="5" font-family="'Bebas Neue', sans-serif" font-size="22" fill="#FF2D87" text-anchor="middle" letter-spacing="2" filter="url(#ng2)">SMASH</text>
+    <text x="0" y="35" font-family="'Bebas Neue', sans-serif" font-size="22" fill="#00E0E0" text-anchor="middle" letter-spacing="2" filter="url(#ng2)">REPEAT</text>
+    <!-- arrow -->
+    <path d="M -75 50 L -55 60 L -75 70 Z" fill="#FF2D87" filter="url(#ng2)"/>
+    <path d="M 75 50 L 55 60 L 75 70 Z" fill="#FF2D87" filter="url(#ng2)"/>
+  </g>
+
+  <!-- Pendant lights -->
+  <g>
+    <line x1="100" y1="0" x2="100" y2="60" stroke="#1a1a1a" stroke-width="2"/>
+    <circle cx="100" cy="75" r="14" fill="#FFE15D" stroke="#1a1a1a" stroke-width="2" filter="url(#ng2)"/>
+    <line x1="500" y1="0" x2="500" y2="60" stroke="#1a1a1a" stroke-width="2"/>
+    <circle cx="500" cy="75" r="14" fill="#FFE15D" stroke="#1a1a1a" stroke-width="2" filter="url(#ng2)"/>
+  </g>
+</svg>

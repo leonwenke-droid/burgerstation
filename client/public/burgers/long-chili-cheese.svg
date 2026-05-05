@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" fill="none">
+  <defs>
+    <radialGradient id="bg2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#C8F2F1"/>
+      <stop offset="100%" stop-color="#8FE1DF"/>
+    </radialGradient>
+    <linearGradient id="bunTop2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F4B86A"/>
+      <stop offset="100%" stop-color="#D88A3C"/>
+    </linearGradient>
+    <linearGradient id="bunBot2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#E89B4A"/>
+      <stop offset="100%" stop-color="#B86A2A"/>
+    </linearGradient>
+    <linearGradient id="patty2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6B2E12"/>
+      <stop offset="100%" stop-color="#3F1A09"/>
+    </linearGradient>
+    <linearGradient id="chiliCheese" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFB347"/>
+      <stop offset="100%" stop-color="#E07020"/>
+    </linearGradient>
+    <radialGradient id="plate2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#E8E8E0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="600" height="600" fill="url(#bg2)"/>
+  <g opacity="0.25">
+    <rect x="0" y="510" width="80" height="90" fill="#0a1530"/>
+    <rect x="160" y="510" width="80" height="90" fill="#0a1530"/>
+    <rect x="320" y="510" width="80" height="90" fill="#0a1530"/>
+    <rect x="480" y="510" width="80" height="90" fill="#0a1530"/>
+    <rect x="80" y="555" width="80" height="45" fill="#0a1530"/>
+    <rect x="240" y="555" width="80" height="45" fill="#0a1530"/>
+    <rect x="400" y="555" width="80" height="45" fill="#0a1530"/>
+  </g>
+  <ellipse cx="300" cy="500" rx="220" ry="22" fill="#000" opacity="0.18"/>
+  <ellipse cx="300" cy="485" rx="225" ry="32" fill="url(#plate2)" stroke="#1a1a1a" stroke-width="3"/>
+
+  <g transform="translate(300 320)">
+    <!-- LONG: bun is wider/longer -->
+    <!-- Bottom bun -->
+    <path d="M -180 130 Q -180 170 -130 175 Q -65 180 0 180 Q 65 180 130 175 Q 180 170 180 130 L 175 110 L -175 110 Z" fill="url(#bunBot2)" stroke="#1a1a1a" stroke-width="3.5"/>
+
+    <!-- Lettuce -->
+    <path d="M -180 110 Q -160 88 -140 105 Q -120 80 -100 100 Q -80 78 -60 100 Q -40 76 -20 100 Q 0 78 20 100 Q 40 76 60 100 Q 80 78 100 100 Q 120 80 140 105 Q 160 88 180 110 L 180 118 L -180 118 Z" fill="#5BC474" stroke="#1a1a1a" stroke-width="3"/>
+
+    <!-- Jalapeños -->
+    <ellipse cx="-90" cy="60" rx="14" ry="6" fill="#3FA15A" stroke="#1a1a1a" stroke-width="2" transform="rotate(-15 -90 60)"/>
+    <ellipse cx="-30" cy="55" rx="12" ry="5" fill="#3FA15A" stroke="#1a1a1a" stroke-width="2" transform="rotate(20 -30 55)"/>
+    <ellipse cx="40" cy="62" rx="13" ry="5.5" fill="#3FA15A" stroke="#1a1a1a" stroke-width="2" transform="rotate(-10 40 62)"/>
+    <ellipse cx="100" cy="58" rx="14" ry="6" fill="#3FA15A" stroke="#1a1a1a" stroke-width="2" transform="rotate(15 100 58)"/>
+
+    <!-- Patty 1 (long) -->
+    <path d="M -178 22 Q -178 4 -160 2 Q -100 -3 0 -1 Q 100 -3 160 2 Q 178 4 178 22 Q 178 39 160 44 Q 100 49 0 46 Q -100 49 -160 44 Q -178 39 -178 22 Z" fill="url(#patty2)" stroke="#1a1a1a" stroke-width="3"/>
+
+    <!-- Chili cheese sauce drip -->
+    <path d="M -185 -5 L 185 -5 L 175 30 Q 130 42 60 38 Q 0 44 -60 38 Q -130 42 -175 30 Z" fill="url(#chiliCheese)" stroke="#1a1a1a" stroke-width="3"/>
+    <!-- Drips -->
+    <path d="M -140 28 L -145 55 L -135 50 Z" fill="url(#chiliCheese)" stroke="#1a1a1a" stroke-width="2.5"/>
+    <path d="M -50 32 L -55 65 L -45 60 Z" fill="url(#chiliCheese)" stroke="#1a1a1a" stroke-width="2.5"/>
+    <path d="M 60 32 L 65 65 L 55 60 Z" fill="url(#chiliCheese)" stroke="#1a1a1a" stroke-width="2.5"/>
+    <path d="M 145 28 L 150 55 L 140 50 Z" fill="url(#chiliCheese)" stroke="#1a1a1a" stroke-width="2.5"/>
+
+    <!-- chili flakes -->
+    <circle cx="-100" cy="10" r="3" fill="#C0392B"/>
+    <circle cx="-40" cy="14" r="2.5" fill="#C0392B"/>
+    <circle cx="20" cy="8" r="3" fill="#C0392B"/>
+    <circle cx="80" cy="12" r="2.5" fill="#C0392B"/>
+    <circle cx="130" cy="10" r="3" fill="#C0392B"/>
+
+    <!-- Top bun (longer) -->
+    <path d="M -175 -10 Q -175 -100 0 -105 Q 175 -100 175 -10 Z" fill="url(#bunTop2)" stroke="#1a1a1a" stroke-width="3.5"/>
+    <path d="M -150 -85 Q -100 -100 0 -103 Q 100 -100 150 -85" fill="none" stroke="#FFE0B0" stroke-width="3" opacity="0.7"/>
+    <!-- Sesame -->
+    <g fill="#FFFFFF" stroke="#1a1a1a" stroke-width="1.5">
+      <ellipse cx="-110" cy="-70" rx="5" ry="3" transform="rotate(-15 -110 -70)"/>
+      <ellipse cx="-60" cy="-85" rx="5" ry="3" transform="rotate(10 -60 -85)"/>
+      <ellipse cx="-20" cy="-92" rx="5" ry="3" transform="rotate(-5 -20 -92)"/>
+      <ellipse cx="30" cy="-90" rx="5" ry="3" transform="rotate(20 30 -90)"/>
+      <ellipse cx="80" cy="-80" rx="5" ry="3" transform="rotate(-15 80 -80)"/>
+      <ellipse cx="120" cy="-65" rx="5" ry="3" transform="rotate(30 120 -65)"/>
+      <ellipse cx="-130" cy="-45" rx="5" ry="3" transform="rotate(-30 -130 -45)"/>
+      <ellipse cx="130" cy="-45" rx="5" ry="3" transform="rotate(30 130 -45)"/>
+    </g>
+  </g>
+
+  <!-- Flame icon -->
+  <g transform="translate(80 100)" opacity="0.8">
+    <path d="M 0 0 Q -8 -15 -4 -25 Q 0 -18 4 -25 Q 8 -15 0 0 Z" fill="#FF2D87"/>
+  </g>
+  <!-- Pepper -->
+  <g transform="translate(520 90) rotate(20)" opacity="0.85">
+    <path d="M 0 0 Q 5 -2 8 -8 L 12 -10 L 10 -6 Q 8 5 0 12 Q -8 5 -10 -6 L -12 -10 L -8 -8 Q -5 -2 0 0 Z" fill="#C0392B"/>
+  </g>
+</svg>

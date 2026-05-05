@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" fill="none">
+  <defs>
+    <filter id="np" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1.2" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <circle cx="40" cy="40" r="38" fill="#0a1530" stroke="#FAFAF6" stroke-width="2"/>
+  <circle cx="40" cy="40" r="34" fill="none" stroke="#FF2D87" stroke-width="1.2" filter="url(#np)"/>
+  <g transform="translate(40 42)">
+    <path d="M -18 -3 Q -18 -15 0 -15 Q 18 -15 18 -3 Z" fill="#FFB347" stroke="#FAFAF6" stroke-width="1.2"/>
+    <ellipse cx="-7" cy="-9" rx="0.8" ry="0.6" fill="#FAFAF6"/>
+    <ellipse cx="0" cy="-12" rx="0.8" ry="0.6" fill="#FAFAF6"/>
+    <ellipse cx="7" cy="-9" rx="0.8" ry="0.6" fill="#FAFAF6"/>
+    <path d="M -19 -1 L 19 -1 L 18 3 Q 9 5 0 4 Q -9 5 -18 3 Z" fill="#FFD93D" stroke="#FAFAF6" stroke-width="1.2"/>
+    <rect x="-19" y="2" width="38" height="5" rx="1" fill="#7A3B1F" stroke="#FAFAF6" stroke-width="1.2"/>
+    <path d="M -19 6 Q -14 10 -10 7 Q -5 10 0 7 Q 5 10 10 7 Q 14 10 19 6 L 19 8 L -19 8 Z" fill="#5BC474" stroke="#FAFAF6" stroke-width="1.2"/>
+    <path d="M -18 8 L 18 8 Q 18 15 0 15 Q -18 15 -18 8 Z" fill="#E89B4A" stroke="#FAFAF6" stroke-width="1.2"/>
+  </g>
+</svg>

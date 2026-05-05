@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" fill="none">
+  <defs>
+    <linearGradient id="skyDusk" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a2d4d"/>
+      <stop offset="50%" stop-color="#3d2052"/>
+      <stop offset="100%" stop-color="#7a2d65"/>
+    </linearGradient>
+    <linearGradient id="brickWall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5a3030"/>
+      <stop offset="100%" stop-color="#3a1f1f"/>
+    </linearGradient>
+    <filter id="ng3">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <!-- Sky -->
+  <rect width="600" height="280" fill="url(#skyDusk)"/>
+  <!-- Stars in sky -->
+  <g fill="#FFE15D" opacity="0.8">
+    <circle cx="80" cy="60" r="1.5"/>
+    <circle cx="180" cy="40" r="1"/>
+    <circle cx="320" cy="80" r="1.5"/>
+    <circle cx="450" cy="50" r="1"/>
+    <circle cx="540" cy="100" r="1.5"/>
+  </g>
+  <!-- Moon -->
+  <circle cx="510" cy="80" r="22" fill="#FAFAF6" opacity="0.85"/>
+  <circle cx="504" cy="74" r="3" fill="#0a1530" opacity="0.2"/>
+  <circle cx="514" cy="86" r="2" fill="#0a1530" opacity="0.2"/>
+
+  <!-- Building wall -->
+  <rect y="280" width="600" height="320" fill="url(#brickWall)"/>
+  <!-- Brick pattern -->
+  <g stroke="#2a1010" stroke-width="1" opacity="0.5">
+    <line x1="0" y1="320" x2="600" y2="320"/>
+    <line x1="0" y1="360" x2="600" y2="360"/>
+    <line x1="0" y1="400" x2="600" y2="400"/>
+    <line x1="0" y1="440" x2="600" y2="440"/>
+    <line x1="0" y1="480" x2="600" y2="480"/>
+    <line x1="0" y1="520" x2="600" y2="520"/>
+    <line x1="40" y1="320" x2="40" y2="360"/>
+    <line x1="120" y1="320" x2="120" y2="360"/>
+    <line x1="200" y1="320" x2="200" y2="360"/>
+    <line x1="280" y1="320" x2="280" y2="360"/>
+    <line x1="360" y1="320" x2="360" y2="360"/>
+    <line x1="440" y1="320" x2="440" y2="360"/>
+    <line x1="520" y1="320" x2="520" y2="360"/>
+    <line x1="0" y1="360" x2="0" y2="400"/>
+    <line x1="80" y1="360" x2="80" y2="400"/>
+    <line x1="160" y1="360" x2="160" y2="400"/>
+    <line x1="240" y1="360" x2="240" y2="400"/>
+    <line x1="320" y1="360" x2="320" y2="400"/>
+    <line x1="400" y1="360" x2="400" y2="400"/>
+    <line x1="480" y1="360" x2="480" y2="400"/>
+    <line x1="560" y1="360" x2="560" y2="400"/>
+  </g>
+
+  <!-- Awning/marquee neon sign -->
+  <g transform="translate(300 230)">
+    <!-- Outer marquee frame -->
+    <rect x="-220" y="-90" width="440" height="180" fill="#0a1530" stroke="#FAFAF6" stroke-width="4" rx="12"/>
+    <!-- Light bulbs around frame -->
+    <g fill="#FFE15D" filter="url(#ng3)">
+      <circle cx="-200" cy="-90" r="5"/>
+      <circle cx="-160" cy="-90" r="5"/>
+      <circle cx="-120" cy="-90" r="5"/>
+      <circle cx="-80" cy="-90" r="5"/>
+      <circle cx="-40" cy="-90" r="5"/>
+      <circle cx="0" cy="-90" r="5"/>
+      <circle cx="40" cy="-90" r="5"/>
+      <circle cx="80" cy="-90" r="5"/>
+      <circle cx="120" cy="-90" r="5"/>
+      <circle cx="160" cy="-90" r="5"/>
+      <circle cx="200" cy="-90" r="5"/>
+      <circle cx="-220" cy="-50" r="5"/>
+      <circle cx="-220" cy="-10" r="5"/>
+      <circle cx="-220" cy="30" r="5"/>
+      <circle cx="-220" cy="70" r="5"/>
+      <circle cx="220" cy="-50" r="5"/>
+      <circle cx="220" cy="-10" r="5"/>
+      <circle cx="220" cy="30" r="5"/>
+      <circle cx="220" cy="70" r="5"/>
+      <circle cx="-200" cy="90" r="5"/>
+      <circle cx="-160" cy="90" r="5"/>
+      <circle cx="-120" cy="90" r="5"/>
+      <circle cx="-80" cy="90" r="5"/>
+      <circle cx="-40" cy="90" r="5"/>
+      <circle cx="0" cy="90" r="5"/>
+      <circle cx="40" cy="90" r="5"/>
+      <circle cx="80" cy="90" r="5"/>
+      <circle cx="120" cy="90" r="5"/>
+      <circle cx="160" cy="90" r="5"/>
+      <circle cx="200" cy="90" r="5"/>
+    </g>
+
+    <!-- Inner sign -->
+    <text x="0" y="-30" font-family="'Bebas Neue', sans-serif" font-size="48" fill="#FF2D87" text-anchor="middle" letter-spacing="6" filter="url(#ng3)">BURGER</text>
+    <text x="0" y="20" font-family="'Bebas Neue', sans-serif" font-size="48" fill="#00E0E0" text-anchor="middle" letter-spacing="6" filter="url(#ng3)">STATION</text>
+    <text x="0" y="60" font-family="'Bebas Neue', sans-serif" font-size="16" fill="#FFE15D" text-anchor="middle" letter-spacing="3" filter="url(#ng3)">SMASH BURGERS · LEER</text>
+  </g>
+
+  <!-- Sidewalk -->
+  <rect y="540" width="600" height="60" fill="#3a3a3a"/>
+  <!-- Door entrance glow -->
+  <ellipse cx="300" cy="560" rx="180" ry="20" fill="#FF2D87" opacity="0.2" filter="url(#ng3)"/>
+
+  <!-- "OPEN" small neon -->
+  <g transform="translate(80 480)">
+    <rect x="-30" y="-15" width="60" height="30" fill="#0a1530" stroke="#FAFAF6" stroke-width="1.5" rx="2"/>
+    <text x="0" y="6" font-family="'Bebas Neue', sans-serif" font-size="18" fill="#00E0E0" text-anchor="middle" letter-spacing="2" filter="url(#ng3)">OPEN</text>
+  </g>
+</svg>

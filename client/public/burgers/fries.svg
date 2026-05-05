@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="none">
+  <defs>
+    <linearGradient id="fryRed" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#E63946"/>
+      <stop offset="100%" stop-color="#A8232E"/>
+    </linearGradient>
+    <linearGradient id="fryYellow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFD93D"/>
+      <stop offset="100%" stop-color="#E6A500"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="400" fill="#FFE6F0"/>
+  <!-- container -->
+  <path d="M 110 200 L 290 200 L 270 360 Q 250 380 200 380 Q 150 380 130 360 Z" fill="url(#fryRed)" stroke="#1a1a1a" stroke-width="3"/>
+  <!-- white stripes -->
+  <rect x="120" y="220" width="160" height="14" fill="#FAFAF6"/>
+  <rect x="120" y="250" width="160" height="14" fill="#FAFAF6"/>
+  <!-- BS logo on container -->
+  <text x="200" y="320" font-family="'Bebas Neue', sans-serif" font-size="22" fill="#FAFAF6" text-anchor="middle" letter-spacing="2">BS</text>
+
+  <!-- fries -->
+  <g stroke="#1a1a1a" stroke-width="2.5">
+    <rect x="135" y="80" width="14" height="140" fill="url(#fryYellow)" rx="2"/>
+    <rect x="155" y="60" width="14" height="160" fill="url(#fryYellow)" rx="2" transform="rotate(-3 162 140)"/>
+    <rect x="175" y="50" width="14" height="170" fill="url(#fryYellow)" rx="2"/>
+    <rect x="195" y="45" width="14" height="175" fill="url(#fryYellow)" rx="2" transform="rotate(2 202 132)"/>
+    <rect x="215" y="55" width="14" height="165" fill="url(#fryYellow)" rx="2"/>
+    <rect x="235" y="70" width="14" height="150" fill="url(#fryYellow)" rx="2" transform="rotate(4 242 145)"/>
+    <rect x="255" y="90" width="14" height="130" fill="url(#fryYellow)" rx="2"/>
+  </g>
+  <!-- highlights -->
+  <g fill="#FFE988" opacity="0.7">
+    <rect x="138" y="85" width="3" height="130" rx="1"/>
+    <rect x="178" y="55" width="3" height="160" rx="1"/>
+    <rect x="218" y="60" width="3" height="155" rx="1"/>
+    <rect x="258" y="95" width="3" height="120" rx="1"/>
+  </g>
+  <!-- salt sparkle -->
+  <circle cx="170" cy="100" r="2" fill="#FAFAF6"/>
+  <circle cx="220" cy="80" r="2" fill="#FAFAF6"/>
+  <circle cx="240" cy="120" r="2" fill="#FAFAF6"/>
+</svg>
