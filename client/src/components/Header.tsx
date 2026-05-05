@@ -1,0 +1,131 @@
+import { Phone, MapPin, Menu as MenuIcon, X } from "lucide-react";
+import { useState } from "react";
+import { Link, useLocation } from "wouter";
+
+const PHONE = "tel:+4949199755279";
+const MAPS =
+  "https://www.google.com/maps/search/?api=1&query=Burger+Station+Bahnhofsring+30+26789+Leer";
+
+const NAV_LINKS = [
+  { label: "Home", href: "/" },
+  { label: "Menü", href: "/menu" },
+  { label: "Über uns", href: "/about" },
+  { label: "Standort", href: "/locations" },
+];
+
+export default function Header() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [location] = useLocation();
+
+  return (
+    <header className="sticky top-0 z-50 bg-[#FEFCCF] border-b-4 border-bs-ink shadow-[4px_4px_0px_0px_var(--bs-ink)]">
+      <div className="container flex items-center justify-between py-3 md:py-4">
+        {/* Brand */}
+        <Link href="/" className="flex items-center gap-3 group">
+          <img
+            src="/brand/mark.svg"
+            alt="Burger Station Logo"
+            className="w-11 h-11 md:w-12 md:h-12 transition-transform group-hover:rotate-6"
+          />
+          <div className="leading-none">
+            <div className="font-display text-subhead text-lg md:text-xl text-bs-ink uppercase tracking-tight">
+              BURGER STATION
+            </div>
+            <div className="text-label-caps text-[10px] md:text-xs text-bs-pink mt-0.5">
+              Leer · Est. 2025
+            </div>
+          </div>
+        </Link>
+
+        {/* Desktop nav */}
+        <nav className="hidden lg:flex items-center gap-8 font-body font-semibold text-sm tracking-wider text-bs-ink uppercase">
+          {NAV_LINKS.map(({ label, href }) => {
+            const active =
+              href === "/"
+                ? location === "/"
+                : location.startsWith(href);
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={`relative pb-1 transition-colors hover:text-bs-pink ${
+                  active
+                    ? "text-bs-pink border-b-4 border-bs-pink"
+                    : "hover:text-bs-pink"
+                }`}
+              >
+                {label}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Desktop CTAs */}
+        <div className="hidden md:flex items-center gap-3">
+          <a
+            href={MAPS}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-cyan btn-sm"
+          >
+            <MapPin size={16} /> Route
+          </a>
+          <a href={PHONE} className="btn-pink btn-sm">
+            <Phone size={16} /> Anrufen
+          </a>
+        </div>
+
+        {/* Mobile hamburger */}
+        <button
+          className="lg:hidden bg-white border-2 border-bs-ink rounded-full p-2 shadow-[3px_3px_0_var(--bs-ink)]"
+          onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label={mobileOpen ? "Menü schließen" : "Menü öffnen"}
+        >
+          {mobileOpen ? <X size={22} /> : <MenuIcon size={22} />}
+        </button>
+      </div>
+
+      {/* Mobile dropdown */}
+      {mobileOpen && (
+        <nav className="lg:hidden bg-[#FEFCCF] border-t-2 border-bs-ink p-4 space-y-1 font-body font-semibold text-base uppercase tracking-wider">
+          {NAV_LINKS.map(({ label, href }) => {
+            const active =
+              href === "/" ? location === "/" : location.startsWith(href);
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={`flex items-center justify-between py-3 px-3 rounded-xl border-2 transition-all ${
+                  active
+                    ? "border-bs-pink bg-bs-pink-cream text-bs-pink"
+                    : "border-transparent hover:border-bs-ink hover:bg-white"
+                }`}
+                onClick={() => setMobileOpen(false)}
+              >
+                {label}
+              </Link>
+            );
+          })}
+          <div className="pt-3 grid grid-cols-2 gap-3">
+            <a
+              href={MAPS}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-cyan btn-sm text-center"
+              onClick={() => setMobileOpen(false)}
+            >
+              <MapPin size={14} /> Route
+            </a>
+            <a
+              href={PHONE}
+              className="btn-pink btn-sm text-center"
+              onClick={() => setMobileOpen(false)}
+            >
+              <Phone size={14} /> Anrufen
+            </a>
+          </div>
+        </nav>
+      )}
+    </header>
+  );
+}

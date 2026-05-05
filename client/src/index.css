@@ -74,7 +74,7 @@
   --bs-cyan-soft:   #8FE1DF;
   --bs-cyan-cream:  #C8F2F1;
   --bs-yellow:      #FFE15D;
-  --bs-cream:       #FAFAF6;
+  --bs-cream:       #FEFCCF;
   --bs-ink:         #0a1530;
   --bs-coal:        #1a1a1a;
   --bs-paper:       #FFF8EB;
@@ -273,29 +273,77 @@
   }
 
   .btn-pink {
-    @apply btn-base;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    padding: 0.875rem 1.75rem;
+    border-radius: 999px;
+    border: 3px solid var(--bs-ink);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+    text-transform: uppercase;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    line-height: 1;
+    cursor: pointer;
+    text-decoration: none;
     background: var(--bs-pink);
     color: white;
     box-shadow: var(--bs-shadow);
   }
+  .btn-pink:focus-visible { outline: 3px solid var(--bs-yellow); outline-offset: 3px; }
   .btn-pink:hover  { transform: translate(3px, 3px); box-shadow: 2px 2px 0 var(--bs-ink); }
   .btn-pink:active { transform: translate(5px, 5px); box-shadow: none; }
 
   .btn-cyan {
-    @apply btn-base;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    padding: 0.875rem 1.75rem;
+    border-radius: 999px;
+    border: 3px solid var(--bs-ink);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+    text-transform: uppercase;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    line-height: 1;
+    cursor: pointer;
+    text-decoration: none;
     background: var(--bs-cyan);
     color: var(--bs-ink);
     box-shadow: var(--bs-shadow);
   }
+  .btn-cyan:focus-visible { outline: 3px solid var(--bs-yellow); outline-offset: 3px; }
   .btn-cyan:hover  { transform: translate(3px, 3px); box-shadow: 2px 2px 0 var(--bs-ink); }
   .btn-cyan:active { transform: translate(5px, 5px); box-shadow: none; }
 
   .btn-ghost-ink {
-    @apply btn-base;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    padding: 0.875rem 1.75rem;
+    border-radius: 999px;
+    border: 3px solid var(--bs-ink);
+    transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+    text-transform: uppercase;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    line-height: 1;
+    cursor: pointer;
+    text-decoration: none;
     background: transparent;
     color: var(--bs-ink);
     box-shadow: none;
   }
+  .btn-ghost-ink:focus-visible { outline: 3px solid var(--bs-yellow); outline-offset: 3px; }
   .btn-ghost-ink:hover { background: var(--bs-ink); color: white; }
 
   .btn-sm {
@@ -532,4 +580,24 @@
     background-size: 5px 5px;
     pointer-events: none;
   }
+}
+
+@layer utilities {
+  /* Tailwind v4 doesn't ship border-3; define it so components can use it */
+  .border-3   { border-width: 3px; }
+  .border-t-3 { border-top-width: 3px; }
+  .border-b-3 { border-bottom-width: 3px; }
+  .border-l-3 { border-left-width: 3px; }
+  .border-r-3 { border-right-width: 3px; }
+
+  /* Fade-in / stagger animations used by card grids */
+  @keyframes fade-in-up {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .fade-in-up      { animation: fade-in-up 0.5s ease both; }
+  .stagger-1       { animation-delay: 0.05s; }
+  .stagger-2       { animation-delay: 0.10s; }
+  .stagger-3       { animation-delay: 0.15s; }
+  .stagger-4       { animation-delay: 0.20s; }
 }
