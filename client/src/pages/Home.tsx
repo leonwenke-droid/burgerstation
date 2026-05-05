@@ -119,7 +119,7 @@ export default function Home() {
       <header
         className={`sticky top-0 z-50 transition-all duration-300 ${
           scrolled
-            ? "bg-white/90 backdrop-blur-md border-b-2 border-[#0a1530] shadow-sm"
+            ? "bg-white/90 backdrop-blur-md border-b-2 border-bs-ink shadow-sm"
             : "bg-transparent"
         }`}
       >
@@ -127,17 +127,17 @@ export default function Home() {
           <a href="#top" className="flex items-center gap-3 group">
             <img src="/brand/mark.svg" alt="Burger Station Logo" className="w-11 h-11 md:w-12 md:h-12 transition-transform group-hover:rotate-6" />
             <div className="leading-none">
-              <div className="text-subhead text-lg md:text-xl text-[#0a1530]">BURGER STATION</div>
-              <div className="text-label-caps text-[10px] md:text-xs text-[#FF2D87] mt-0.5">Leer · Est. 2025</div>
+              <div className="text-subhead text-lg md:text-xl text-bs-ink">BURGER STATION</div>
+              <div className="text-label-caps text-[10px] md:text-xs text-bs-pink mt-0.5">Leer · Est. 2025</div>
             </div>
           </a>
 
-          <nav className="hidden lg:flex items-center gap-8 font-body font-semibold text-sm tracking-wider text-[#0a1530] uppercase">
-            <a href="#erlebnis" className="hover:text-[#FF2D87] transition">Erlebnis</a>
-            <a href="#bestseller" className="hover:text-[#FF2D87] transition">Bestseller</a>
-            <a href="#menu" className="hover:text-[#FF2D87] transition">Menü</a>
-            <a href="#standort" className="hover:text-[#FF2D87] transition">Standort</a>
-            <a href="#kontakt" className="hover:text-[#FF2D87] transition">Kontakt</a>
+          <nav className="hidden lg:flex items-center gap-8 font-body font-semibold text-sm tracking-wider text-bs-ink uppercase">
+            <a href="#erlebnis" className="hover:text-bs-pink transition">Erlebnis</a>
+            <a href="#bestseller" className="hover:text-bs-pink transition">Bestseller</a>
+            <a href="#menu" className="hover:text-bs-pink transition">Menü</a>
+            <a href="#standort" className="hover:text-bs-pink transition">Standort</a>
+            <a href="#kontakt" className="hover:text-bs-pink transition">Kontakt</a>
           </nav>
 
           <div className="hidden md:flex items-center gap-3">
@@ -150,7 +150,7 @@ export default function Home() {
           </div>
 
           <button
-            className="md:hidden bg-white border-2 border-[#0a1530] rounded-full p-2 shadow-[3px_3px_0_#0a1530]"
+            className="md:hidden bg-white border-2 border-bs-ink rounded-full p-2 shadow-[3px_3px_0_var(--bs-ink)]"
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label="Menü öffnen"
           >
@@ -159,7 +159,7 @@ export default function Home() {
         </div>
 
         {mobileOpen && (
-          <nav className="md:hidden bg-white border-t-2 border-[#0a1530] p-4 space-y-1 font-body font-semibold text-base uppercase tracking-wider">
+          <nav className="md:hidden bg-white border-t-2 border-bs-ink p-4 space-y-1 font-body font-semibold text-base uppercase tracking-wider">
             {[
               ["Erlebnis", "#erlebnis"],
               ["Bestseller", "#bestseller"],
@@ -184,30 +184,30 @@ export default function Home() {
       <section id="top" className="relative hero-gradient overflow-hidden pt-8 pb-16 md:pt-14 md:pb-24">
         {/* Decorative elements */}
         <div className="absolute inset-0 halftone pointer-events-none"></div>
-        <div className="absolute top-12 left-8 w-20 h-20 rounded-full border-4 border-[#FF2D87] opacity-50 hidden md:block float-anim"></div>
-        <div className="absolute top-32 right-12 w-12 h-12 rounded-full bg-[#FFE15D] border-2 border-[#0a1530] hidden md:block float-anim" style={{animationDelay: "1s"}}></div>
-        <div className="absolute bottom-32 left-16 w-8 h-8 rounded-full bg-[#00E0E0] hidden md:block float-anim" style={{animationDelay: "2s"}}></div>
+        <div className="absolute top-12 left-8 w-20 h-20 rounded-full border-4 border-bs-pink opacity-50 hidden md:block float-anim"></div>
+        <div className="absolute top-32 right-12 w-12 h-12 rounded-full bg-bs-yellow border-2 border-bs-ink hidden md:block float-anim" style={{animationDelay: "1s"}}></div>
+        <div className="absolute bottom-32 left-16 w-8 h-8 rounded-full bg-bs-cyan hidden md:block float-anim" style={{animationDelay: "2s"}}></div>
 
         <div className="container relative z-10 grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
           {/* LEFT — Copy */}
           <div className="lg:col-span-7 space-y-6 fade-in-up">
             {/* Pre-headline / status badge */}
-            <div className="inline-flex items-center gap-2 bg-[#0a1530] text-white px-4 py-2 rounded-full text-label-caps border-2 border-[#0a1530] shadow-[3px_3px_0_#FF2D87]">
-              <span className="w-2 h-2 rounded-full bg-[#00E0E0] animate-pulse"></span>
+            <div className="inline-flex items-center gap-2 bg-bs-ink text-white px-4 py-2 rounded-full text-label-caps border-2 border-bs-ink shadow-[3px_3px_0_var(--bs-pink)]">
+              <span className="w-2 h-2 rounded-full bg-bs-cyan animate-pulse"></span>
               SEIT MAI 2025 GEÖFFNET · LEER
             </div>
 
             <h1 className="text-display leading-[0.95]">
-              <span className="block text-5xl md:text-7xl lg:text-8xl text-[#0a1530]">SMASH BURGER</span>
+              <span className="block text-5xl md:text-7xl lg:text-8xl text-bs-ink">SMASH BURGER</span>
               <span className="block text-3xl md:text-5xl lg:text-6xl mt-2">
                 <span className="neon-text-pink neon-flicker">IN LEER</span>
               </span>
-              <span className="block text-xl md:text-2xl lg:text-3xl text-[#0a1530] mt-4 font-body italic font-medium normal-case tracking-normal">
+              <span className="block text-xl md:text-2xl lg:text-3xl text-bs-ink mt-4 font-body italic font-medium normal-case tracking-normal">
                 Halal · Handmade · Hot.
               </span>
             </h1>
 
-            <p className="text-lg md:text-xl text-[#0a1530]/80 max-w-xl leading-relaxed">
+            <p className="text-lg md:text-xl text-bs-ink/80 max-w-xl leading-relaxed">
               Saftige Smash Patties, knusprige Fries und cremige Shakes — direkt am Bahnhofsring 30. Pinke Wände, Neonlicht, echte Diner-Vibes.
             </p>
 
@@ -235,11 +235,11 @@ export default function Home() {
           <div className="lg:col-span-5 relative">
             <div className="relative aspect-square max-w-md mx-auto">
               {/* Backdrop neon glow */}
-              <div className="absolute inset-8 rounded-full bg-[#FF2D87] opacity-30 blur-3xl"></div>
+              <div className="absolute inset-8 rounded-full bg-bs-pink opacity-30 blur-3xl"></div>
               {/* Sunburst */}
               <div className="absolute inset-0 spin-slow opacity-40">
                 <svg viewBox="0 0 200 200" className="w-full h-full">
-                  <g stroke="#FF2D87" strokeWidth="2">
+                  <g stroke="var(--bs-pink)" strokeWidth="2">
                     {Array.from({length: 24}).map((_, i) => (
                       <line key={i} x1="100" y1="100" x2="100" y2="0" transform={`rotate(${i * 15} 100 100)`} strokeDasharray="2 6"/>
                     ))}
@@ -253,9 +253,9 @@ export default function Home() {
                 className="relative w-full h-full object-contain drop-shadow-2xl float-anim"
               />
               {/* Sticker price */}
-              <div className="absolute -bottom-2 -right-2 md:bottom-4 md:right-4 bg-[#FFE15D] border-3 border-[#0a1530] rounded-full w-28 h-28 md:w-32 md:h-32 flex flex-col items-center justify-center text-display rotate-12 shadow-[5px_5px_0_#0a1530]" style={{borderWidth: "3px"}}>
+              <div className="absolute -bottom-2 -right-2 md:bottom-4 md:right-4 bg-bs-yellow border-3 border-bs-ink rounded-full w-28 h-28 md:w-32 md:h-32 flex flex-col items-center justify-center text-display rotate-12 shadow-[5px_5px_0_var(--bs-ink)]" style={{borderWidth: "3px"}}>
                 <span className="text-xs tracking-widest">AB</span>
-                <span className="text-3xl md:text-4xl text-[#FF2D87] leading-none">6,90</span>
+                <span className="text-3xl md:text-4xl text-bs-pink leading-none">6,90</span>
                 <span className="text-xs tracking-widest mt-1">EURO</span>
               </div>
             </div>
@@ -267,18 +267,18 @@ export default function Home() {
       </section>
 
       {/* ============== TICKER ============== */}
-      <section className="bg-[#0a1530] border-y-2 border-[#0a1530] overflow-hidden py-3">
-        <div className="ticker-track font-body font-black text-xl md:text-2xl tracking-[0.15em] text-[#FFE15D] whitespace-nowrap">
+      <section className="bg-bs-ink border-y-2 border-bs-ink overflow-hidden py-3">
+        <div className="ticker-track font-body font-black text-xl md:text-2xl tracking-[0.15em] text-bs-yellow whitespace-nowrap">
           {Array.from({length: 4}).map((_, i) => (
             <div key={i} className="flex items-center shrink-0">
               <span className="px-6">SMASH BURGERS</span>
-              <span className="text-[#FF2D87] px-2">★</span>
+              <span className="text-bs-pink px-2">★</span>
               <span className="px-6 neon-text-cyan">HALAL & HANDMADE</span>
-              <span className="text-[#FF2D87] px-2">★</span>
+              <span className="text-bs-pink px-2">★</span>
               <span className="px-6">FRIES · SHAKES · VIBES</span>
-              <span className="text-[#FF2D87] px-2">★</span>
+              <span className="text-bs-pink px-2">★</span>
               <span className="px-6 neon-text-pink">BAHNHOFSRING 30 · LEER</span>
-              <span className="text-[#FF2D87] px-2">★</span>
+              <span className="text-bs-pink px-2">★</span>
             </div>
           ))}
         </div>
@@ -290,11 +290,11 @@ export default function Home() {
           <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center mb-16">
             <div className="space-y-5">
               <span className="badge-neon badge-pink-fill">DAS ERLEBNIS</span>
-              <h2 className="text-headline text-5xl md:text-6xl lg:text-7xl text-[#0a1530]">
+              <h2 className="text-headline text-5xl md:text-6xl lg:text-7xl text-bs-ink">
                 Mehr als nur<br />
                 <span className="neon-text-pink">ein Burger.</span>
               </h2>
-              <p className="text-lg text-[#0a1530]/80 leading-relaxed max-w-lg">
+              <p className="text-lg text-bs-ink/80 leading-relaxed max-w-lg">
                 Pinke Wände. Neonlicht. US-Nummernschilder. Vinyl an den Wänden. Burger Station ist kein normaler Imbiss — es ist der Foodspot, an dem du isst, fotografierst und wiederkommst.
               </p>
               <div className="flex flex-wrap gap-3 pt-2">
@@ -307,8 +307,8 @@ export default function Home() {
 
             {/* Interior collage */}
             <div className="grid grid-cols-2 gap-4">
-              <img src="/patterns/interior-1.svg" alt="Pinke Wand mit Burger-Station-Neonschild" className="rounded-2xl border-2 border-[#0a1530] shadow-[4px_4px_0_#0a1530] aspect-square object-cover w-full"/>
-              <img src="/patterns/interior-2.svg" alt="Türkise Wand mit Diner-Booth und Retro-Postern" className="rounded-2xl border-2 border-[#0a1530] shadow-[4px_4px_0_#FF2D87] aspect-square object-cover w-full mt-8"/>
+              <img src="/patterns/interior-1.svg" alt="Pinke Wand mit Burger-Station-Neonschild" className="rounded-2xl border-2 border-bs-ink shadow-[4px_4px_0_var(--bs-ink)] aspect-square object-cover w-full"/>
+              <img src="/patterns/interior-2.svg" alt="Türkise Wand mit Diner-Booth und Retro-Postern" className="rounded-2xl border-2 border-bs-ink shadow-[4px_4px_0_var(--bs-pink)] aspect-square object-cover w-full mt-8"/>
             </div>
           </div>
 
@@ -320,7 +320,7 @@ export default function Home() {
                 desc: "Leuchtende Schilder, pinke Wände, Diner-Atmosphäre. Jede Ecke ist ein Foto wert.",
                 color: "pink",
                 icon: (
-                  <svg viewBox="0 0 60 60" className="w-12 h-12"><circle cx="30" cy="30" r="22" fill="none" stroke="#FF2D87" strokeWidth="3"/><path d="M22 28 L22 38 L38 38 L38 28 M30 38 L30 22" stroke="#FF2D87" strokeWidth="3" fill="none" strokeLinecap="round"/></svg>
+                  <svg viewBox="0 0 60 60" className="w-12 h-12"><circle cx="30" cy="30" r="22" fill="none" stroke="var(--bs-pink)" strokeWidth="3"/><path d="M22 28 L22 38 L38 38 L38 28 M30 38 L30 22" stroke="var(--bs-pink)" strokeWidth="3" fill="none" strokeLinecap="round"/></svg>
                 ),
               },
               {
@@ -328,7 +328,7 @@ export default function Home() {
                 desc: "Pastellfarben, Checkerboard, US-Nummernschilder, Vinyl-Schallplatten — wie aus den 50ern.",
                 color: "cyan",
                 icon: (
-                  <svg viewBox="0 0 60 60" className="w-12 h-12"><circle cx="30" cy="30" r="22" fill="#0a1530"/><circle cx="30" cy="30" r="8" fill="#00E0E0"/><circle cx="30" cy="30" r="3" fill="#0a1530"/></svg>
+                  <svg viewBox="0 0 60 60" className="w-12 h-12"><circle cx="30" cy="30" r="22" fill="var(--bs-ink)"/><circle cx="30" cy="30" r="8" fill="var(--bs-cyan)"/><circle cx="30" cy="30" r="3" fill="var(--bs-ink)"/></svg>
                 ),
               },
               {
@@ -336,25 +336,25 @@ export default function Home() {
                 desc: "Direkt am Bahnhofsring. Schnell zwischen Termin und Heimweg, oder als ganzer Abend.",
                 color: "yellow",
                 icon: (
-                  <svg viewBox="0 0 60 60" className="w-12 h-12"><path d="M30 8 C18 8 12 18 12 26 C12 38 30 52 30 52 C30 52 48 38 48 26 C48 18 42 8 30 8 Z" fill="#FFE15D" stroke="#0a1530" strokeWidth="2.5"/><circle cx="30" cy="25" r="6" fill="#FF2D87"/></svg>
+                  <svg viewBox="0 0 60 60" className="w-12 h-12"><path d="M30 8 C18 8 12 18 12 26 C12 38 30 52 30 52 C30 52 48 38 48 26 C48 18 42 8 30 8 Z" fill="var(--bs-yellow)" stroke="var(--bs-ink)" strokeWidth="2.5"/><circle cx="30" cy="25" r="6" fill="var(--bs-pink)"/></svg>
                 ),
               },
             ].map((f, i) => (
               <div key={i} className={`fade-in-up stagger-${i+1} retro-card p-7`}>
                 <div className="mb-4">{f.icon}</div>
-                <h3 className="text-subhead text-2xl text-[#0a1530] mb-2">{f.title}</h3>
-                <p className="text-[#0a1530]/75 leading-relaxed">{f.desc}</p>
+                <h3 className="text-subhead text-2xl text-bs-ink mb-2">{f.title}</h3>
+                <p className="text-bs-ink/75 leading-relaxed">{f.desc}</p>
               </div>
             ))}
           </div>
 
           {/* Instagram tag prompt */}
           <div className="mt-12 retro-card-pink p-6 md:p-8 flex flex-col md:flex-row items-center gap-5">
-            <div className="bg-white border-2 border-[#0a1530] rounded-full p-3">
-              <Instagram size={28} className="text-[#FF2D87]"/>
+            <div className="bg-white border-2 border-bs-ink rounded-full p-3">
+              <Instagram size={28} className="text-bs-pink"/>
             </div>
             <div className="flex-1 text-center md:text-left">
-              <p className="text-subhead text-lg md:text-xl text-[#0a1530]">
+              <p className="text-subhead text-lg md:text-xl text-bs-ink">
                 Mach dein Foto. Tag <span className="neon-text-pink">@burgerstationleer</span>. Werde Teil der Wand.
               </p>
             </div>
@@ -364,16 +364,16 @@ export default function Home() {
       </section>
 
       {/* ============== BESTSELLER ============== */}
-      <section id="bestseller" className="py-20 md:py-28 bg-[#FFE6F0] relative overflow-hidden">
-        <div className="absolute top-10 right-10 font-body italic font-black text-[#FF2D87] text-3xl rotate-12 hidden md:block opacity-70">★ Top 4 ★</div>
+      <section id="bestseller" className="py-20 md:py-28 bg-bs-pink-cream relative overflow-hidden">
+        <div className="absolute top-10 right-10 font-body italic font-black text-bs-pink text-3xl rotate-12 hidden md:block opacity-70">★ Top 4 ★</div>
 
         <div className="container relative">
           <div className="text-center mb-14">
             <span className="badge-neon badge-yellow-fill">DIE FAVORITEN</span>
-            <h2 className="text-headline text-5xl md:text-6xl lg:text-7xl text-[#0a1530] mt-4">
+            <h2 className="text-headline text-5xl md:text-6xl lg:text-7xl text-bs-ink mt-4">
               BELIEBT<br/>IN <span className="neon-text-pink">LEER</span>
             </h2>
-            <p className="text-lg text-[#0a1530]/75 mt-4 max-w-2xl mx-auto">
+            <p className="text-lg text-bs-ink/75 mt-4 max-w-2xl mx-auto">
               Die vier Burger, mit denen du nichts falsch machst.
             </p>
           </div>
@@ -388,11 +388,11 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="p-5 flex-1 flex flex-col">
-                  <h3 className="text-subhead text-2xl text-[#0a1530] mb-1">{b.name}</h3>
-                  <p className="text-sm text-[#0a1530]/70 leading-relaxed flex-1">{b.desc}</p>
-                  <div className="flex items-center justify-between pt-4 mt-3 border-t-2 border-dashed border-[#0a1530]/20">
+                  <h3 className="text-subhead text-2xl text-bs-ink mb-1">{b.name}</h3>
+                  <p className="text-sm text-bs-ink/70 leading-relaxed flex-1">{b.desc}</p>
+                  <div className="flex items-center justify-between pt-4 mt-3 border-t-2 border-dashed border-bs-ink/20">
                     <span className="text-display text-3xl neon-text-pink">{b.price}€</span>
-                    <a href="#menu" className="text-label-caps text-xs text-[#0a1530] hover:text-[#FF2D87] transition flex items-center gap-1">
+                    <a href="#menu" className="text-label-caps text-xs text-bs-ink hover:text-bs-pink transition flex items-center gap-1">
                       INS MENÜ <ChevronRight size={14}/>
                     </a>
                   </div>
@@ -404,14 +404,14 @@ export default function Home() {
       </section>
 
       {/* ============== BUNDLE / OFFER ============== */}
-      <section className="relative py-16 md:py-20 bg-[#0a1530] overflow-hidden">
+      <section className="relative py-16 md:py-20 bg-bs-ink overflow-hidden">
         <div className="stripes-yellow-black absolute top-0 inset-x-0 h-4"></div>
         <div className="stripes-yellow-black absolute bottom-0 inset-x-0 h-4"></div>
 
         <div className="container relative">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-block bg-white border-3 border-[#FFE15D] rounded-2xl px-6 py-2 mb-6 -rotate-2 shadow-[5px_5px_0_#FF2D87]" style={{borderWidth: "3px"}}>
-              <span className="font-body italic font-extrabold text-[#FF2D87] text-2xl">Menü-Deal</span>
+            <div className="inline-block bg-white border-3 border-bs-yellow rounded-2xl px-6 py-2 mb-6 -rotate-2 shadow-[5px_5px_0_var(--bs-pink)]" style={{borderWidth: "3px"}}>
+              <span className="font-body italic font-extrabold text-bs-pink text-2xl">Menü-Deal</span>
             </div>
 
             <h2 className="text-display text-5xl md:text-7xl lg:text-8xl text-white">
@@ -420,14 +420,14 @@ export default function Home() {
             </h2>
 
             <div className="mt-8 flex flex-wrap items-center justify-center gap-4 md:gap-8 text-display text-3xl md:text-5xl text-white">
-              <span className="bg-[#FF2D87] px-5 py-3 rounded-2xl border-3 border-white shadow-[4px_4px_0_white]" style={{borderWidth: "3px"}}>BURGER</span>
-              <span className="text-[#FFE15D]">+</span>
-              <span className="bg-[#00E0E0] text-[#0a1530] px-5 py-3 rounded-2xl border-3 border-white shadow-[4px_4px_0_white]" style={{borderWidth: "3px"}}>FRIES</span>
-              <span className="text-[#FFE15D]">+</span>
-              <span className="bg-[#FFE15D] text-[#0a1530] px-5 py-3 rounded-2xl border-3 border-white shadow-[4px_4px_0_white]" style={{borderWidth: "3px"}}>DRINK</span>
+              <span className="bg-bs-pink px-5 py-3 rounded-2xl border-3 border-white shadow-[4px_4px_0_white]" style={{borderWidth: "3px"}}>BURGER</span>
+              <span className="text-bs-yellow">+</span>
+              <span className="bg-bs-cyan text-bs-ink px-5 py-3 rounded-2xl border-3 border-white shadow-[4px_4px_0_white]" style={{borderWidth: "3px"}}>FRIES</span>
+              <span className="text-bs-yellow">+</span>
+              <span className="bg-bs-yellow text-bs-ink px-5 py-3 rounded-2xl border-3 border-white shadow-[4px_4px_0_white]" style={{borderWidth: "3px"}}>DRINK</span>
             </div>
 
-            <p className="text-headline text-3xl md:text-4xl text-[#FFE15D] mt-8 tracking-widest">
+            <p className="text-headline text-3xl md:text-4xl text-bs-yellow mt-8 tracking-widest">
               AB <span className="neon-text-yellow">+3,00€</span>
             </p>
             <p className="text-white/70 mt-3 text-lg">Aufpreis auf jeden Burger. Frag bei der Bestellung.</p>
@@ -442,7 +442,7 @@ export default function Home() {
         <div className="container">
           <div className="text-center mb-14">
             <span className="badge-neon badge-cyan-fill">WARUM BURGER STATION?</span>
-            <h2 className="text-headline text-5xl md:text-6xl lg:text-7xl text-[#0a1530] mt-4">
+            <h2 className="text-headline text-5xl md:text-6xl lg:text-7xl text-bs-ink mt-4">
               VIER GUTE GRÜNDE.
             </h2>
           </div>
@@ -456,12 +456,12 @@ export default function Home() {
             ].map((u, i) => (
               <div key={i} className={`fade-in-up stagger-${i+1} text-center group`}>
                 <div className="relative inline-block">
-                  <div className="w-32 h-32 mx-auto mb-5 rounded-full bg-gradient-to-br from-[#FFE6F0] to-[#C8F2F1] border-3 border-[#0a1530] flex flex-col items-center justify-center shadow-[5px_5px_0_#0a1530] group-hover:rotate-6 transition-transform" style={{borderWidth: "3px"}}>
-                    <span className="text-display text-2xl text-[#FF2D87] leading-none">{u.title}</span>
-                    <span className="text-subhead text-base text-[#0a1530] leading-none mt-1">{u.subtitle}</span>
+                  <div className="w-32 h-32 mx-auto mb-5 rounded-full bg-gradient-to-br from-bs-pink-cream to-bs-cyan-cream border-3 border-bs-ink flex flex-col items-center justify-center shadow-[5px_5px_0_var(--bs-ink)] group-hover:rotate-6 transition-transform" style={{borderWidth: "3px"}}>
+                    <span className="text-display text-2xl text-bs-pink leading-none">{u.title}</span>
+                    <span className="text-subhead text-base text-bs-ink leading-none mt-1">{u.subtitle}</span>
                   </div>
                 </div>
-                <p className="text-[#0a1530]/75 leading-relaxed max-w-xs mx-auto">{u.desc}</p>
+                <p className="text-bs-ink/75 leading-relaxed max-w-xs mx-auto">{u.desc}</p>
               </div>
             ))}
           </div>
@@ -469,14 +469,14 @@ export default function Home() {
       </section>
 
       {/* ============== MENU ============== */}
-      <section id="menu" className="py-20 md:py-28 bg-[#FAFAF6] relative">
+      <section id="menu" className="py-20 md:py-28 bg-bs-cream relative">
         <div className="container">
           <div className="text-center mb-10">
             <span className="badge-neon badge-pink-fill">UNSERE KARTE</span>
-            <h2 className="text-headline text-5xl md:text-6xl lg:text-7xl text-[#0a1530] mt-4">
+            <h2 className="text-headline text-5xl md:text-6xl lg:text-7xl text-bs-ink mt-4">
               DAS <span className="neon-text-pink">MENÜ</span>
             </h2>
-            <p className="text-[#0a1530]/70 mt-4">Alle Preise in EUR. Allergene auf Anfrage.</p>
+            <p className="text-bs-ink/70 mt-4">Alle Preise in EUR. Allergene auf Anfrage.</p>
           </div>
 
           {/* Tabs */}
@@ -495,11 +495,11 @@ export default function Home() {
           {/* Items */}
           <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-4">
             {menu[tab].map((item, i) => (
-              <div key={i} className="bg-white rounded-2xl border-2 border-[#0a1530] p-5 shadow-[4px_4px_0_#0a1530] hover:shadow-[6px_6px_0_#FF2D87] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all">
+              <div key={i} className="bg-white rounded-2xl border-2 border-bs-ink p-5 shadow-[4px_4px_0_var(--bs-ink)] hover:shadow-[6px_6px_0_var(--bs-pink)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all">
                 <div className="flex justify-between items-start gap-4 mb-2">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h4 className="text-subhead text-lg text-[#0a1530]">{item.name}</h4>
+                      <h4 className="text-subhead text-lg text-bs-ink">{item.name}</h4>
                       {item.tags?.map((t) => (
                         <span key={t} className="badge-neon badge-yellow-fill text-[10px]">{t}</span>
                       ))}
@@ -507,13 +507,13 @@ export default function Home() {
                   </div>
                   <span className="text-headline text-2xl neon-text-pink whitespace-nowrap">{item.price}€</span>
                 </div>
-                {item.desc && <p className="text-sm text-[#0a1530]/70 leading-relaxed">{item.desc}</p>}
+                {item.desc && <p className="text-sm text-bs-ink/70 leading-relaxed">{item.desc}</p>}
               </div>
             ))}
           </div>
 
           <div className="text-center mt-10">
-            <p className="text-sm text-[#0a1530]/60 mb-4">Vor Ort bestellen — keine Online-Bestellung verfügbar.</p>
+            <p className="text-sm text-bs-ink/60 mb-4">Vor Ort bestellen — keine Online-Bestellung verfügbar.</p>
             <div className="inline-flex flex-wrap justify-center gap-3">
               <a href={MAPS} target="_blank" rel="noopener noreferrer" className="btn-cyan btn-sm">
                 <MapPin size={16}/> Vorbeikommen
@@ -527,14 +527,14 @@ export default function Home() {
       </section>
 
       {/* ============== REVIEWS ============== */}
-      <section className="py-20 md:py-24 bg-[#C8F2F1]">
+      <section className="py-20 md:py-24 bg-bs-cyan-cream">
         <div className="container">
           <div className="text-center mb-12">
             <span className="badge-neon badge-pink-fill">DAS SAGT LEER</span>
-            <h2 className="text-headline text-4xl md:text-5xl lg:text-6xl text-[#0a1530] mt-4">
+            <h2 className="text-headline text-4xl md:text-5xl lg:text-6xl text-bs-ink mt-4">
               FRISCH ERÖFFNET —<br/>ERSTE STIMMEN FOLGEN.
             </h2>
-            <p className="text-[#0a1530]/75 mt-5 max-w-2xl mx-auto">
+            <p className="text-bs-ink/75 mt-5 max-w-2xl mx-auto">
               Burger Station hat im Mai 2025 in Leer eröffnet. Echte Google-Bewertungen werden hier eingebunden, sobald sie eingehen — keine Fake-Reviews, keine erfundenen Stimmen.
             </p>
           </div>
@@ -557,10 +557,10 @@ export default function Home() {
                 tag: "Was du erlebst",
               },
             ].map((card, i) => (
-              <div key={i} className="bg-white rounded-2xl border-2 border-[#0a1530] p-6 shadow-[5px_5px_0_#0a1530]">
+              <div key={i} className="bg-white rounded-2xl border-2 border-bs-ink p-6 shadow-[5px_5px_0_var(--bs-ink)]">
                 <span className="badge-neon badge-cyan-fill">{card.tag}</span>
-                <h3 className="text-subhead text-xl text-[#0a1530] mt-4 mb-3">{card.title}</h3>
-                <p className="text-[#0a1530]/80 leading-relaxed">{card.text}</p>
+                <h3 className="text-subhead text-xl text-bs-ink mt-4 mb-3">{card.title}</h3>
+                <p className="text-bs-ink/80 leading-relaxed">{card.text}</p>
               </div>
             ))}
           </div>
@@ -584,10 +584,10 @@ export default function Home() {
           <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center mb-12">
             <div>
               <span className="badge-neon badge-yellow-fill">@BURGERSTATIONLEER</span>
-              <h2 className="text-headline text-5xl md:text-6xl lg:text-7xl text-[#0a1530] mt-4">
+              <h2 className="text-headline text-5xl md:text-6xl lg:text-7xl text-bs-ink mt-4">
                 Dein nächster <span className="neon-text-pink">Foodspot</span> in Leer.
               </h2>
-              <p className="text-lg text-[#0a1530]/75 mt-5 leading-relaxed">
+              <p className="text-lg text-bs-ink/75 mt-5 leading-relaxed">
                 Burger, Neonlicht, Behind-the-Scenes. Folge uns für Aktionen, neue Menüs und den ehrlichsten Blick hinter die Theke.
               </p>
               <a href={INSTAGRAM} target="_blank" rel="noopener noreferrer" className="btn-pink mt-6 inline-flex">
@@ -609,7 +609,7 @@ export default function Home() {
                   href={INSTAGRAM}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="aspect-square rounded-xl border-2 border-[#0a1530] overflow-hidden shadow-[3px_3px_0_#0a1530] hover:shadow-[5px_5px_0_#FF2D87] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all bg-pink-50"
+                  className="aspect-square rounded-xl border-2 border-bs-ink overflow-hidden shadow-[3px_3px_0_var(--bs-ink)] hover:shadow-[5px_5px_0_var(--bs-pink)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all bg-pink-50"
                 >
                   <img src={p.src} alt={p.alt} className="w-full h-full object-cover"/>
                 </a>
@@ -620,11 +620,11 @@ export default function Home() {
       </section>
 
       {/* ============== STANDORT ============== */}
-      <section id="standort" className="py-20 md:py-28 bg-[#FFE6F0] relative overflow-hidden">
+      <section id="standort" className="py-20 md:py-28 bg-bs-pink-cream relative overflow-hidden">
         <div className="container">
           <div className="text-center mb-12">
             <span className="badge-neon badge-cyan-fill">UNSER STANDORT</span>
-            <h2 className="text-headline text-5xl md:text-6xl lg:text-7xl text-[#0a1530] mt-4">
+            <h2 className="text-headline text-5xl md:text-6xl lg:text-7xl text-bs-ink mt-4">
               FIND <span className="neon-text-pink">US</span>.
             </h2>
           </div>
@@ -644,10 +644,10 @@ export default function Home() {
             <div className="lg:col-span-2 space-y-4">
               <div className="retro-card-pink p-6">
                 <div className="flex items-start gap-3 mb-2">
-                  <MapPin size={22} className="text-[#FF2D87] mt-1 shrink-0"/>
+                  <MapPin size={22} className="text-bs-pink mt-1 shrink-0"/>
                   <div>
-                    <h3 className="text-subhead text-xl text-[#0a1530]">Adresse</h3>
-                    <p className="text-[#0a1530]/85 mt-1 leading-relaxed">
+                    <h3 className="text-subhead text-xl text-bs-ink">Adresse</h3>
+                    <p className="text-bs-ink/85 mt-1 leading-relaxed">
                       Bahnhofsring 30<br/>
                       26789 Leer<br/>
                       Niedersachsen
@@ -661,10 +661,10 @@ export default function Home() {
 
               <div className="retro-card-cyan p-6">
                 <div className="flex items-start gap-3">
-                  <Clock size={22} className="text-[#00E0E0] mt-1 shrink-0" strokeWidth={2.5}/>
+                  <Clock size={22} className="text-bs-cyan mt-1 shrink-0" strokeWidth={2.5}/>
                   <div>
-                    <h3 className="text-subhead text-xl text-[#0a1530]">Öffnungszeiten</h3>
-                    <div className="mt-3 space-y-1.5 text-[#0a1530]/85 font-medium">
+                    <h3 className="text-subhead text-xl text-bs-ink">Öffnungszeiten</h3>
+                    <div className="mt-3 space-y-1.5 text-bs-ink/85 font-medium">
                       <div className="flex justify-between gap-4"><span>So – Do</span><span className="font-body font-bold tracking-wider">11:00 – 23:00</span></div>
                       <div className="flex justify-between gap-4"><span>Fr & Sa</span><span className="font-body font-bold tracking-wider">11:00 – 02:00</span></div>
                     </div>
@@ -672,12 +672,12 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="bg-white rounded-2xl border-2 border-[#0a1530] p-6 shadow-[4px_4px_0_#0a1530]">
+              <div className="bg-white rounded-2xl border-2 border-bs-ink p-6 shadow-[4px_4px_0_var(--bs-ink)]">
                 <div className="flex items-start gap-3">
-                  <Phone size={22} className="text-[#0a1530] mt-1 shrink-0"/>
+                  <Phone size={22} className="text-bs-ink mt-1 shrink-0"/>
                   <div>
-                    <h3 className="text-subhead text-xl text-[#0a1530]">Telefon</h3>
-                    <a href={PHONE} className="text-lg font-medium text-[#0a1530] hover:text-[#FF2D87] transition mt-1 block">
+                    <h3 className="text-subhead text-xl text-bs-ink">Telefon</h3>
+                    <a href={PHONE} className="text-lg font-medium text-bs-ink hover:text-bs-pink transition mt-1 block">
                       {PHONE_DISPLAY}
                     </a>
                   </div>
@@ -689,13 +689,13 @@ export default function Home() {
       </section>
 
       {/* ============== KONTAKT ============== */}
-      <section id="kontakt" className="py-20 md:py-28 bg-[#0a1530] text-white relative overflow-hidden">
+      <section id="kontakt" className="py-20 md:py-28 bg-bs-ink text-white relative overflow-hidden">
         <div className="absolute top-0 inset-x-0 stripes-yellow-black h-4"></div>
-        <div className="absolute -top-20 -left-20 w-72 h-72 rounded-full bg-[#FF2D87] opacity-20 blur-3xl"></div>
-        <div className="absolute -bottom-20 -right-20 w-72 h-72 rounded-full bg-[#00E0E0] opacity-20 blur-3xl"></div>
+        <div className="absolute -top-20 -left-20 w-72 h-72 rounded-full bg-bs-pink opacity-20 blur-3xl"></div>
+        <div className="absolute -bottom-20 -right-20 w-72 h-72 rounded-full bg-bs-cyan opacity-20 blur-3xl"></div>
 
         <div className="container relative text-center max-w-3xl mx-auto">
-          <Flame size={48} className="text-[#FFE15D] mx-auto mb-4"/>
+          <Flame size={48} className="text-bs-yellow mx-auto mb-4"/>
           <h2 className="text-display text-6xl md:text-8xl">
             LUST AUF <span className="neon-text-pink">BURGER</span>?
           </h2>
@@ -717,7 +717,7 @@ export default function Home() {
       </section>
 
       {/* ============== FOOTER ============== */}
-      <footer className="bg-[#FFE6F0] border-t-4 border-[#0a1530]">
+      <footer className="bg-bs-pink-cream border-t-4 border-bs-ink">
         <div className="checker-strip-pink"></div>
         <div className="container py-14">
           <div className="grid md:grid-cols-4 gap-10 mb-10">
@@ -725,44 +725,44 @@ export default function Home() {
               <div className="flex items-center gap-3 mb-4">
                 <img src="/brand/mark.svg" alt="Burger Station" className="w-14 h-14"/>
                 <div>
-                  <div className="text-subhead text-2xl text-[#0a1530]">BURGER STATION</div>
-                  <div className="text-label-caps text-xs text-[#FF2D87]">Est. 2025 · Leer</div>
+                  <div className="text-subhead text-2xl text-bs-ink">BURGER STATION</div>
+                  <div className="text-label-caps text-xs text-bs-pink">Est. 2025 · Leer</div>
                 </div>
               </div>
-              <p className="text-[#0a1530]/75 leading-relaxed max-w-md">
+              <p className="text-bs-ink/75 leading-relaxed max-w-md">
                 Authentic Smash Burgers, Halal & Handmade. American Retro Diner direkt am Bahnhofsring in Leer.
               </p>
-              <a href={INSTAGRAM} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 mt-4 font-body font-semibold tracking-wide text-[#0a1530] hover:text-[#FF2D87] transition">
+              <a href={INSTAGRAM} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 mt-4 font-body font-semibold tracking-wide text-bs-ink hover:text-bs-pink transition">
                 <Instagram size={18}/> @burgerstationleer
               </a>
             </div>
 
             <div>
-              <h4 className="text-label-caps text-[#0a1530] mb-4">FINDEN</h4>
-              <p className="text-[#0a1530]/80 text-sm leading-relaxed mb-3">
+              <h4 className="text-label-caps text-bs-ink mb-4">FINDEN</h4>
+              <p className="text-bs-ink/80 text-sm leading-relaxed mb-3">
                 Bahnhofsring 30<br/>
                 26789 Leer
               </p>
-              <a href={MAPS} target="_blank" rel="noopener noreferrer" className="text-sm text-[#FF2D87] font-semibold hover:underline">
+              <a href={MAPS} target="_blank" rel="noopener noreferrer" className="text-sm text-bs-pink font-semibold hover:underline">
                 Route starten →
               </a>
             </div>
 
             <div>
-              <h4 className="text-label-caps text-[#0a1530] mb-4">KONTAKT</h4>
-              <a href={PHONE} className="text-[#0a1530]/80 text-sm hover:text-[#FF2D87] transition block mb-2">{PHONE_DISPLAY}</a>
-              <p className="text-[#0a1530]/60 text-xs leading-relaxed">
+              <h4 className="text-label-caps text-bs-ink mb-4">KONTAKT</h4>
+              <a href={PHONE} className="text-bs-ink/80 text-sm hover:text-bs-pink transition block mb-2">{PHONE_DISPLAY}</a>
+              <p className="text-bs-ink/60 text-xs leading-relaxed">
                 So–Do: 11–23 Uhr<br/>
                 Fr&Sa: 11–02 Uhr
               </p>
             </div>
           </div>
 
-          <div className="pt-6 border-t-2 border-dashed border-[#0a1530]/30 flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-[#0a1530]/60">© 2026 Burger Station Leer. Alle Rechte vorbehalten.</p>
+          <div className="pt-6 border-t-2 border-dashed border-bs-ink/30 flex flex-col md:flex-row items-center justify-between gap-4">
+            <p className="text-sm text-bs-ink/60">© 2026 Burger Station Leer. Alle Rechte vorbehalten.</p>
             <div className="flex gap-5 text-sm">
-              <a href="/impressum" className="text-[#0a1530]/70 hover:text-[#FF2D87] transition">Impressum</a>
-              <a href="/datenschutz" className="text-[#0a1530]/70 hover:text-[#FF2D87] transition">Datenschutz</a>
+              <a href="/impressum" className="text-bs-ink/70 hover:text-bs-pink transition">Impressum</a>
+              <a href="/datenschutz" className="text-bs-ink/70 hover:text-bs-pink transition">Datenschutz</a>
             </div>
           </div>
         </div>
