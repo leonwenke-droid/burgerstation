@@ -340,7 +340,7 @@ export default function Home() {
                 ),
               },
             ].map((f, i) => (
-              <div key={i} className={`fade-in-up stagger-${i+1} retro-card p-7`}>
+              <div key={i} className={`fade-in-up stagger-${i+1} retro-card p-6`}>
                 <div className="mb-4">{f.icon}</div>
                 <h3 className="text-subhead text-2xl text-bs-ink mb-2">{f.title}</h3>
                 <p className="text-bs-ink/75 leading-relaxed">{f.desc}</p>
@@ -387,7 +387,7 @@ export default function Home() {
                     <span className="badge-neon badge-pink-fill">{b.badge}</span>
                   </div>
                 </div>
-                <div className="p-5 flex-1 flex flex-col">
+                <div className="p-6 flex-1 flex flex-col">
                   <h3 className="text-subhead text-2xl text-bs-ink mb-1">{b.name}</h3>
                   <p className="text-sm text-bs-ink/70 leading-relaxed flex-1">{b.desc}</p>
                   <div className="flex items-center justify-between pt-4 mt-3 border-t-2 border-dashed border-bs-ink/20">
@@ -404,7 +404,7 @@ export default function Home() {
       </section>
 
       {/* ============== BUNDLE / OFFER ============== */}
-      <section className="relative py-16 md:py-20 bg-bs-ink overflow-hidden">
+      <section className="relative py-20 md:py-24 bg-bs-ink overflow-hidden">
         <div className="stripes-yellow-black absolute top-0 inset-x-0 h-4"></div>
         <div className="stripes-yellow-black absolute bottom-0 inset-x-0 h-4"></div>
 
@@ -495,7 +495,7 @@ export default function Home() {
           {/* Items */}
           <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-4">
             {menu[tab].map((item, i) => (
-              <div key={i} className="bg-white rounded-2xl border-2 border-bs-ink p-5 shadow-[4px_4px_0_var(--bs-ink)] hover:shadow-[6px_6px_0_var(--bs-pink)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all">
+              <div key={i} className="bg-white rounded-2xl border-2 border-bs-ink p-6 shadow-[4px_4px_0_var(--bs-ink)] hover:shadow-[6px_6px_0_var(--bs-pink)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all">
                 <div className="flex justify-between items-start gap-4 mb-2">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -595,7 +595,7 @@ export default function Home() {
               </a>
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {[
                 { src: "/burgers/double-smash.svg", alt: "Double Smash Burger" },
                 { src: "/patterns/interior-1.svg", alt: "Pinke Wand mit Neon" },
