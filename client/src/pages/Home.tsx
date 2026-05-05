@@ -127,12 +127,12 @@ export default function Home() {
           <a href="#top" className="flex items-center gap-3 group">
             <img src="/brand/mark.svg" alt="Burger Station Logo" className="w-11 h-11 md:w-12 md:h-12 transition-transform group-hover:rotate-6" />
             <div className="leading-none">
-              <div className="font-display text-lg md:text-xl tracking-wider text-[#0a1530]">BURGER STATION</div>
-              <div className="font-body text-[10px] md:text-xs text-[#FF2D87] tracking-[0.25em] uppercase mt-0.5">Leer · Est. 2025</div>
+              <div className="text-subhead text-lg md:text-xl text-[#0a1530]">BURGER STATION</div>
+              <div className="text-label-caps text-[10px] md:text-xs text-[#FF2D87] mt-0.5">Leer · Est. 2025</div>
             </div>
           </a>
 
-          <nav className="hidden lg:flex items-center gap-8 font-display text-base tracking-wider text-[#0a1530]">
+          <nav className="hidden lg:flex items-center gap-8 font-body font-semibold text-sm tracking-wider text-[#0a1530] uppercase">
             <a href="#erlebnis" className="hover:text-[#FF2D87] transition">Erlebnis</a>
             <a href="#bestseller" className="hover:text-[#FF2D87] transition">Bestseller</a>
             <a href="#menu" className="hover:text-[#FF2D87] transition">Menü</a>
@@ -159,7 +159,7 @@ export default function Home() {
         </div>
 
         {mobileOpen && (
-          <nav className="md:hidden bg-white border-t-2 border-[#0a1530] p-4 space-y-1 font-display text-lg">
+          <nav className="md:hidden bg-white border-t-2 border-[#0a1530] p-4 space-y-1 font-body font-semibold text-base uppercase tracking-wider">
             {[
               ["Erlebnis", "#erlebnis"],
               ["Bestseller", "#bestseller"],
@@ -192,17 +192,17 @@ export default function Home() {
           {/* LEFT — Copy */}
           <div className="lg:col-span-7 space-y-6 fade-in-up">
             {/* Pre-headline / status badge */}
-            <div className="inline-flex items-center gap-2 bg-[#0a1530] text-white px-4 py-2 rounded-full font-display tracking-widest text-sm border-2 border-[#0a1530] shadow-[3px_3px_0_#FF2D87]">
+            <div className="inline-flex items-center gap-2 bg-[#0a1530] text-white px-4 py-2 rounded-full text-label-caps border-2 border-[#0a1530] shadow-[3px_3px_0_#FF2D87]">
               <span className="w-2 h-2 rounded-full bg-[#00E0E0] animate-pulse"></span>
               SEIT MAI 2025 GEÖFFNET · LEER
             </div>
 
-            <h1 className="font-display leading-[0.9]">
+            <h1 className="text-display leading-[0.95]">
               <span className="block text-5xl md:text-7xl lg:text-8xl text-[#0a1530]">SMASH BURGER</span>
               <span className="block text-3xl md:text-5xl lg:text-6xl mt-2">
                 <span className="neon-text-pink neon-flicker">IN LEER</span>
               </span>
-              <span className="block text-2xl md:text-3xl lg:text-4xl text-[#0a1530] mt-3 font-marker normal-case tracking-normal">
+              <span className="block text-xl md:text-2xl lg:text-3xl text-[#0a1530] mt-4 font-body italic font-medium normal-case tracking-normal">
                 Halal · Handmade · Hot.
               </span>
             </h1>
@@ -253,7 +253,7 @@ export default function Home() {
                 className="relative w-full h-full object-contain drop-shadow-2xl float-anim"
               />
               {/* Sticker price */}
-              <div className="absolute -bottom-2 -right-2 md:bottom-4 md:right-4 bg-[#FFE15D] border-3 border-[#0a1530] rounded-full w-28 h-28 md:w-32 md:h-32 flex flex-col items-center justify-center font-display rotate-12 shadow-[5px_5px_0_#0a1530]" style={{borderWidth: "3px"}}>
+              <div className="absolute -bottom-2 -right-2 md:bottom-4 md:right-4 bg-[#FFE15D] border-3 border-[#0a1530] rounded-full w-28 h-28 md:w-32 md:h-32 flex flex-col items-center justify-center text-display rotate-12 shadow-[5px_5px_0_#0a1530]" style={{borderWidth: "3px"}}>
                 <span className="text-xs tracking-widest">AB</span>
                 <span className="text-3xl md:text-4xl text-[#FF2D87] leading-none">6,90</span>
                 <span className="text-xs tracking-widest mt-1">EURO</span>
@@ -268,7 +268,7 @@ export default function Home() {
 
       {/* ============== TICKER ============== */}
       <section className="bg-[#0a1530] border-y-2 border-[#0a1530] overflow-hidden py-3">
-        <div className="ticker-track font-display text-2xl md:text-3xl tracking-[0.2em] text-[#FFE15D] whitespace-nowrap">
+        <div className="ticker-track font-body font-black text-xl md:text-2xl tracking-[0.15em] text-[#FFE15D] whitespace-nowrap">
           {Array.from({length: 4}).map((_, i) => (
             <div key={i} className="flex items-center shrink-0">
               <span className="px-6">SMASH BURGERS</span>
@@ -290,7 +290,7 @@ export default function Home() {
           <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center mb-16">
             <div className="space-y-5">
               <span className="badge-neon badge-pink-fill">DAS ERLEBNIS</span>
-              <h2 className="font-display text-5xl md:text-6xl lg:text-7xl text-[#0a1530] leading-none">
+              <h2 className="text-headline text-5xl md:text-6xl lg:text-7xl text-[#0a1530]">
                 Mehr als nur<br />
                 <span className="neon-text-pink">ein Burger.</span>
               </h2>
@@ -342,7 +342,7 @@ export default function Home() {
             ].map((f, i) => (
               <div key={i} className={`fade-in-up stagger-${i+1} retro-card p-7`}>
                 <div className="mb-4">{f.icon}</div>
-                <h3 className="font-display text-2xl text-[#0a1530] mb-2">{f.title}</h3>
+                <h3 className="text-subhead text-2xl text-[#0a1530] mb-2">{f.title}</h3>
                 <p className="text-[#0a1530]/75 leading-relaxed">{f.desc}</p>
               </div>
             ))}
@@ -354,7 +354,7 @@ export default function Home() {
               <Instagram size={28} className="text-[#FF2D87]"/>
             </div>
             <div className="flex-1 text-center md:text-left">
-              <p className="font-display text-xl md:text-2xl text-[#0a1530]">
+              <p className="text-subhead text-lg md:text-xl text-[#0a1530]">
                 Mach dein Foto. Tag <span className="neon-text-pink">@burgerstationleer</span>. Werde Teil der Wand.
               </p>
             </div>
@@ -365,12 +365,12 @@ export default function Home() {
 
       {/* ============== BESTSELLER ============== */}
       <section id="bestseller" className="py-20 md:py-28 bg-[#FFE6F0] relative overflow-hidden">
-        <div className="absolute top-10 right-10 font-marker text-[#FF2D87] text-3xl rotate-12 hidden md:block opacity-70">★ Top 4 ★</div>
+        <div className="absolute top-10 right-10 font-body italic font-black text-[#FF2D87] text-3xl rotate-12 hidden md:block opacity-70">★ Top 4 ★</div>
 
         <div className="container relative">
           <div className="text-center mb-14">
             <span className="badge-neon badge-yellow-fill">DIE FAVORITEN</span>
-            <h2 className="font-display text-5xl md:text-7xl text-[#0a1530] mt-4 leading-none">
+            <h2 className="text-headline text-5xl md:text-6xl lg:text-7xl text-[#0a1530] mt-4">
               BELIEBT<br/>IN <span className="neon-text-pink">LEER</span>
             </h2>
             <p className="text-lg text-[#0a1530]/75 mt-4 max-w-2xl mx-auto">
@@ -388,11 +388,11 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="p-5 flex-1 flex flex-col">
-                  <h3 className="font-display text-2xl text-[#0a1530] mb-1">{b.name}</h3>
+                  <h3 className="text-subhead text-2xl text-[#0a1530] mb-1">{b.name}</h3>
                   <p className="text-sm text-[#0a1530]/70 leading-relaxed flex-1">{b.desc}</p>
                   <div className="flex items-center justify-between pt-4 mt-3 border-t-2 border-dashed border-[#0a1530]/20">
-                    <span className="font-display text-3xl neon-text-pink">{b.price}€</span>
-                    <a href="#menu" className="font-display text-sm tracking-widest text-[#0a1530] hover:text-[#FF2D87] transition flex items-center gap-1">
+                    <span className="text-display text-3xl neon-text-pink">{b.price}€</span>
+                    <a href="#menu" className="text-label-caps text-xs text-[#0a1530] hover:text-[#FF2D87] transition flex items-center gap-1">
                       INS MENÜ <ChevronRight size={14}/>
                     </a>
                   </div>
@@ -411,15 +411,15 @@ export default function Home() {
         <div className="container relative">
           <div className="max-w-4xl mx-auto text-center">
             <div className="inline-block bg-white border-3 border-[#FFE15D] rounded-2xl px-6 py-2 mb-6 -rotate-2 shadow-[5px_5px_0_#FF2D87]" style={{borderWidth: "3px"}}>
-              <span className="font-marker text-[#FF2D87] text-2xl">Menü-Deal</span>
+              <span className="font-body italic font-extrabold text-[#FF2D87] text-2xl">Menü-Deal</span>
             </div>
 
-            <h2 className="font-display text-5xl md:text-7xl lg:text-8xl text-white leading-none">
+            <h2 className="text-display text-5xl md:text-7xl lg:text-8xl text-white">
               <span className="block">MACH DEIN</span>
               <span className="block neon-text-yellow">MENÜ KOMPLETT</span>
             </h2>
 
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-4 md:gap-8 font-display text-3xl md:text-5xl text-white">
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-4 md:gap-8 text-display text-3xl md:text-5xl text-white">
               <span className="bg-[#FF2D87] px-5 py-3 rounded-2xl border-3 border-white shadow-[4px_4px_0_white]" style={{borderWidth: "3px"}}>BURGER</span>
               <span className="text-[#FFE15D]">+</span>
               <span className="bg-[#00E0E0] text-[#0a1530] px-5 py-3 rounded-2xl border-3 border-white shadow-[4px_4px_0_white]" style={{borderWidth: "3px"}}>FRIES</span>
@@ -427,7 +427,7 @@ export default function Home() {
               <span className="bg-[#FFE15D] text-[#0a1530] px-5 py-3 rounded-2xl border-3 border-white shadow-[4px_4px_0_white]" style={{borderWidth: "3px"}}>DRINK</span>
             </div>
 
-            <p className="font-display text-3xl md:text-5xl text-[#FFE15D] mt-8 tracking-widest">
+            <p className="text-headline text-3xl md:text-4xl text-[#FFE15D] mt-8 tracking-widest">
               AB <span className="neon-text-yellow">+3,00€</span>
             </p>
             <p className="text-white/70 mt-3 text-lg">Aufpreis auf jeden Burger. Frag bei der Bestellung.</p>
@@ -442,7 +442,7 @@ export default function Home() {
         <div className="container">
           <div className="text-center mb-14">
             <span className="badge-neon badge-cyan-fill">WARUM BURGER STATION?</span>
-            <h2 className="font-display text-5xl md:text-7xl text-[#0a1530] mt-4 leading-none">
+            <h2 className="text-headline text-5xl md:text-6xl lg:text-7xl text-[#0a1530] mt-4">
               VIER GUTE GRÜNDE.
             </h2>
           </div>
@@ -457,8 +457,8 @@ export default function Home() {
               <div key={i} className={`fade-in-up stagger-${i+1} text-center group`}>
                 <div className="relative inline-block">
                   <div className="w-32 h-32 mx-auto mb-5 rounded-full bg-gradient-to-br from-[#FFE6F0] to-[#C8F2F1] border-3 border-[#0a1530] flex flex-col items-center justify-center shadow-[5px_5px_0_#0a1530] group-hover:rotate-6 transition-transform" style={{borderWidth: "3px"}}>
-                    <span className="font-display text-3xl text-[#FF2D87] leading-none">{u.title}</span>
-                    <span className="font-display text-xl text-[#0a1530] leading-none mt-1">{u.subtitle}</span>
+                    <span className="text-display text-2xl text-[#FF2D87] leading-none">{u.title}</span>
+                    <span className="text-subhead text-base text-[#0a1530] leading-none mt-1">{u.subtitle}</span>
                   </div>
                 </div>
                 <p className="text-[#0a1530]/75 leading-relaxed max-w-xs mx-auto">{u.desc}</p>
@@ -473,7 +473,7 @@ export default function Home() {
         <div className="container">
           <div className="text-center mb-10">
             <span className="badge-neon badge-pink-fill">UNSERE KARTE</span>
-            <h2 className="font-display text-5xl md:text-7xl text-[#0a1530] mt-4 leading-none">
+            <h2 className="text-headline text-5xl md:text-6xl lg:text-7xl text-[#0a1530] mt-4">
               DAS <span className="neon-text-pink">MENÜ</span>
             </h2>
             <p className="text-[#0a1530]/70 mt-4">Alle Preise in EUR. Allergene auf Anfrage.</p>
@@ -499,13 +499,13 @@ export default function Home() {
                 <div className="flex justify-between items-start gap-4 mb-2">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h4 className="font-display text-xl text-[#0a1530] tracking-wide">{item.name}</h4>
+                      <h4 className="text-subhead text-lg text-[#0a1530]">{item.name}</h4>
                       {item.tags?.map((t) => (
                         <span key={t} className="badge-neon badge-yellow-fill text-[10px]">{t}</span>
                       ))}
                     </div>
                   </div>
-                  <span className="font-display text-2xl neon-text-pink whitespace-nowrap">{item.price}€</span>
+                  <span className="text-headline text-2xl neon-text-pink whitespace-nowrap">{item.price}€</span>
                 </div>
                 {item.desc && <p className="text-sm text-[#0a1530]/70 leading-relaxed">{item.desc}</p>}
               </div>
@@ -531,8 +531,8 @@ export default function Home() {
         <div className="container">
           <div className="text-center mb-12">
             <span className="badge-neon badge-pink-fill">DAS SAGT LEER</span>
-            <h2 className="font-display text-5xl md:text-6xl text-[#0a1530] mt-4 leading-none">
-              FRISCH ERÖFFNET — <br/>ERSTE STIMMEN FOLGEN.
+            <h2 className="text-headline text-4xl md:text-5xl lg:text-6xl text-[#0a1530] mt-4">
+              FRISCH ERÖFFNET —<br/>ERSTE STIMMEN FOLGEN.
             </h2>
             <p className="text-[#0a1530]/75 mt-5 max-w-2xl mx-auto">
               Burger Station hat im Mai 2025 in Leer eröffnet. Echte Google-Bewertungen werden hier eingebunden, sobald sie eingehen — keine Fake-Reviews, keine erfundenen Stimmen.
@@ -559,7 +559,7 @@ export default function Home() {
             ].map((card, i) => (
               <div key={i} className="bg-white rounded-2xl border-2 border-[#0a1530] p-6 shadow-[5px_5px_0_#0a1530]">
                 <span className="badge-neon badge-cyan-fill">{card.tag}</span>
-                <h3 className="font-display text-2xl text-[#0a1530] mt-4 mb-3">{card.title}</h3>
+                <h3 className="text-subhead text-xl text-[#0a1530] mt-4 mb-3">{card.title}</h3>
                 <p className="text-[#0a1530]/80 leading-relaxed">{card.text}</p>
               </div>
             ))}
@@ -584,7 +584,7 @@ export default function Home() {
           <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center mb-12">
             <div>
               <span className="badge-neon badge-yellow-fill">@BURGERSTATIONLEER</span>
-              <h2 className="font-display text-5xl md:text-6xl text-[#0a1530] mt-4 leading-none">
+              <h2 className="text-headline text-5xl md:text-6xl lg:text-7xl text-[#0a1530] mt-4">
                 Dein nächster <span className="neon-text-pink">Foodspot</span> in Leer.
               </h2>
               <p className="text-lg text-[#0a1530]/75 mt-5 leading-relaxed">
@@ -624,7 +624,7 @@ export default function Home() {
         <div className="container">
           <div className="text-center mb-12">
             <span className="badge-neon badge-cyan-fill">UNSER STANDORT</span>
-            <h2 className="font-display text-5xl md:text-7xl text-[#0a1530] mt-4 leading-none">
+            <h2 className="text-headline text-5xl md:text-6xl lg:text-7xl text-[#0a1530] mt-4">
               FIND <span className="neon-text-pink">US</span>.
             </h2>
           </div>
@@ -646,7 +646,7 @@ export default function Home() {
                 <div className="flex items-start gap-3 mb-2">
                   <MapPin size={22} className="text-[#FF2D87] mt-1 shrink-0"/>
                   <div>
-                    <h3 className="font-display text-2xl text-[#0a1530]">Adresse</h3>
+                    <h3 className="text-subhead text-xl text-[#0a1530]">Adresse</h3>
                     <p className="text-[#0a1530]/85 mt-1 leading-relaxed">
                       Bahnhofsring 30<br/>
                       26789 Leer<br/>
@@ -663,10 +663,10 @@ export default function Home() {
                 <div className="flex items-start gap-3">
                   <Clock size={22} className="text-[#00E0E0] mt-1 shrink-0" strokeWidth={2.5}/>
                   <div>
-                    <h3 className="font-display text-2xl text-[#0a1530]">Öffnungszeiten</h3>
+                    <h3 className="text-subhead text-xl text-[#0a1530]">Öffnungszeiten</h3>
                     <div className="mt-3 space-y-1.5 text-[#0a1530]/85 font-medium">
-                      <div className="flex justify-between gap-4"><span>So – Do</span><span className="font-display tracking-wider">11:00 – 23:00</span></div>
-                      <div className="flex justify-between gap-4"><span>Fr & Sa</span><span className="font-display tracking-wider">11:00 – 02:00</span></div>
+                      <div className="flex justify-between gap-4"><span>So – Do</span><span className="font-body font-bold tracking-wider">11:00 – 23:00</span></div>
+                      <div className="flex justify-between gap-4"><span>Fr & Sa</span><span className="font-body font-bold tracking-wider">11:00 – 02:00</span></div>
                     </div>
                   </div>
                 </div>
@@ -676,7 +676,7 @@ export default function Home() {
                 <div className="flex items-start gap-3">
                   <Phone size={22} className="text-[#0a1530] mt-1 shrink-0"/>
                   <div>
-                    <h3 className="font-display text-2xl text-[#0a1530]">Telefon</h3>
+                    <h3 className="text-subhead text-xl text-[#0a1530]">Telefon</h3>
                     <a href={PHONE} className="text-lg font-medium text-[#0a1530] hover:text-[#FF2D87] transition mt-1 block">
                       {PHONE_DISPLAY}
                     </a>
@@ -696,7 +696,7 @@ export default function Home() {
 
         <div className="container relative text-center max-w-3xl mx-auto">
           <Flame size={48} className="text-[#FFE15D] mx-auto mb-4"/>
-          <h2 className="font-display text-6xl md:text-8xl leading-none">
+          <h2 className="text-display text-6xl md:text-8xl">
             LUST AUF <span className="neon-text-pink">BURGER</span>?
           </h2>
           <p className="text-xl text-white/80 mt-6 leading-relaxed">
@@ -725,20 +725,20 @@ export default function Home() {
               <div className="flex items-center gap-3 mb-4">
                 <img src="/brand/mark.svg" alt="Burger Station" className="w-14 h-14"/>
                 <div>
-                  <div className="font-display text-2xl text-[#0a1530] tracking-wider">BURGER STATION</div>
-                  <div className="text-xs text-[#FF2D87] tracking-[0.25em] uppercase">Est. 2025 · Leer</div>
+                  <div className="text-subhead text-2xl text-[#0a1530]">BURGER STATION</div>
+                  <div className="text-label-caps text-xs text-[#FF2D87]">Est. 2025 · Leer</div>
                 </div>
               </div>
               <p className="text-[#0a1530]/75 leading-relaxed max-w-md">
                 Authentic Smash Burgers, Halal & Handmade. American Retro Diner direkt am Bahnhofsring in Leer.
               </p>
-              <a href={INSTAGRAM} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 mt-4 font-display tracking-wider text-[#0a1530] hover:text-[#FF2D87] transition">
+              <a href={INSTAGRAM} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 mt-4 font-body font-semibold tracking-wide text-[#0a1530] hover:text-[#FF2D87] transition">
                 <Instagram size={18}/> @burgerstationleer
               </a>
             </div>
 
             <div>
-              <h4 className="font-display text-lg tracking-widest text-[#0a1530] mb-4">FINDEN</h4>
+              <h4 className="text-label-caps text-[#0a1530] mb-4">FINDEN</h4>
               <p className="text-[#0a1530]/80 text-sm leading-relaxed mb-3">
                 Bahnhofsring 30<br/>
                 26789 Leer
@@ -749,7 +749,7 @@ export default function Home() {
             </div>
 
             <div>
-              <h4 className="font-display text-lg tracking-widest text-[#0a1530] mb-4">KONTAKT</h4>
+              <h4 className="text-label-caps text-[#0a1530] mb-4">KONTAKT</h4>
               <a href={PHONE} className="text-[#0a1530]/80 text-sm hover:text-[#FF2D87] transition block mb-2">{PHONE_DISPLAY}</a>
               <p className="text-[#0a1530]/60 text-xs leading-relaxed">
                 So–Do: 11–23 Uhr<br/>
