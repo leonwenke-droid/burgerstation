@@ -7,15 +7,105 @@ import { useState, useEffect } from "react";
  */
 
 type MenuItem = { name: string; price: string; desc?: string; tags?: string[] };
+type MenuKey = "beef" | "chicken" | "vegan" | "sides" | "sauces" | "shakes" | "drinks";
 
 const PHONE = "tel:+4949199755279";
 const PHONE_DISPLAY = "0491 99 755 279";
 const MAPS = "https://www.google.com/maps/search/?api=1&query=Burger+Station+Bahnhofsring+30+26789+Leer";
 const INSTAGRAM = "https://instagram.com/burgerstationleer";
 
+const MENU: Record<MenuKey, MenuItem[]> = {
+  beef: [
+    { name: "Single Smash", price: "6,90", desc: "Brioche Bun, Single Beef Patty, Cheddar, Onion, Lettuce, Pickles, Burger Sauce" },
+    { name: "Double Smash", price: "9,40", desc: "Doppeltes Beef Patty, geschmolzener Cheddar, Pickles, Burger Sauce", tags: ["Top Seller"] },
+    { name: "Long Chili Cheese", price: "11,90", desc: "Doppeltes Beef, Chili Cheese, Jalapeños, Burger Sauce", tags: ["Spicy"] },
+    { name: "BBQ Smash", price: "9,90", desc: "Beef Patty, Bacon, Cheddar, Onion Rings, BBQ Sauce", tags: ["Smoky"] },
+    { name: "Croissant Smash", price: "11,40", desc: "Croissant Bun, doppeltes Beef Patty, Cheddar, Burger Sauce", tags: ["Signature"] },
+    { name: "Sucuk Burger", price: "8,90", desc: "Sucuk, Cheddar, Onion, Lettuce, Pickles, Garlic Sauce" },
+  ],
+  chicken: [
+    { name: "Classic Chicken", price: "9,00", desc: "Knuspriges Chicken Patty, Buttermilk-Mariniert, Cheddar, Lettuce, Pickles, Burger Sauce" },
+    { name: "Garlic Chicken", price: "9,00", desc: "Chicken Patty, Cheddar, Garlic Sauce" },
+    { name: "Long Chicken", price: "11,50", desc: "Doppelt Chicken Patty, Cheddar, Lettuce, Onion, Pickles, Burger Sauce" },
+  ],
+  vegan: [
+    { name: "Vegan Burger", price: "8,70", desc: "Vegan Patty, Lettuce, Onion, Pickles, Vegan Sauce" },
+    { name: "Falafel Burger", price: "8,70", desc: "Hausgemachte Falafel, Lettuce, Onion, Pickles, Vegan Sauce" },
+  ],
+  sides: [
+    { name: "Fries", price: "3,50" },
+    { name: "Beef & Cheese Fries", price: "7,90", desc: "Fries mit Smash Beef und Cheese Sauce" },
+    { name: "Sweet Potato Fries", price: "4,50" },
+    { name: "8 Chicken Nuggets", price: "6,00" },
+    { name: "Chicken Tenders", price: "6,60" },
+    { name: "Onion Rings", price: "6,20" },
+  ],
+  sauces: [
+    { name: "Burger Sauce", price: "1,50" },
+    { name: "Cheese Sauce", price: "4,00" },
+    { name: "Garlic Sauce", price: "1,50" },
+    { name: "Sweet & Sour Sauce", price: "1,50" },
+    { name: "Ketchup", price: "0,60" },
+    { name: "Mayo", price: "0,60" },
+  ],
+  shakes: [
+    { name: "Chocolate Shake", price: "4,00", desc: "Cremig, kalt, klassisch" },
+    { name: "Vanilla Shake", price: "4,00", desc: "Vanille, dick, eiskalt" },
+  ],
+  drinks: [
+    { name: "Water", price: "2,00" },
+    { name: "Fritz Limo", price: "3,30", desc: "Cola · Orange · Zitrone" },
+  ],
+};
+
+const TAB_LABELS: Record<MenuKey, string> = {
+  beef: "🥩 Beef",
+  chicken: "🍗 Chicken",
+  vegan: "🌱 Vegan",
+  sides: "🍟 Sides",
+  sauces: "🥫 Sauces",
+  shakes: "🥤 Shakes",
+  drinks: "🧊 Drinks",
+};
+
+const BESTSELLERS = [
+  {
+    name: "Double Smash",
+    price: "9,40",
+    desc: "Zwei knackig gesmashte Beef Patties, Cheddar, Pickles, Burger Sauce.",
+    badge: "Top Seller",
+    img: "/burgers/double-smash.svg",
+    bg: "from-bs-pink-cream",
+  },
+  {
+    name: "Long Chili Cheese",
+    price: "11,90",
+    desc: "Doppelt Beef, Chili Cheese und Jalapeños — würzig, intensiv, lang.",
+    badge: "Spicy",
+    img: "/burgers/long-chili-cheese.svg",
+    bg: "from-bs-cyan-cream",
+  },
+  {
+    name: "BBQ Smash",
+    price: "9,90",
+    desc: "Bacon, Onion Rings, rauchige BBQ Sauce. Crunchy bis zum letzten Bissen.",
+    badge: "Smoky",
+    img: "/burgers/bbq-smash.svg",
+    bg: "from-yellow-50",
+  },
+  {
+    name: "Croissant Smash",
+    price: "11,40",
+    desc: "Buttriges Croissant trifft Double Beef. Unser Signature Move.",
+    badge: "Signature",
+    img: "/burgers/croissant-smash.svg",
+    bg: "from-bs-pink-cream",
+  },
+];
+
 export default function Home() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [tab, setTab] = useState<keyof typeof menu>("beef");
+  const [tab, setTab] = useState<MenuKey>("beef");
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -23,95 +113,6 @@ export default function Home() {
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  const menu: Record<string, MenuItem[]> = {
-    beef: [
-      { name: "Single Smash", price: "6,90", desc: "Brioche Bun, Single Beef Patty, Cheddar, Onion, Lettuce, Pickles, Burger Sauce" },
-      { name: "Double Smash", price: "9,40", desc: "Doppeltes Beef Patty, geschmolzener Cheddar, Pickles, Burger Sauce", tags: ["Top Seller"] },
-      { name: "Long Chili Cheese", price: "11,90", desc: "Doppeltes Beef, Chili Cheese, Jalapeños, Burger Sauce", tags: ["Spicy"] },
-      { name: "BBQ Smash", price: "9,90", desc: "Beef Patty, Bacon, Cheddar, Onion Rings, BBQ Sauce", tags: ["Smoky"] },
-      { name: "Croissant Smash", price: "11,40", desc: "Croissant Bun, doppeltes Beef Patty, Cheddar, Burger Sauce", tags: ["Signature"] },
-      { name: "Sucuk Burger", price: "8,90", desc: "Sucuk, Cheddar, Onion, Lettuce, Pickles, Garlic Sauce" },
-    ],
-    chicken: [
-      { name: "Classic Chicken", price: "9,00", desc: "Knuspriges Chicken Patty, Buttermilk-Mariniert, Cheddar, Lettuce, Pickles, Burger Sauce" },
-      { name: "Garlic Chicken", price: "9,00", desc: "Chicken Patty, Cheddar, Garlic Sauce" },
-      { name: "Long Chicken", price: "11,50", desc: "Doppelt Chicken Patty, Cheddar, Lettuce, Onion, Pickles, Burger Sauce" },
-    ],
-    vegan: [
-      { name: "Vegan Burger", price: "8,70", desc: "Vegan Patty, Lettuce, Onion, Pickles, Vegan Sauce" },
-      { name: "Falafel Burger", price: "8,70", desc: "Hausgemachte Falafel, Lettuce, Onion, Pickles, Vegan Sauce" },
-    ],
-    sides: [
-      { name: "Fries", price: "3,50" },
-      { name: "Beef & Cheese Fries", price: "7,90", desc: "Fries mit Smash Beef und Cheese Sauce" },
-      { name: "Sweet Potato Fries", price: "4,50" },
-      { name: "8 Chicken Nuggets", price: "6,00" },
-      { name: "Chicken Tenders", price: "6,60" },
-      { name: "Onion Rings", price: "6,20" },
-    ],
-    sauces: [
-      { name: "Burger Sauce", price: "1,50" },
-      { name: "Cheese Sauce", price: "4,00" },
-      { name: "Garlic Sauce", price: "1,50" },
-      { name: "Sweet & Sour Sauce", price: "1,50" },
-      { name: "Ketchup", price: "0,60" },
-      { name: "Mayo", price: "0,60" },
-    ],
-    shakes: [
-      { name: "Chocolate Shake", price: "4,00", desc: "Cremig, kalt, klassisch" },
-      { name: "Vanilla Shake", price: "4,00", desc: "Vanille, dick, eiskalt" },
-    ],
-    drinks: [
-      { name: "Water", price: "2,00" },
-      { name: "Fritz Limo", price: "3,30", desc: "Cola · Orange · Zitrone" },
-    ],
-  };
-
-  const tabLabels: Record<string, string> = {
-    beef: "🥩 Beef",
-    chicken: "🍗 Chicken",
-    vegan: "🌱 Vegan",
-    sides: "🍟 Sides",
-    sauces: "🥫 Sauces",
-    shakes: "🥤 Shakes",
-    drinks: "🧊 Drinks",
-  };
-
-  const bestsellers = [
-    {
-      name: "Double Smash",
-      price: "9,40",
-      desc: "Zwei knackig gesmashte Beef Patties, Cheddar, Pickles, Burger Sauce.",
-      badge: "Top Seller",
-      img: "/burgers/double-smash.svg",
-      bg: "from-pink-100",
-    },
-    {
-      name: "Long Chili Cheese",
-      price: "11,90",
-      desc: "Doppelt Beef, Chili Cheese und Jalapeños — würzig, intensiv, lang.",
-      badge: "Spicy",
-      img: "/burgers/long-chili-cheese.svg",
-      bg: "from-cyan-100",
-    },
-    {
-      name: "BBQ Smash",
-      price: "9,90",
-      desc: "Bacon, Onion Rings, rauchige BBQ Sauce. Crunchy bis zum letzten Bissen.",
-      badge: "Smoky",
-      img: "/burgers/bbq-smash.svg",
-      bg: "from-yellow-50",
-    },
-    {
-      name: "Croissant Smash",
-      price: "11,40",
-      desc: "Buttriges Croissant trifft Double Beef. Unser Signature Move.",
-      badge: "Signature",
-      img: "/burgers/croissant-smash.svg",
-      bg: "from-pink-50",
-    },
-  ];
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -379,7 +380,7 @@ export default function Home() {
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {bestsellers.map((b, i) => (
+            {BESTSELLERS.map((b, i) => (
               <div key={i} className={`fade-in-up stagger-${i+1} retro-card overflow-hidden flex flex-col`}>
                 <div className={`relative bg-gradient-to-br ${b.bg} to-white aspect-square overflow-hidden`}>
                   <img src={b.img} alt={`${b.name} Smash Burger`} className="w-full h-full object-cover"/>
@@ -481,20 +482,20 @@ export default function Home() {
 
           {/* Tabs */}
           <div className="menu-tabs justify-center md:justify-center mb-10 max-w-4xl mx-auto">
-            {Object.keys(menu).map((k) => (
+            {(Object.keys(MENU) as MenuKey[]).map((k) => (
               <button
                 key={k}
-                onClick={() => setTab(k as keyof typeof menu)}
+                onClick={() => setTab(k)}
                 className={`menu-tab ${tab === k ? "active" : ""}`}
               >
-                {tabLabels[k]}
+                {TAB_LABELS[k]}
               </button>
             ))}
           </div>
 
           {/* Items */}
           <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-4">
-            {menu[tab].map((item, i) => (
+            {MENU[tab].map((item, i) => (
               <div key={i} className="bg-white rounded-2xl border-2 border-bs-ink p-6 shadow-[4px_4px_0_var(--bs-ink)] hover:shadow-[6px_6px_0_var(--bs-pink)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all">
                 <div className="flex justify-between items-start gap-4 mb-2">
                   <div className="flex-1">
