@@ -1,5 +1,4 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { getGoogleReviewsNormalized } from "./_lib/googleReviews";
 
 export default async function handler(_req: IncomingMessage, res: ServerResponse) {
   const safeLog = (data: Record<string, unknown>) => {
@@ -28,7 +27,9 @@ export default async function handler(_req: IncomingMessage, res: ServerResponse
   safeLog({ phase: "handler-entry", nodeEnv: process.env.NODE_ENV || null });
 
   try {
-    const result = await getGoogleReviewsNormalized();
+    // Dynamically import to avoid hard-crash on module load in serverless runtime.
+    const mod = await import("./_lib/googleReviews");
+    const result = await mod.getGoogleReviewsNormalized();
     if (!result.ok) {
       res.statusCode = result.status;
       res.setHeader("Content-Type", "application/json; charset=utf-8");
