@@ -31,12 +31,8 @@ function envInt(name: string, fallback: number) {
 }
 
 function computeLinks(placeId: string) {
-  const reviewsUrl =
-    process.env.VITE_GOOGLE_REVIEWS_URL ||
-    `https://www.google.com/maps/place/?q=place_id:${placeId}`;
-  const writeReviewUrl =
-    process.env.VITE_GOOGLE_WRITE_REVIEW_URL ||
-    `https://search.google.com/local/writereview?placeid=${placeId}`;
+  const reviewsUrl = `https://www.google.com/maps/place/?q=place_id:${placeId}`;
+  const writeReviewUrl = `https://search.google.com/local/writereview?placeid=${placeId}`;
   return { reviewsUrl, writeReviewUrl };
 }
 

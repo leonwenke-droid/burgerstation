@@ -135,13 +135,13 @@ export default function GoogleReviewsSection() {
   const selected = useMemo(() => selectReviews(data?.reviews ?? []), [data]);
 
   const reviewsUrl =
-    (import.meta.env.VITE_GOOGLE_REVIEWS_URL as string | undefined) ||
     data?.reviewsUrl ||
+    (import.meta.env.VITE_GOOGLE_REVIEWS_URL as string | undefined) ||
     "https://share.google/iEiigXqw0ldw2wlly";
 
   const writeReviewUrl =
-    (import.meta.env.VITE_GOOGLE_WRITE_REVIEW_URL as string | undefined) ||
     data?.writeReviewUrl ||
+    (import.meta.env.VITE_GOOGLE_WRITE_REVIEW_URL as string | undefined) ||
     "https://share.google/iEiigXqw0ldw2wlly";
 
   const ratingLabel =
