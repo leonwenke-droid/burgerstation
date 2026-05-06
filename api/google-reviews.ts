@@ -1,5 +1,67 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 
+type GoogleReview = {
+  id: string;
+  authorName: string;
+  authorProfileUrl: string;
+  authorPhotoUrl: string;
+  rating: 1 | 2 | 3 | 4 | 5;
+  relativeTime: string;
+  publishTime: string;
+  text: string;
+  language: string;
+};
+
+type NormalizedGoogleReviewsResponse = {
+  source: "google";
+  placeName: string;
+  rating: number | null;
+  userRatingsTotal: number | null;
+  reviewsUrl: string;
+  writeReviewUrl: string;
+  reviews: GoogleReview[];
+  updatedAt: string;
+};
+
+function envInt(name: string, fallback: number) {
+  const raw = process.env[name];
+  if (!raw) return fallback;
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function computeLinks(placeId: string) {
+  const reviewsUrl =
+    process.env.VITE_GOOGLE_REVIEWS_URL ||
+    `https://www.google.com/maps/place/?q=place_id:${placeId}`;
+  const writeReviewUrl =
+    process.env.VITE_GOOGLE_WRITE_REVIEW_URL ||
+    `https://search.google.com/local/writereview?placeid=${placeId}`;
+  return { reviewsUrl, writeReviewUrl };
+}
+
+type PlacesPlaceDetailsResponse = {
+  displayName?: { text?: string };
+  rating?: number;
+  userRatingCount?: number;
+  googleMapsUri?: string;
+  reviews?: Array<{
+    name?: string;
+    rating?: number;
+    relativePublishTimeDescription?: string;
+    publishTime?: string;
+    text?: { text?: string; languageCode?: string };
+    authorAttribution?: { displayName?: string; uri?: string; photoUri?: string };
+  }>;
+};
+
+let cache:
+  | {
+      value: NormalizedGoogleReviewsResponse;
+      expiresAtMs: number;
+    }
+  | undefined;
+
 export default async function handler(_req: IncomingMessage, res: ServerResponse) {
   const safeLog = (data: Record<string, unknown>) => {
     try {
@@ -27,24 +89,112 @@ export default async function handler(_req: IncomingMessage, res: ServerResponse
   safeLog({ phase: "handler-entry", nodeEnv: process.env.NODE_ENV || null });
 
   try {
-    // Dynamically import to avoid hard-crash on module load in serverless runtime.
-    const mod = await import("./_lib/googleReviews");
-    const result = await mod.getGoogleReviewsNormalized();
-    if (!result.ok) {
-      res.statusCode = result.status;
+    const apiKey = process.env.GOOGLE_PLACES_API_KEY || "";
+    const placeId = process.env.GOOGLE_PLACE_ID || "";
+    const ttlSeconds = envInt("GOOGLE_REVIEWS_CACHE_TTL_SECONDS", 86400);
+
+    safeLog({
+      phase: "env-check",
+      hasApiKey: Boolean(apiKey),
+      hasPlaceId: Boolean(placeId),
+      ttlSeconds,
+      hasGlobalFetch: typeof fetch === "function",
+    });
+
+    if (!apiKey) {
+      res.statusCode = 500;
       res.setHeader("Content-Type", "application/json; charset=utf-8");
-      res.end(JSON.stringify({ error: result.error }));
+      res.end(JSON.stringify({ error: "Missing GOOGLE_PLACES_API_KEY" }));
+      return;
+    }
+    if (!placeId) {
+      res.statusCode = 500;
+      res.setHeader("Content-Type", "application/json; charset=utf-8");
+      res.end(JSON.stringify({ error: "Missing GOOGLE_PLACE_ID" }));
       return;
     }
 
+    const now = Date.now();
+    if (cache && cache.expiresAtMs > now) {
+      res.statusCode = 200;
+      res.setHeader("Content-Type", "application/json; charset=utf-8");
+      res.setHeader(
+        "Cache-Control",
+        `public, max-age=0, s-maxage=${ttlSeconds}, stale-while-revalidate=3600`,
+      );
+      res.end(JSON.stringify(cache.value));
+      return;
+    }
+
+    const fieldMask = ["displayName", "rating", "userRatingCount", "googleMapsUri", "reviews"].join(
+      ",",
+    );
+    const url = `https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}?languageCode=de`;
+
+    let resp: Response;
+    try {
+      resp = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Goog-Api-Key": apiKey,
+          "X-Goog-FieldMask": fieldMask,
+        },
+      });
+    } catch (e) {
+      res.statusCode = 502;
+      res.setHeader("Content-Type", "application/json; charset=utf-8");
+      res.end(JSON.stringify({ error: `Network error: ${String(e)}` }));
+      return;
+    }
+
+    if (!resp.ok) {
+      const body = await resp.text().catch(() => "");
+      res.statusCode = resp.status || 502;
+      res.setHeader("Content-Type", "application/json; charset=utf-8");
+      res.end(JSON.stringify({ error: body || `Google Places error (${resp.status})` }));
+      return;
+    }
+
+    const json = (await resp.json()) as PlacesPlaceDetailsResponse;
+    const { reviewsUrl, writeReviewUrl } = computeLinks(placeId);
+
+    const reviews: GoogleReview[] = (json.reviews || []).map((r, idx) => {
+      const rating = Math.min(5, Math.max(1, Math.round(r.rating || 0))) as 1 | 2 | 3 | 4 | 5;
+      const id = r.name || `review-${idx}`;
+      return {
+        id,
+        authorName: r.authorAttribution?.displayName || "Google Nutzer",
+        authorProfileUrl: r.authorAttribution?.uri || "",
+        authorPhotoUrl: r.authorAttribution?.photoUri || "",
+        rating,
+        relativeTime: r.relativePublishTimeDescription || "",
+        publishTime: r.publishTime || "",
+        text: r.text?.text || "",
+        language: r.text?.languageCode || "",
+      };
+    });
+
+    const value: NormalizedGoogleReviewsResponse = {
+      source: "google",
+      placeName: json.displayName?.text || "Burger Station",
+      rating: typeof json.rating === "number" ? json.rating : null,
+      userRatingsTotal: typeof json.userRatingCount === "number" ? json.userRatingCount : null,
+      reviewsUrl: json.googleMapsUri || reviewsUrl,
+      writeReviewUrl,
+      reviews,
+      updatedAt: new Date().toISOString(),
+    };
+
+    cache = { value, expiresAtMs: now + ttlSeconds * 1000 };
+
     res.statusCode = 200;
     res.setHeader("Content-Type", "application/json; charset=utf-8");
-    // Vercel/CDN caching (24h default, configurable)
     res.setHeader(
       "Cache-Control",
-      `public, max-age=0, s-maxage=${result.cacheTtlSeconds}, stale-while-revalidate=3600`,
+      `public, max-age=0, s-maxage=${ttlSeconds}, stale-while-revalidate=3600`,
     );
-    res.end(JSON.stringify(result.value));
+    res.end(JSON.stringify(value));
   } catch (e) {
     safeLog({
       phase: "handler-exception",
