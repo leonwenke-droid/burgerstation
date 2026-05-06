@@ -166,7 +166,7 @@ function BurgerCard({ item, img }: { item: MenuItem; img?: string }) {
           <img
             src={img}
             alt={item.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
           />
         </div>
       )}
@@ -273,25 +273,25 @@ export default function Menu() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-2">
               <BurgerCard
                 item={BEEF[0]}
-                img="/burgers/hero-burger.svg"
+                img="/images/menu/single-smash.png"
               />
               <BurgerCard
                 item={BEEF[1]}
-                img="/burgers/double-smash.svg"
+                img="/images/menu/double-smash.png"
               />
               <BurgerCard
                 item={BEEF[2]}
-                img="/burgers/long-chili-cheese.svg"
+                img="/images/menu/long-chili-cheese.png"
               />
               <BurgerCard
                 item={BEEF[3]}
-                img="/burgers/bbq-smash.svg"
+                img="/images/menu/bbq-smash.png"
               />
               <BurgerCard
                 item={BEEF[4]}
-                img="/burgers/croissant-smash.svg"
+                img="/images/menu/croissant-smash.png"
               />
-              <BurgerCard item={BEEF[5]} />
+              <BurgerCard item={BEEF[5]} img="/images/menu/sucuk-burger.png" />
             </div>
           </section>
 

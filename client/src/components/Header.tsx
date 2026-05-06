@@ -26,9 +26,9 @@ export default function Header() {
         {/* Brand */}
         <Link href="/" className="flex items-center gap-3 group">
           <img
-            src="/brand/mark.svg"
+            src="/images/brand/burger-station-logo-transparent.png"
             alt="Burger Station Logo"
-            className="w-11 h-11 md:w-12 md:h-12 transition-transform group-hover:rotate-6"
+            className="w-11 h-11 md:w-12 md:h-12 object-contain transition-transform group-hover:rotate-6"
           />
           <div className="leading-none">
             <div className="font-display text-subhead text-lg md:text-xl text-bs-ink uppercase tracking-tight">

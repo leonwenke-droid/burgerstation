@@ -20,9 +20,9 @@ export default function Footer() {
             <div className="md:col-span-2">
               <div className="flex items-center gap-3 mb-4">
                 <img
-                  src="/brand/mark.svg"
+                  src="/images/brand/burger-station-logo-transparent.png"
                   alt="Burger Station Leer Logo"
-                  className="w-14 h-14"
+                  className="w-14 h-14 object-contain"
                 />
                 <div>
                   <div className="text-subhead text-2xl text-bs-ink uppercase tracking-tight">

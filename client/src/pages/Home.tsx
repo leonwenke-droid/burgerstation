@@ -14,7 +14,7 @@ const BESTSELLERS = [
     price: "9,40",
     desc: "Zwei knackig gesmashte Beef Patties, Cheddar, Pickles, Burger Sauce.",
     badge: "Top Seller",
-    img: "/burgers/double-smash.svg",
+    img: "/images/menu/double-smash.png",
     plate: "DBL-SMSH-001",
     plateBg: "var(--bs-primary-f)",
   },
@@ -23,7 +23,7 @@ const BESTSELLERS = [
     price: "11,90",
     desc: "Doppelt Beef, Chili Cheese und Jalapeños — würzig, intensiv, lang.",
     badge: "Spicy",
-    img: "/burgers/long-chili-cheese.svg",
+    img: "/images/menu/long-chili-cheese.png",
     plate: "LNG-CHI-002",
     plateBg: "var(--bs-peach)",
   },
@@ -32,7 +32,7 @@ const BESTSELLERS = [
     price: "9,90",
     desc: "Bacon, Onion Rings, rauchige BBQ Sauce. Crunchy bis zum letzten Bissen.",
     badge: "Smoky",
-    img: "/burgers/bbq-smash.svg",
+    img: "/images/menu/bbq-smash.png",
     plate: "BBQ-SMS-003",
     plateBg: "var(--bs-yellow)",
   },
@@ -41,7 +41,7 @@ const BESTSELLERS = [
     price: "11,40",
     desc: "Buttriges Croissant trifft Double Beef. Unser Signature Move.",
     badge: "Signature",
-    img: "/burgers/croissant-smash.svg",
+    img: "/images/menu/croissant-smash.png",
     plate: "CRS-SMS-004",
     plateBg: "var(--bs-primary-f)",
   },
@@ -106,9 +106,9 @@ export default function Home() {
               {/* Circular framed image */}
               <div className="relative z-10 w-64 h-64 md:w-[360px] md:h-[360px] lg:w-[440px] lg:h-[440px] rounded-full overflow-hidden border-4 border-bs-ink shadow-[0_0_40px_rgba(254,212,200,0.8)] hover:scale-105 transition-transform duration-500">
                 <img
-                  src="/burgers/hero-burger.svg"
+                  src="/images/menu/hero-burger.png"
                   alt="Burger Station Smash Burger mit Käse, Bacon und frischem Salat"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain"
                 />
               </div>
               {/* Rotating price sticker */}
@@ -182,7 +182,7 @@ export default function Home() {
                   <img
                     src={b.img}
                     alt={`${b.name} Smash Burger`}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                   />
                   <div className="absolute top-3 left-3 -rotate-2">
                     <span className="badge-neon badge-yellow-fill">{b.badge}</span>
@@ -417,11 +417,11 @@ export default function Home() {
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {[
-                { src: "/burgers/double-smash.svg", alt: "Double Smash Burger" },
+                { src: "/images/menu/double-smash.png", alt: "Double Smash Burger" },
                 { src: "/patterns/interior-1.svg", alt: "Pinke Wand mit Neon" },
                 { src: "/burgers/shake.svg", alt: "Chocolate Shake" },
                 { src: "/patterns/interior-3.svg", alt: "Storefront bei Nacht" },
-                { src: "/burgers/long-chili-cheese.svg", alt: "Long Chili Cheese" },
+                { src: "/images/menu/long-chili-cheese.png", alt: "Long Chili Cheese Burger" },
                 { src: "/burgers/fries.svg", alt: "Fries im Karton" },
               ].map((p, i) => (
                 <a
@@ -431,7 +431,11 @@ export default function Home() {
                   rel="noopener noreferrer"
                   className="aspect-square rounded-xl border-2 border-bs-ink overflow-hidden shadow-[3px_3px_0_var(--bs-ink)] hover:shadow-[5px_5px_0_var(--bs-teal)] hover:-translate-y-0.5 hover:-translate-x-0.5 transition-all bg-bs-pink-cream"
                 >
-                  <img src={p.src} alt={p.alt} className="w-full h-full object-cover" />
+                  <img
+                    src={p.src}
+                    alt={p.alt}
+                    className="w-full h-full object-contain"
+                  />
                 </a>
               ))}
             </div>
