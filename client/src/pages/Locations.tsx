@@ -65,7 +65,7 @@ export default function Locations() {
                     alt="Burger Station Neon-Schild und Diner-Elemente"
                     className="w-full h-full object-contain bg-transparent group-hover:scale-105 transition-transform duration-500"
                   />
-                  <div className="absolute -top-2 -right-2 bg-bs-yellow border-2 border-bs-ink rounded-full w-11 h-11 flex items-center justify-center rotate-12 shadow-[2px_2px_0_var(--bs-ink)] z-10 text-xl">
+                  <div className="absolute top-2 right-2 bg-bs-yellow border-2 border-bs-ink rounded-full w-11 h-11 flex items-center justify-center rotate-12 shadow-[2px_2px_0_var(--bs-ink)] z-10 text-xl">
                     ★
                   </div>
                 </div>
