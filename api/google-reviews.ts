@@ -63,43 +63,10 @@ let cache:
   | undefined;
 
 export default async function handler(_req: IncomingMessage, res: ServerResponse) {
-  const safeLog = (data: Record<string, unknown>) => {
-    try {
-      if (typeof fetch !== "function") return;
-      // #region agent log
-      fetch("http://127.0.0.1:7795/ingest/66c2885f-1421-4d80-ad50-1c0a8d3bdcd6", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "734526" },
-        body: JSON.stringify({
-          sessionId: "734526",
-          runId: "pre-fix",
-          hypothesisId: "H1",
-          location: "api/google-reviews.ts:safeLog",
-          message: "Debug log event",
-          data,
-          timestamp: Date.now(),
-        }),
-      }).catch(() => {});
-      // #endregion
-    } catch {
-      // ignore
-    }
-  };
-
-  safeLog({ phase: "handler-entry", nodeEnv: process.env.NODE_ENV || null });
-
   try {
     const apiKey = process.env.GOOGLE_PLACES_API_KEY || "";
     const placeId = process.env.GOOGLE_PLACE_ID || "";
     const ttlSeconds = envInt("GOOGLE_REVIEWS_CACHE_TTL_SECONDS", 86400);
-
-    safeLog({
-      phase: "env-check",
-      hasApiKey: Boolean(apiKey),
-      hasPlaceId: Boolean(placeId),
-      ttlSeconds,
-      hasGlobalFetch: typeof fetch === "function",
-    });
 
     if (!apiKey) {
       res.statusCode = 500;
@@ -196,10 +163,6 @@ export default async function handler(_req: IncomingMessage, res: ServerResponse
     );
     res.end(JSON.stringify(value));
   } catch (e) {
-    safeLog({
-      phase: "handler-exception",
-      error: e instanceof Error ? { name: e.name, message: e.message, stack: e.stack } : String(e),
-    });
     res.statusCode = 500;
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     res.end(
