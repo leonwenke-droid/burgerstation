@@ -2,6 +2,7 @@ import { Phone, MapPin, Instagram, ChevronRight, Star, Clock, Flame } from "luci
 import { Link } from "wouter";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import GoogleReviewsSection from "@/components/GoogleReviewsSection";
 
 const PHONE = "tel:+4949199755279";
 const PHONE_DISPLAY = "0491 99 755 279";
@@ -311,8 +312,16 @@ export default function Home() {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <img src="/patterns/interior-1.svg" alt="Burger Station Neonwand und Innenraum" className="rounded-2xl border-2 border-bs-ink shadow-[4px_4px_0_var(--bs-ink)] aspect-square object-cover w-full" />
-              <img src="/patterns/interior-2.svg" alt="Burger Station Diner Booth" className="rounded-2xl border-2 border-bs-ink shadow-[4px_4px_0_var(--bs-teal)] aspect-square object-cover w-full mt-8" />
+              <img
+                src="/images/foodspot/foodspot-2.png"
+                alt="Burger Station Milkshake im Retro-Stil"
+                className="rounded-2xl border-2 border-bs-ink shadow-[4px_4px_0_var(--bs-ink)] aspect-square object-contain w-full bg-transparent"
+              />
+              <img
+                src="/images/foodspot/foodspot-3.png"
+                alt="Burger Station Neon-Schild und Diner-Elemente"
+                className="rounded-2xl border-2 border-bs-ink shadow-[4px_4px_0_var(--bs-teal)] aspect-square object-contain w-full mt-8 bg-transparent"
+              />
             </div>
           </div>
 
@@ -358,45 +367,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ════════════════════ REVIEWS ════════════════════ */}
-      <section className="py-20 md:py-24 bg-bs-surface-hi">
-        <div className="container">
-          <div className="text-center mb-12">
-            <span className="badge-neon badge-pink-fill">DAS SAGT LEER</span>
-            <h2 className="text-headline text-4xl md:text-5xl lg:text-6xl text-bs-ink mt-4 uppercase">
-              FRISCH ERÖFFNET —<br />ERSTE STIMMEN FOLGEN.
-            </h2>
-            <p className="text-bs-ink-v mt-5 max-w-2xl mx-auto">
-              Burger Station hat im Mai 2025 in Leer eröffnet. Echte Google-Bewertungen werden hier eingebunden, sobald sie eingehen — keine Fake-Reviews, keine erfundenen Stimmen.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {[
-              { title: "Authentic Smash Burgers", text: "Doppeltes Beef, knackig gesmasht, geschmolzener Cheddar. Genau so, wie Smash Burger sein müssen.", tag: "Was wir machen" },
-              { title: "Halal & Handmade", text: "Patties täglich frisch geformt, Fleisch transparent halal. Kein Marketing — nur Standard.", tag: "Was uns wichtig ist" },
-              { title: "Mehr als Essen", text: "Pinke Wände, Neonlicht, Diner-Vibes. Gäste kommen für den Burger, bleiben für die Atmosphäre.", tag: "Was du erlebst" },
-            ].map((card, i) => (
-              <div key={i} className="bg-white rounded-xl border-[3px] border-bs-ink p-6 shadow-[5px_5px_0_var(--bs-ink)]">
-                <span className="badge-neon badge-cyan-fill">{card.tag}</span>
-                <h3 className="text-subhead text-xl text-bs-ink mt-4 mb-3">{card.title}</h3>
-                <p className="text-bs-ink-v leading-relaxed">{card.text}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center mt-10">
-            <a
-              href="https://www.google.com/search?q=Burger+Station+Leer+Bahnhofsring+30"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-ghost-ink btn-sm"
-            >
-              <Star size={16} /> Auf Google bewerten
-            </a>
-          </div>
-        </div>
-      </section>
+      <GoogleReviewsSection />
 
       {/* ════════════════════ INSTAGRAM ════════════════════ */}
       <section className="py-20 md:py-24 bg-white">
@@ -418,11 +389,11 @@ export default function Home() {
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {[
                 { src: "/images/menu/double-smash.png", alt: "Double Smash Burger" },
-                { src: "/patterns/interior-1.svg", alt: "Pinke Wand mit Neon" },
-                { src: "/burgers/shake.svg", alt: "Chocolate Shake" },
-                { src: "/patterns/interior-3.svg", alt: "Storefront bei Nacht" },
+                { src: "/images/foodspot/foodspot-2.png", alt: "Burger Station Neon-Schild im Retro-Stil" },
+                { src: "/images/foodspot/foodspot-1.png", alt: "Burger Station Milkshake im Retro-Stil" },
+                { src: "/images/foodspot/foodspot-3.png", alt: "Burger Station Leuchtschild mit Diner-Elementen" },
                 { src: "/images/menu/long-chili-cheese.png", alt: "Long Chili Cheese Burger" },
-                { src: "/burgers/fries.svg", alt: "Fries im Karton" },
+                { src: "/images/foodspot/foodspot-4.png", alt: "Burger Station Fries im Retro-Stil" },
               ].map((p, i) => (
                 <a
                   key={i}

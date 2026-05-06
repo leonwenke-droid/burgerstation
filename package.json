@@ -5,11 +5,13 @@
   "license": "MIT",
   "scripts": {
     "dev": "vite --host",
+    "dev:api": "tsx server/dev.ts",
     "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
     "start": "NODE_ENV=production node dist/index.js",
     "preview": "vite preview --host",
     "check": "tsc --noEmit",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "google:find-place": "tsx scripts/find-google-place-id.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
