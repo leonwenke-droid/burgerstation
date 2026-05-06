@@ -174,15 +174,22 @@
     width: 100%;
     margin-left: auto;
     margin-right: auto;
-    padding-left: 1.25rem;
-    padding-right: 1.25rem;
+    padding-left: calc(1.25rem + env(safe-area-inset-left));
+    padding-right: calc(1.25rem + env(safe-area-inset-right));
   }
   .flex { min-height: 0; min-width: 0; }
   @media (min-width: 640px) {
-    .container { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .container {
+      padding-left: calc(1.5rem + env(safe-area-inset-left));
+      padding-right: calc(1.5rem + env(safe-area-inset-right));
+    }
   }
   @media (min-width: 1024px) {
-    .container { padding-left: 2rem; padding-right: 2rem; max-width: 1280px; }
+    .container {
+      padding-left: calc(2rem + env(safe-area-inset-left));
+      padding-right: calc(2rem + env(safe-area-inset-right));
+      max-width: 1280px;
+    }
   }
 
   /* ─── Typography ─────────────────────────────────────── */
@@ -520,6 +527,9 @@
     background: var(--bs-cream);
     border-top: 3px solid var(--bs-ink);
     padding: 0.65rem;
+    padding-left: calc(0.65rem + env(safe-area-inset-left));
+    padding-right: calc(0.65rem + env(safe-area-inset-right));
+    padding-bottom: calc(0.65rem + env(safe-area-inset-bottom));
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     gap: 0.5rem;
