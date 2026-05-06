@@ -43,98 +43,111 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  /* brand tokens exposed as Tailwind utilities: bg-bs-pink, text-bs-ink, etc. */
-  --color-bs-pink: var(--bs-pink);
-  --color-bs-pink-dark: var(--bs-pink-dark);
-  --color-bs-pink-soft: var(--bs-pink-soft);
-  --color-bs-pink-cream: var(--bs-pink-cream);
-  --color-bs-cyan: var(--bs-cyan);
-  --color-bs-cyan-soft: var(--bs-cyan-soft);
-  --color-bs-cyan-cream: var(--bs-cyan-cream);
-  --color-bs-yellow: var(--bs-yellow);
-  --color-bs-cream: var(--bs-cream);
-  --color-bs-ink: var(--bs-ink);
-  --color-bs-coal: var(--bs-coal);
-  --color-bs-paper: var(--bs-paper);
+  /* Stitch brand tokens as Tailwind utilities */
+  --color-bs-teal:        var(--bs-teal);
+  --color-bs-primary-c:   var(--bs-primary-c);
+  --color-bs-primary-f:   var(--bs-primary-f);
+  --color-bs-peach:       var(--bs-peach);
+  --color-bs-yellow:      var(--bs-yellow);
+  --color-bs-cream:       var(--bs-cream);
+  --color-bs-surface-hi:  var(--bs-surface-hi);
+  --color-bs-surface-top: var(--bs-surface-top);
+  --color-bs-ink:         var(--bs-ink);
+  --color-bs-ink-v:       var(--bs-ink-v);
+  /* Backwards-compat aliases — old component class names still resolve */
+  --color-bs-pink:        var(--bs-pink);
+  --color-bs-pink-dark:   var(--bs-pink-dark);
+  --color-bs-pink-soft:   var(--bs-pink-soft);
+  --color-bs-pink-cream:  var(--bs-pink-cream);
+  --color-bs-cyan:        var(--bs-cyan);
+  --color-bs-cyan-soft:   var(--bs-cyan-soft);
+  --color-bs-cyan-cream:  var(--bs-cyan-cream);
+  --color-bs-coal:        var(--bs-coal);
+  --color-bs-paper:       var(--bs-paper);
 }
 
 :root {
   /* ============================================================
-     BURGER STATION — BRAND DESIGN TOKENS
-     Stitch: "Modern American Retro Diner" / "Neon Soda & Smash"
+     BURGER STATION — STITCH DESIGN TOKENS
+     Visual system: Google Stitch "Modern American Retro Diner"
      Fonts: Epilogue (display) + Plus Jakarta Sans (body)
      ============================================================ */
 
-  /* --- Palette --- */
-  --bs-pink:        #FF2D87;
-  --bs-pink-dark:   #C8006B;   /* AA-contrast safe for body-size text on white */
-  --bs-pink-soft:   #FFB6D9;
-  --bs-pink-cream:  #FFE6F0;
-  --bs-cyan:        #00E0E0;
-  --bs-cyan-soft:   #8FE1DF;
-  --bs-cyan-cream:  #C8F2F1;
-  --bs-yellow:      #FFE15D;
-  --bs-cream:       #FEFCCF;
-  --bs-ink:         #0a1530;
-  --bs-coal:        #1a1a1a;
-  --bs-paper:       #FFF8EB;
+  /* --- Core Stitch Palette --- */
+  --bs-teal:        #006a62;   /* primary — heading accents, primary CTAs         */
+  --bs-primary-c:   #40e0d0;   /* primary-container — turquoise, add-btns          */
+  --bs-primary-f:   #61f9e9;   /* primary-fixed — license plate bg                 */
+  --bs-peach:       #fed4c8;   /* secondary-container — secondary CTAs, card tints */
+  --bs-yellow:      #ffe16d;   /* tertiary-fixed — badges, stickers, price tags     */
+  --bs-cream:       #fefccf;   /* surface / main background                         */
+  --bs-surface-hi:  #eceabe;   /* surface-container-high — ticker, alt sections     */
+  --bs-surface-top: #e6e5b9;   /* surface-container-highest — footer bg             */
+  --bs-ink:         #1d1d03;   /* on-surface — all borders, shadows, primary text   */
+  --bs-ink-v:       #3c4a47;   /* on-surface-variant — body copy                    */
 
-  /* --- Shadow scale (Stitch-derived: hard offset, no blur) --- */
+  /* --- Backwards-compat aliases (keeps existing class names working) --- */
+  --bs-pink:        #006a62;   /* was hot-pink, now teal primary                    */
+  --bs-pink-dark:   #004d47;
+  --bs-pink-soft:   #40e0d0;
+  --bs-pink-cream:  #fed4c8;   /* was rose-tint, now peach secondary-container     */
+  --bs-cyan:        #40e0d0;   /* turquoise — unchanged                             */
+  --bs-cyan-soft:   #61f9e9;
+  --bs-cyan-cream:  #eceabe;   /* was teal-cream, now surface-hi                   */
+  --bs-coal:        #1d1d03;
+  --bs-paper:       #fefccf;
+
+  /* --- Shadow scale (hard offset, zero blur, olive-black) --- */
   --bs-shadow-sm:   4px 4px 0 var(--bs-ink);
   --bs-shadow:      6px 6px 0 var(--bs-ink);
   --bs-shadow-lg:   8px 8px 0 var(--bs-ink);
-  --bs-shadow-pink: 6px 6px 0 var(--bs-pink);
-  --bs-shadow-cyan: 6px 6px 0 var(--bs-cyan);
+  --bs-shadow-pink: 6px 6px 0 var(--bs-teal);
+  --bs-shadow-cyan: 6px 6px 0 var(--bs-primary-c);
 
   /* --- shadcn system bridge --- */
-  --primary:                    var(--bs-pink);
+  --primary:                    var(--bs-teal);
   --primary-foreground:         #ffffff;
-  --secondary:                  var(--bs-cyan);
-  --secondary-foreground:       var(--bs-coal);
+  --secondary:                  var(--bs-peach);
+  --secondary-foreground:       var(--bs-ink);
   --background:                 var(--bs-cream);
-  --foreground:                 var(--bs-coal);
+  --foreground:                 var(--bs-ink);
   --card:                       #ffffff;
-  --card-foreground:            var(--bs-coal);
+  --card-foreground:            var(--bs-ink);
   --popover:                    #ffffff;
-  --popover-foreground:         var(--bs-coal);
-  --muted:                      #f0ede5;
-  --muted-foreground:           #555555;
+  --popover-foreground:         var(--bs-ink);
+  --muted:                      var(--bs-surface-hi);
+  --muted-foreground:           var(--bs-ink-v);
   --accent:                     var(--bs-yellow);
-  --accent-foreground:          var(--bs-coal);
-  --destructive:                var(--bs-pink);
+  --accent-foreground:          var(--bs-ink);
+  --destructive:                #ba1a1a;
   --destructive-foreground:     #ffffff;
-  --border:                     #e8e4d8;
+  --border:                     var(--bs-surface-top);
   --input:                      #ffffff;
-  --ring:                       var(--bs-pink);
+  --ring:                       var(--bs-teal);
   --radius:                     0.875rem;
-  --chart-1:                    var(--bs-pink);
-  --chart-2:                    var(--bs-cyan);
+  --chart-1:                    var(--bs-teal);
+  --chart-2:                    var(--bs-primary-c);
   --chart-3:                    var(--bs-yellow);
-  --chart-4:                    var(--bs-pink-soft);
-  --chart-5:                    var(--bs-cyan-soft);
+  --chart-4:                    var(--bs-peach);
+  --chart-5:                    var(--bs-surface-hi);
   --sidebar:                    var(--bs-cream);
-  --sidebar-foreground:         var(--bs-coal);
-  --sidebar-primary:            var(--bs-pink);
+  --sidebar-foreground:         var(--bs-ink);
+  --sidebar-primary:            var(--bs-teal);
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent:             var(--bs-yellow);
-  --sidebar-accent-foreground:  var(--bs-coal);
-  --sidebar-border:             #e8e4d8;
-  --sidebar-ring:               var(--bs-pink);
+  --sidebar-accent-foreground:  var(--bs-ink);
+  --sidebar-border:             var(--bs-surface-top);
+  --sidebar-ring:               var(--bs-teal);
 }
 
-/* brand is always light — dark class is a no-op */
+/* Brand is always light — dark class is a no-op */
 .dark {
   --background: var(--bs-cream);
-  --foreground: var(--bs-coal);
+  --foreground: var(--bs-ink);
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  html {
-    scroll-behavior: smooth;
-  }
+  * { @apply border-border outline-ring/50; }
+  html { scroll-behavior: smooth; }
   body {
     @apply bg-background text-foreground;
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
@@ -142,9 +155,7 @@
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
   }
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Epilogue', sans-serif;
-  }
+  h1, h2, h3, h4, h5, h6 { font-family: 'Epilogue', sans-serif; }
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
   [type="button"]:not(:disabled),
@@ -153,13 +164,8 @@
   a[href],
   select:not(:disabled),
   input[type="checkbox"]:not(:disabled),
-  input[type="radio"]:not(:disabled) {
-    @apply cursor-pointer;
-  }
-  ::selection {
-    background: var(--bs-pink);
-    color: white;
-  }
+  input[type="radio"]:not(:disabled) { @apply cursor-pointer; }
+  ::selection { background: var(--bs-primary-c); color: var(--bs-ink); }
 }
 
 @layer components {
@@ -172,7 +178,6 @@
     padding-right: 1.25rem;
   }
   .flex { min-height: 0; min-width: 0; }
-
   @media (min-width: 640px) {
     .container { padding-left: 1.5rem; padding-right: 1.5rem; }
   }
@@ -180,11 +185,9 @@
     .container { padding-left: 2rem; padding-right: 2rem; max-width: 1280px; }
   }
 
-  /* ─── Typography utilities ───────────────────────────── */
+  /* ─── Typography ─────────────────────────────────────── */
   .font-display { font-family: 'Epilogue', sans-serif; }
   .font-body    { font-family: 'Plus Jakarta Sans', sans-serif; }
-
-  /* Semantic scale (Stitch "Neon Soda & Smash" type ramp) */
   .text-display {
     font-family: 'Epilogue', sans-serif;
     font-weight: 900;
@@ -212,66 +215,7 @@
     line-height: 1;
   }
 
-  /* ─── Neon glow ──────────────────────────────────────── */
-  .neon-text-pink {
-    color: var(--bs-pink);
-    text-shadow:
-      0 0 4px var(--bs-pink),
-      0 0 12px color-mix(in srgb, var(--bs-pink) 60%, transparent),
-      0 0 28px color-mix(in srgb, var(--bs-pink) 40%, transparent);
-  }
-  .neon-text-cyan {
-    color: var(--bs-cyan);
-    text-shadow:
-      0 0 4px var(--bs-cyan),
-      0 0 12px color-mix(in srgb, var(--bs-cyan) 60%, transparent),
-      0 0 28px color-mix(in srgb, var(--bs-cyan) 40%, transparent);
-  }
-  .neon-text-yellow {
-    color: var(--bs-yellow);
-    text-shadow:
-      0 0 4px var(--bs-yellow),
-      0 0 10px color-mix(in srgb, var(--bs-yellow) 60%, transparent);
-  }
-  .neon-box-pink {
-    border: 2px solid var(--bs-pink);
-    box-shadow:
-      inset 0 0 10px color-mix(in srgb, var(--bs-pink) 30%, transparent),
-      0 0 12px color-mix(in srgb, var(--bs-pink) 50%, transparent),
-      0 0 28px color-mix(in srgb, var(--bs-pink) 25%, transparent);
-  }
-  .neon-box-cyan {
-    border: 2px solid var(--bs-cyan);
-    box-shadow:
-      inset 0 0 10px color-mix(in srgb, var(--bs-cyan) 30%, transparent),
-      0 0 12px color-mix(in srgb, var(--bs-cyan) 50%, transparent),
-      0 0 28px color-mix(in srgb, var(--bs-cyan) 25%, transparent);
-  }
-
-  /* ─── Buttons (Stitch: flat fill, 3px border, 6px hard shadow, press-down) */
-  .btn-base {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-weight: 700;
-    letter-spacing: 0.07em;
-    padding: 0.875rem 1.75rem;
-    border-radius: 999px;
-    border: 3px solid var(--bs-ink);
-    transition: transform 0.12s ease, box-shadow 0.12s ease;
-    text-transform: uppercase;
-    font-size: 1rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    line-height: 1;
-    cursor: pointer;
-    text-decoration: none;
-  }
-  .btn-base:focus-visible {
-    outline: 3px solid var(--bs-yellow);
-    outline-offset: 3px;
-  }
-
+  /* ─── Buttons (Stitch: rounded-full, 3px border, 6px hard shadow, press-down) ── */
   .btn-pink {
     font-family: 'Plus Jakarta Sans', sans-serif;
     font-weight: 700;
@@ -289,8 +233,8 @@
     line-height: 1;
     cursor: pointer;
     text-decoration: none;
-    background: var(--bs-pink);
-    color: white;
+    background: var(--bs-teal);
+    color: #ffffff;
     box-shadow: var(--bs-shadow);
   }
   .btn-pink:focus-visible { outline: 3px solid var(--bs-yellow); outline-offset: 3px; }
@@ -314,7 +258,7 @@
     line-height: 1;
     cursor: pointer;
     text-decoration: none;
-    background: var(--bs-cyan);
+    background: var(--bs-peach);
     color: var(--bs-ink);
     box-shadow: var(--bs-shadow);
   }
@@ -346,12 +290,29 @@
   .btn-ghost-ink:focus-visible { outline: 3px solid var(--bs-yellow); outline-offset: 3px; }
   .btn-ghost-ink:hover { background: var(--bs-ink); color: white; }
 
-  .btn-sm {
-    padding: 0.6rem 1.25rem;
-    font-size: 0.875rem;
+  .btn-base {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    padding: 0.875rem 1.75rem;
+    border-radius: 999px;
+    border: 3px solid var(--bs-ink);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+    text-transform: uppercase;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    line-height: 1;
+    cursor: pointer;
+    text-decoration: none;
   }
+  .btn-base:focus-visible { outline: 3px solid var(--bs-yellow); outline-offset: 3px; }
 
-  /* ─── Cards (Stitch: 3px border, 8px hard shadow) ───── */
+  .btn-sm { padding: 0.6rem 1.25rem; font-size: 0.875rem; }
+
+  /* ─── Cards (Stitch: white bg, 3px border, 8px hard shadow) ─── */
   .retro-card {
     background: white;
     border: 3px solid var(--bs-ink);
@@ -359,21 +320,21 @@
     box-shadow: var(--bs-shadow-lg);
   }
   .retro-card-pink {
-    background: var(--bs-pink-cream);
+    background: var(--bs-peach);
     border: 3px solid var(--bs-ink);
     border-radius: 1.25rem;
-    box-shadow: var(--bs-shadow-pink);
+    box-shadow: var(--bs-shadow-lg);
   }
   .retro-card-cyan {
-    background: var(--bs-cyan-cream);
+    background: var(--bs-surface-hi);
     border: 3px solid var(--bs-ink);
     border-radius: 1.25rem;
-    box-shadow: var(--bs-shadow-cyan);
+    box-shadow: var(--bs-shadow-lg);
   }
 
   /* ─── License plate (Stitch card footer detail) ──────── */
   .license-plate {
-    background: white;
+    background: var(--bs-primary-f);
     border: 3px solid var(--bs-ink);
     border-radius: 6px;
     padding: 0.4rem 0.75rem;
@@ -388,11 +349,7 @@
     line-height: 1.1;
     box-shadow: var(--bs-shadow-sm);
   }
-  .license-plate small {
-    font-size: 0.6rem;
-    color: var(--bs-pink);
-    letter-spacing: 0.25em;
-  }
+  .license-plate small { font-size: 0.6rem; color: var(--bs-teal); letter-spacing: 0.25em; }
 
   /* ─── Badges ─────────────────────────────────────────── */
   .badge-neon {
@@ -406,81 +363,100 @@
     border: 2px solid var(--bs-ink);
     text-transform: uppercase;
   }
-  .badge-pink-fill   { background: var(--bs-pink);   color: white; }
-  .badge-cyan-fill   { background: var(--bs-cyan);   color: var(--bs-ink); }
-  .badge-yellow-fill { background: var(--bs-yellow); color: var(--bs-ink); }
+  .badge-pink-fill   { background: var(--bs-teal);     color: white; }
+  .badge-cyan-fill   { background: var(--bs-primary-c); color: var(--bs-ink); }
+  .badge-yellow-fill { background: var(--bs-yellow);   color: var(--bs-ink); }
 
   /* ─── Patterns ───────────────────────────────────────── */
-  .checker-bg {
+
+  /* Teal checker — primary pattern, matches Stitch exactly */
+  .checker-teal {
+    background-color: var(--bs-cream);
     background-image:
-      linear-gradient(45deg,  var(--bs-ink) 25%, transparent 25%),
-      linear-gradient(-45deg, var(--bs-ink) 25%, transparent 25%),
-      linear-gradient(45deg,  transparent 75%, var(--bs-ink) 75%),
-      linear-gradient(-45deg, transparent 75%, var(--bs-ink) 75%);
+      linear-gradient(45deg,  #006a62 25%, transparent 25%),
+      linear-gradient(-45deg, #006a62 25%, transparent 25%),
+      linear-gradient(45deg,  transparent 75%, #006a62 75%),
+      linear-gradient(-45deg, transparent 75%, #006a62 75%);
+    background-size: 32px 32px;
+    background-position: 0 0, 0 16px, 16px -16px, -16px 0px;
+  }
+  .checker-bg {
+    background-color: var(--bs-cream);
+    background-image:
+      linear-gradient(45deg,  #006a62 25%, transparent 25%),
+      linear-gradient(-45deg, #006a62 25%, transparent 25%),
+      linear-gradient(45deg,  transparent 75%, #006a62 75%),
+      linear-gradient(-45deg, transparent 75%, #006a62 75%);
     background-size: 28px 28px;
     background-position: 0 0, 0 14px, 14px -14px, -14px 0px;
   }
   .checker-strip {
     height: 30px;
-    background-color: white;
+    background-color: var(--bs-cream);
     background-image:
-      linear-gradient(45deg,  var(--bs-ink) 25%, transparent 25%),
-      linear-gradient(-45deg, var(--bs-ink) 25%, transparent 25%),
-      linear-gradient(45deg,  transparent 75%, var(--bs-ink) 75%),
-      linear-gradient(-45deg, transparent 75%, var(--bs-ink) 75%);
+      linear-gradient(45deg,  #006a62 25%, transparent 25%),
+      linear-gradient(-45deg, #006a62 25%, transparent 25%),
+      linear-gradient(45deg,  transparent 75%, #006a62 75%),
+      linear-gradient(-45deg, transparent 75%, #006a62 75%);
     background-size: 30px 30px;
     background-position: 0 0, 0 15px, 15px -15px, -15px 0px;
   }
+  /* Alias kept for Footer component */
   .checker-strip-pink {
     height: 30px;
-    background-color: white;
+    background-color: var(--bs-cream);
     background-image:
-      linear-gradient(45deg,  var(--bs-pink) 25%, transparent 25%),
-      linear-gradient(-45deg, var(--bs-pink) 25%, transparent 25%),
-      linear-gradient(45deg,  transparent 75%, var(--bs-pink) 75%),
-      linear-gradient(-45deg, transparent 75%, var(--bs-pink) 75%);
+      linear-gradient(45deg,  #006a62 25%, transparent 25%),
+      linear-gradient(-45deg, #006a62 25%, transparent 25%),
+      linear-gradient(45deg,  transparent 75%, #006a62 75%),
+      linear-gradient(-45deg, transparent 75%, #006a62 75%);
     background-size: 30px 30px;
     background-position: 0 0, 0 15px, 15px -15px, -15px 0px;
   }
+  /* Teal+cream checker — used for full-section CTA banners */
   .stripes-yellow-black {
-    background: repeating-linear-gradient(
-      45deg,
-      var(--bs-yellow),
-      var(--bs-yellow) 18px,
-      var(--bs-ink) 18px,
-      var(--bs-ink) 36px
-    );
+    background-color: var(--bs-cream);
+    background-image:
+      linear-gradient(45deg,  #006a62 25%, transparent 25%),
+      linear-gradient(-45deg, #006a62 25%, transparent 25%),
+      linear-gradient(45deg,  transparent 75%, #006a62 75%),
+      linear-gradient(-45deg, transparent 75%, #006a62 75%);
+    background-size: 32px 32px;
+    background-position: 0 0, 0 16px, 16px -16px, -16px 0px;
   }
   .halftone {
     background-image: radial-gradient(circle, var(--bs-ink) 1.2px, transparent 1.2px);
     background-size: 14px 14px;
-    opacity: 0.08;
+    opacity: 0.04;
   }
+
+  /* ─── Neon classes — repurposed as Stitch drop-shadow style ─── */
+  .neon-text-pink {
+    color: var(--bs-teal);
+    text-shadow: 4px 4px 0px var(--bs-primary-c);
+  }
+  .neon-text-cyan { color: var(--bs-primary-c); }
+  .neon-text-yellow {
+    color: var(--bs-yellow);
+    text-shadow: 2px 2px 0px var(--bs-ink);
+  }
+  .neon-flicker {} /* intentionally empty — flicker removed */
+  .neon-box-pink { border: 3px solid var(--bs-teal);     box-shadow: 4px 4px 0 var(--bs-ink); }
+  .neon-box-cyan { border: 3px solid var(--bs-primary-c); box-shadow: 4px 4px 0 var(--bs-ink); }
+
+  /* ─── Hero — always plain cream, never gradient ─────── */
+  .hero-gradient { background: var(--bs-cream); }
 
   /* ─── Animations ─────────────────────────────────────── */
-  @keyframes neon-flicker {
-    0%, 100% { opacity: 1; }
-    45%       { opacity: 1; }
-    50%       { opacity: 0.8; }
-    52%       { opacity: 1; }
-    53%       { opacity: 0.85; }
-    55%       { opacity: 1; }
+  @keyframes ticker {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
   }
-  .neon-flicker { animation: neon-flicker 4s ease-in-out infinite; }
-
-  @keyframes pulse-pink {
-    0%, 100% {
-      box-shadow:
-        0 0 14px color-mix(in srgb, var(--bs-pink) 60%, transparent),
-        0 0 28px color-mix(in srgb, var(--bs-pink) 30%, transparent);
-    }
-    50% {
-      box-shadow:
-        0 0 22px color-mix(in srgb, var(--bs-pink) 90%, transparent),
-        0 0 44px color-mix(in srgb, var(--bs-pink) 50%, transparent);
-    }
+  .ticker-track {
+    display: flex;
+    animation: ticker 36s linear infinite;
+    width: max-content;
   }
-  .pulse-pink { animation: pulse-pink 2.4s ease-in-out infinite; }
 
   @keyframes float {
     0%, 100% { transform: translateY(0); }
@@ -494,15 +470,11 @@
   }
   .spin-slow { animation: spin-slow 18s linear infinite; }
 
-  @keyframes ticker {
-    0%   { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
+  @keyframes pulse-teal {
+    0%, 100% { box-shadow: var(--bs-shadow); }
+    50%       { box-shadow: var(--bs-shadow), 0 0 20px color-mix(in srgb, var(--bs-primary-c) 60%, transparent); }
   }
-  .ticker-track {
-    display: flex;
-    animation: ticker 36s linear infinite;
-    width: max-content;
-  }
+  .pulse-pink { animation: pulse-teal 2.4s ease-in-out infinite; }
 
   /* ─── Menu tabs ──────────────────────────────────────── */
   .menu-tabs {
@@ -514,7 +486,6 @@
     -ms-overflow-style: none;
   }
   .menu-tabs::-webkit-scrollbar { display: none; }
-
   .menu-tab {
     flex-shrink: 0;
     padding: 0.7rem 1.4rem;
@@ -532,12 +503,9 @@
     position: relative;
   }
   .menu-tab:hover { background: var(--bs-yellow); }
-  .menu-tab:focus-visible {
-    outline: 3px solid var(--bs-yellow);
-    outline-offset: 2px;
-  }
+  .menu-tab:focus-visible { outline: 3px solid var(--bs-yellow); outline-offset: 2px; }
   .menu-tab.active {
-    background: var(--bs-pink);
+    background: var(--bs-teal);
     color: white;
     box-shadow: var(--bs-shadow-sm);
     transform: translate(-1px, -1px);
@@ -549,7 +517,7 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background: white;
+    background: var(--bs-cream);
     border-top: 3px solid var(--bs-ink);
     padding: 0.65rem;
     display: grid;
@@ -560,44 +528,32 @@
   }
   @media (min-width: 768px) { .sticky-cta { display: none; } }
 
-  /* ─── Hero gradient ──────────────────────────────────── */
-  .hero-gradient {
-    background:
-      radial-gradient(ellipse at top right,
-        color-mix(in srgb, var(--bs-yellow) 25%, transparent) 0%, transparent 55%),
-      radial-gradient(ellipse at bottom left,
-        color-mix(in srgb, var(--bs-cyan) 25%, transparent) 0%, transparent 55%),
-      linear-gradient(135deg, var(--bs-pink-cream) 0%, var(--bs-pink-soft) 60%, #FF8FB8 100%);
-  }
-
   /* ─── Grain overlay ──────────────────────────────────── */
   .grain { position: relative; }
   .grain::after {
     content: "";
     position: absolute;
     inset: 0;
-    background-image: radial-gradient(circle at 1px 1px, rgba(0,0,0,0.05) 1px, transparent 0);
+    background-image: radial-gradient(circle at 1px 1px, rgba(0,0,0,0.04) 1px, transparent 0);
     background-size: 5px 5px;
     pointer-events: none;
   }
 }
 
 @layer utilities {
-  /* Tailwind v4 doesn't ship border-3; define it so components can use it */
   .border-3   { border-width: 3px; }
   .border-t-3 { border-top-width: 3px; }
   .border-b-3 { border-bottom-width: 3px; }
   .border-l-3 { border-left-width: 3px; }
   .border-r-3 { border-right-width: 3px; }
 
-  /* Fade-in / stagger animations used by card grids */
   @keyframes fade-in-up {
     from { opacity: 0; transform: translateY(16px); }
     to   { opacity: 1; transform: translateY(0); }
   }
-  .fade-in-up      { animation: fade-in-up 0.5s ease both; }
-  .stagger-1       { animation-delay: 0.05s; }
-  .stagger-2       { animation-delay: 0.10s; }
-  .stagger-3       { animation-delay: 0.15s; }
-  .stagger-4       { animation-delay: 0.20s; }
+  .fade-in-up { animation: fade-in-up 0.5s ease both; }
+  .stagger-1  { animation-delay: 0.05s; }
+  .stagger-2  { animation-delay: 0.10s; }
+  .stagger-3  { animation-delay: 0.15s; }
+  .stagger-4  { animation-delay: 0.20s; }
 }

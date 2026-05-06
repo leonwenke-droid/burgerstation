@@ -18,7 +18,10 @@ export default function Header() {
   const [location] = useLocation();
 
   return (
-    <header className="sticky top-0 z-50 bg-[#FEFCCF] border-b-4 border-bs-ink shadow-[4px_4px_0px_0px_var(--bs-ink)]">
+    <header
+      className="sticky top-0 z-50 border-b-4 border-bs-ink shadow-[4px_4px_0px_0px_var(--bs-ink)]"
+      style={{ background: "var(--bs-cream)" }}
+    >
       <div className="container flex items-center justify-between py-3 md:py-4">
         {/* Brand */}
         <Link href="/" className="flex items-center gap-3 group">
@@ -31,7 +34,7 @@ export default function Header() {
             <div className="font-display text-subhead text-lg md:text-xl text-bs-ink uppercase tracking-tight">
               BURGER STATION
             </div>
-            <div className="text-label-caps text-[10px] md:text-xs text-bs-pink mt-0.5">
+            <div className="text-label-caps text-[10px] md:text-xs text-bs-teal mt-0.5">
               Leer · Est. 2025
             </div>
           </div>
@@ -41,17 +44,15 @@ export default function Header() {
         <nav className="hidden lg:flex items-center gap-8 font-body font-semibold text-sm tracking-wider text-bs-ink uppercase">
           {NAV_LINKS.map(({ label, href }) => {
             const active =
-              href === "/"
-                ? location === "/"
-                : location.startsWith(href);
+              href === "/" ? location === "/" : location.startsWith(href);
             return (
               <Link
                 key={href}
                 href={href}
-                className={`relative pb-1 transition-colors hover:text-bs-pink ${
+                className={`relative pb-1 transition-colors ${
                   active
-                    ? "text-bs-pink border-b-4 border-bs-pink"
-                    : "hover:text-bs-pink"
+                    ? "text-bs-teal border-b-4 border-bs-teal"
+                    : "hover:text-bs-teal"
                 }`}
               >
                 {label}
@@ -87,7 +88,10 @@ export default function Header() {
 
       {/* Mobile dropdown */}
       {mobileOpen && (
-        <nav className="lg:hidden bg-[#FEFCCF] border-t-2 border-bs-ink p-4 space-y-1 font-body font-semibold text-base uppercase tracking-wider">
+        <nav
+          className="lg:hidden border-t-2 border-bs-ink p-4 space-y-1 font-body font-semibold text-base uppercase tracking-wider"
+          style={{ background: "var(--bs-cream)" }}
+        >
           {NAV_LINKS.map(({ label, href }) => {
             const active =
               href === "/" ? location === "/" : location.startsWith(href);
@@ -97,7 +101,7 @@ export default function Header() {
                 href={href}
                 className={`flex items-center justify-between py-3 px-3 rounded-xl border-2 transition-all ${
                   active
-                    ? "border-bs-pink bg-bs-pink-cream text-bs-pink"
+                    ? "border-bs-teal bg-bs-primary-c/30 text-bs-teal"
                     : "border-transparent hover:border-bs-ink hover:bg-white"
                 }`}
                 onClick={() => setMobileOpen(false)}

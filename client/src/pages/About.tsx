@@ -7,7 +7,7 @@ const INSTAGRAM = "https://instagram.com/burgerstationleer";
 
 export default function About() {
   return (
-    <div className="min-h-screen bg-[#FEFCCF] text-bs-ink overflow-x-hidden">
+    <div className="min-h-screen bg-bs-cream text-bs-ink overflow-x-hidden">
       <Header />
 
       <main>
@@ -77,12 +77,12 @@ export default function About() {
           </div>
         </section>
 
-        {/* Checkerboard divider */}
+        {/* Teal checker divider */}
         <div
           className="w-full h-4 border-y-4 border-bs-ink"
           style={{
             backgroundImage:
-              "linear-gradient(45deg, var(--bs-ink) 25%, transparent 25%, transparent 75%, var(--bs-ink) 75%, var(--bs-ink)), linear-gradient(45deg, var(--bs-ink) 25%, #FEFCCF 25%, #FEFCCF 75%, var(--bs-ink) 75%, var(--bs-ink))",
+              "linear-gradient(45deg, #006a62 25%, transparent 25%, transparent 75%, #006a62 75%, #006a62), linear-gradient(45deg, #006a62 25%, #fefccf 25%, #fefccf 75%, #006a62 75%, #006a62)",
             backgroundSize: "16px 16px",
             backgroundPosition: "0 0, 8px 8px",
           }}
@@ -127,14 +127,14 @@ export default function About() {
         </section>
 
         {/* ── Values / USPs ── */}
-        <section className="py-16 md:py-20 bg-bs-ink text-white relative overflow-hidden">
-          <div className="absolute top-0 inset-x-0 stripes-yellow-black h-4" aria-hidden="true"></div>
-          <div className="absolute bottom-0 inset-x-0 stripes-yellow-black h-4" aria-hidden="true"></div>
+        <section className="py-16 md:py-20 bg-bs-surface-hi relative overflow-hidden">
+          <div className="checker-strip absolute top-0 inset-x-0" aria-hidden="true"></div>
+          <div className="checker-strip absolute bottom-0 inset-x-0" aria-hidden="true"></div>
 
-          <div className="container pt-4 pb-4">
+          <div className="container pt-6 pb-6">
             <div className="text-center mb-12">
-              <h2 className="text-headline text-5xl md:text-6xl text-white uppercase">
-                WAS UNS <span className="neon-text-cyan">AUSMACHT</span>.
+              <h2 className="text-headline text-5xl md:text-6xl text-bs-ink uppercase drop-shadow-[3px_3px_0px_#40e0d0]">
+                WAS UNS AUSMACHT.
               </h2>
             </div>
 
@@ -163,25 +163,23 @@ export default function About() {
               ].map((v, i) => (
                 <div
                   key={i}
-                  className="bg-bs-ink border-3 border-white rounded-2xl p-6 shadow-[5px_5px_0_var(--bs-pink)] text-center group hover:-translate-y-1 transition-transform"
-                  style={{ borderWidth: "3px" }}
+                  className="bg-white border-[3px] border-bs-ink rounded-2xl p-6 shadow-[5px_5px_0_var(--bs-ink)] text-center group hover:-translate-y-1 transition-transform"
                 >
                   <div
-                    className={`w-16 h-16 mx-auto mb-4 rounded-full border-3 border-white flex items-center justify-center text-display text-3xl ${
+                    className={`w-16 h-16 mx-auto mb-4 rounded-full border-[3px] border-bs-ink flex items-center justify-center text-display text-3xl ${
                       v.accent === "pink"
-                        ? "bg-bs-pink text-white"
+                        ? "bg-bs-teal text-white"
                         : v.accent === "cyan"
-                          ? "bg-bs-cyan text-bs-ink"
+                          ? "bg-bs-primary-c text-bs-ink"
                           : "bg-bs-yellow text-bs-ink"
                     }`}
-                    style={{ borderWidth: "3px" }}
                   >
                     {i === 0 ? "✓" : i === 1 ? "✦" : i === 2 ? "★" : "📍"}
                   </div>
-                  <h3 className="text-subhead text-xl text-white mb-2">
+                  <h3 className="text-subhead text-xl text-bs-ink mb-2">
                     {v.title}
                   </h3>
-                  <p className="text-white/70 text-sm leading-relaxed">
+                  <p className="text-bs-ink-v text-sm leading-relaxed">
                     {v.desc}
                   </p>
                 </div>

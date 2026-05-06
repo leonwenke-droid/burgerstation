@@ -10,10 +10,10 @@ const INSTAGRAM = "https://instagram.com/burgerstationleer";
 export default function Footer() {
   return (
     <footer className="border-t-4 border-bs-ink">
-      {/* Checkerboard top strip */}
-      <div className="checker-strip-pink" aria-hidden="true"></div>
+      {/* Teal checker top strip */}
+      <div className="checker-strip" aria-hidden="true"></div>
 
-      <div className="bg-[#FEFCCF]">
+      <div style={{ background: "var(--bs-surface-top)" }}>
         <div className="container py-14">
           <div className="grid md:grid-cols-4 gap-10 mb-10">
             {/* Brand col */}
@@ -28,12 +28,12 @@ export default function Footer() {
                   <div className="text-subhead text-2xl text-bs-ink uppercase tracking-tight">
                     BURGER STATION
                   </div>
-                  <div className="text-label-caps text-xs text-bs-pink mt-0.5">
+                  <div className="text-label-caps text-xs text-bs-teal mt-0.5">
                     Est. 2025 · Leer
                   </div>
                 </div>
               </div>
-              <p className="text-bs-ink/75 leading-relaxed max-w-md">
+              <p className="text-bs-ink-v leading-relaxed max-w-md">
                 Authentic Smash Burgers, Halal &amp; Handmade. American Retro
                 Diner direkt am Bahnhofsring in Leer.
               </p>
@@ -41,7 +41,7 @@ export default function Footer() {
                 href={INSTAGRAM}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 mt-4 font-body font-semibold tracking-wide text-bs-ink hover:text-bs-pink transition"
+                className="inline-flex items-center gap-2 mt-4 font-body font-semibold tracking-wide text-bs-ink hover:text-bs-teal transition"
               >
                 <Instagram size={18} />
                 @burgerstationleer
@@ -61,7 +61,7 @@ export default function Footer() {
                   <li key={href}>
                     <Link
                       href={href}
-                      className="text-bs-ink/80 hover:text-bs-pink transition"
+                      className="text-bs-ink-v hover:text-bs-teal transition"
                     >
                       {label}
                     </Link>
@@ -75,8 +75,8 @@ export default function Footer() {
               <h4 className="text-label-caps text-bs-ink mb-4">KONTAKT</h4>
               <div className="space-y-3 text-sm">
                 <div className="flex items-start gap-2">
-                  <MapPin size={16} className="text-bs-pink mt-0.5 shrink-0" />
-                  <div className="text-bs-ink/80 leading-relaxed">
+                  <MapPin size={16} className="text-bs-teal mt-0.5 shrink-0" />
+                  <div className="text-bs-ink-v leading-relaxed">
                     Bahnhofsring 30
                     <br />
                     26789 Leer
@@ -86,7 +86,7 @@ export default function Footer() {
                   <Phone size={16} className="text-bs-ink mt-0.5 shrink-0" />
                   <a
                     href={PHONE}
-                    className="text-bs-ink/80 hover:text-bs-pink transition"
+                    className="text-bs-ink-v hover:text-bs-teal transition"
                   >
                     {PHONE_DISPLAY}
                   </a>
@@ -108,13 +108,13 @@ export default function Footer() {
             <div className="flex gap-5 text-sm">
               <Link
                 href="/impressum"
-                className="text-bs-ink/70 hover:text-bs-pink transition"
+                className="text-bs-ink-v hover:text-bs-teal transition"
               >
                 Impressum
               </Link>
               <Link
                 href="/datenschutz"
-                className="text-bs-ink/70 hover:text-bs-pink transition"
+                className="text-bs-ink-v hover:text-bs-teal transition"
               >
                 Datenschutz
               </Link>

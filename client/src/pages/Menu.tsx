@@ -118,7 +118,7 @@ function CheckerDivider() {
       className="h-4 w-full my-10 border-y-4 border-bs-ink"
       style={{
         backgroundImage:
-          "linear-gradient(45deg, var(--bs-ink) 25%, transparent 25%, transparent 75%, var(--bs-ink) 75%, var(--bs-ink)), linear-gradient(45deg, var(--bs-ink) 25%, #FEFCCF 25%, #FEFCCF 75%, var(--bs-ink) 75%, var(--bs-ink))",
+          "linear-gradient(45deg, #006a62 25%, transparent 25%, transparent 75%, #006a62 75%, #006a62), linear-gradient(45deg, #006a62 25%, #fefccf 25%, #fefccf 75%, #006a62 75%, #006a62)",
         backgroundSize: "16px 16px",
         backgroundPosition: "0 0, 8px 8px",
       }}
@@ -136,10 +136,10 @@ function CategoryHeader({
 }) {
   const bg =
     accent === "primary"
-      ? "bg-bs-pink text-white"
+      ? "bg-bs-teal text-white"
       : accent === "yellow"
         ? "bg-bs-yellow text-bs-ink"
-        : "bg-bs-cyan text-bs-ink";
+        : "bg-bs-primary-c text-bs-ink";
 
   return (
     <div className="flex items-center gap-3 mb-8">
@@ -155,14 +155,14 @@ function CategoryHeader({
 
 function BurgerCard({ item, img }: { item: MenuItem; img?: string }) {
   return (
-    <div className="bg-[#FEFCCF] border-3 border-bs-ink rounded-2xl overflow-visible relative flex flex-col shadow-[6px_6px_0_var(--bs-ink)] group hover:-translate-y-1 transition-transform duration-300" style={{ borderWidth: "3px" }}>
+    <div className="bg-white border-[3px] border-bs-ink rounded-2xl overflow-visible relative flex flex-col shadow-[6px_6px_0_var(--bs-ink)] group hover:-translate-y-1 transition-transform duration-300">
       {item.badge && (
-        <div className="absolute -top-4 -right-4 bg-bs-pink text-white text-label-caps w-16 h-16 rounded-full flex items-center justify-center border-3 border-bs-ink rotate-12 z-10 shadow-[3px_3px_0_var(--bs-ink)] text-[11px] font-bold uppercase leading-none text-center" style={{ borderWidth: "3px" }}>
+        <div className="absolute -top-4 -right-4 bg-bs-yellow text-bs-ink text-label-caps w-16 h-16 rounded-full flex items-center justify-center border-[3px] border-bs-ink rotate-12 z-10 shadow-[3px_3px_0_var(--bs-ink)] text-[11px] font-bold uppercase leading-none text-center">
           {item.badge}
         </div>
       )}
       {img && (
-        <div className="h-44 w-full border-b-3 border-bs-ink overflow-hidden bg-bs-pink-cream rounded-t-2xl" style={{ borderBottomWidth: "3px" }}>
+        <div className="h-44 w-full border-b-[3px] border-bs-ink overflow-hidden bg-bs-peach rounded-t-2xl">
           <img
             src={img}
             alt={item.name}
@@ -195,9 +195,9 @@ function BurgerCard({ item, img }: { item: MenuItem; img?: string }) {
 
 function HorizontalCard({ item }: { item: MenuItem }) {
   return (
-    <div className="bg-[#FEFCCF] border-2 border-bs-ink rounded-xl overflow-visible relative flex flex-row items-center p-4 shadow-[4px_4px_0_var(--bs-ink)] gap-4 group hover:-translate-y-1 transition-transform duration-300">
+    <div className="bg-white border-2 border-bs-ink rounded-xl overflow-visible relative flex flex-row items-center p-4 shadow-[4px_4px_0_var(--bs-ink)] gap-4 group hover:-translate-y-1 transition-transform duration-300">
       {item.badge && (
-        <div className="absolute -top-3 -right-3 bg-bs-pink text-white text-label-caps w-12 h-12 rounded-full flex items-center justify-center border-2 border-bs-ink rotate-12 z-10 shadow-[2px_2px_0_var(--bs-ink)] text-[10px] font-bold uppercase leading-none text-center">
+        <div className="absolute -top-3 -right-3 bg-bs-yellow text-bs-ink text-label-caps w-12 h-12 rounded-full flex items-center justify-center border-2 border-bs-ink rotate-12 z-10 shadow-[2px_2px_0_var(--bs-ink)] text-[10px] font-bold uppercase leading-none text-center">
           {item.badge}
         </div>
       )}
@@ -223,7 +223,7 @@ function HorizontalCard({ item }: { item: MenuItem }) {
 
 function ShakeCard({ item }: { item: MenuItem }) {
   return (
-    <div className="bg-[#FEFCCF] border-2 border-bs-ink rounded-full px-4 pt-4 pb-6 flex flex-col items-center shadow-[4px_4px_0_var(--bs-ink)] group hover:-translate-y-1 transition-transform duration-300 text-center">
+    <div className="bg-white border-2 border-bs-ink rounded-full px-4 pt-4 pb-6 flex flex-col items-center shadow-[4px_4px_0_var(--bs-ink)] group hover:-translate-y-1 transition-transform duration-300 text-center">
       <h3 className="text-subhead text-lg text-bs-ink mt-2">{item.name}</h3>
       {item.desc && (
         <p className="text-xs text-bs-ink/60 mt-1">{item.desc}</p>
@@ -239,7 +239,7 @@ function ShakeCard({ item }: { item: MenuItem }) {
 
 export default function Menu() {
   return (
-    <div className="min-h-screen bg-[#FEFCCF] text-bs-ink">
+    <div className="min-h-screen bg-bs-cream text-bs-ink">
       <Header />
 
       <main className="w-full pb-20">
@@ -253,7 +253,7 @@ export default function Menu() {
             </div>
             <h1 className="text-display text-6xl md:text-8xl text-bs-ink uppercase relative">
               DIE KARTE
-              <div className="absolute -top-3 -right-8 md:-right-12 bg-bs-pink text-white text-label-caps px-3 py-1 rounded-full border-2 border-bs-ink rotate-12 shadow-[2px_2px_0_var(--bs-ink)] text-xs font-bold uppercase hidden md:block">
+              <div className="absolute -top-3 -right-8 md:-right-12 bg-bs-yellow text-bs-ink text-label-caps px-3 py-1 rounded-full border-2 border-bs-ink rotate-12 shadow-[2px_2px_0_var(--bs-ink)] text-xs font-bold uppercase hidden md:block">
                 FRISCH!
               </div>
             </h1>
@@ -355,12 +355,12 @@ export default function Menu() {
               {SAUCES.map((item) => (
                 <div
                   key={item.name}
-                  className="bg-[#FEFCCF] border-2 border-bs-ink rounded-xl p-4 shadow-[3px_3px_0_var(--bs-ink)] text-center group hover:-translate-y-0.5 transition-transform"
+                  className="bg-white border-2 border-bs-ink rounded-xl p-4 shadow-[3px_3px_0_var(--bs-ink)] text-center group hover:-translate-y-0.5 transition-transform"
                 >
                   <h3 className="text-subhead text-base text-bs-ink mb-2">
                     {item.name}
                   </h3>
-                  <span className="font-body font-bold text-sm text-bs-pink">
+                  <span className="font-body font-bold text-sm text-bs-teal">
                     {item.price} €
                   </span>
                 </div>
@@ -372,27 +372,25 @@ export default function Menu() {
 
           {/* Bottom CTA */}
           <section className="text-center py-4">
-            <div className="bg-bs-ink text-white rounded-3xl border-3 border-bs-ink p-10 md:p-14 shadow-[8px_8px_0_var(--bs-pink)] max-w-3xl mx-auto" style={{ borderWidth: "3px" }}>
-              <span className="badge-neon badge-yellow-fill">VOR ORT BESTELLEN</span>
-              <h2 className="text-display text-4xl md:text-6xl text-white mt-4 mb-3">
-                KOMM VORBEI.
-              </h2>
-              <p className="text-white/70 text-lg leading-relaxed mb-8">
-                Keine Online-Bestellung. Komm einfach vorbei — Bahnhofsring
-                30, Leer. Frisch gesmasht, heiß serviert.
-              </p>
-              <div className="flex flex-wrap gap-3 justify-center">
-                <a
-                  href={MAPS}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-cyan"
-                >
-                  <MapPin size={18} /> Route starten
-                </a>
-                <a href={PHONE} className="btn-pink pulse-pink">
-                  <Phone size={18} /> Anrufen
-                </a>
+            <div className="relative overflow-hidden rounded-3xl border-[4px] border-bs-ink shadow-[12px_12px_0_var(--bs-ink)] max-w-3xl mx-auto checker-teal">
+              <div className="absolute inset-0 bg-bs-cream/80 backdrop-blur-sm" aria-hidden="true"></div>
+              <div className="relative z-10 bg-bs-peach border-[4px] border-bs-ink rounded-2xl m-4 p-8 md:p-12 shadow-[6px_6px_0_var(--bs-ink)]">
+                <span className="badge-neon badge-yellow-fill">VOR ORT BESTELLEN</span>
+                <h2 className="text-display text-4xl md:text-6xl text-bs-ink mt-4 mb-3 drop-shadow-[3px_3px_0px_#006a62]">
+                  KOMM VORBEI.
+                </h2>
+                <p className="text-bs-ink-v text-lg leading-relaxed mb-8">
+                  Keine Online-Bestellung. Komm einfach vorbei — Bahnhofsring
+                  30, Leer. Frisch gesmasht, heiß serviert.
+                </p>
+                <div className="flex flex-wrap gap-3 justify-center">
+                  <a href={MAPS} target="_blank" rel="noopener noreferrer" className="btn-cyan">
+                    <MapPin size={18} /> Route starten
+                  </a>
+                  <a href={PHONE} className="btn-pink pulse-pink">
+                    <Phone size={18} /> Anrufen
+                  </a>
+                </div>
               </div>
             </div>
           </section>
