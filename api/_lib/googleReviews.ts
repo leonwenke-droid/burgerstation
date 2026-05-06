@@ -68,46 +68,44 @@ export async function getGoogleReviewsNormalized(): Promise<
   const placeId = process.env.GOOGLE_PLACE_ID || "";
   const ttlSeconds = envInt("GOOGLE_REVIEWS_CACHE_TTL_SECONDS", 86400);
 
-  // #region agent log
-  fetch("http://127.0.0.1:7795/ingest/66c2885f-1421-4d80-ad50-1c0a8d3bdcd6", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "734526" },
-    body: JSON.stringify({
-      sessionId: "734526",
-      runId: "pre-fix",
-      hypothesisId: "H2",
-      location: "api/_lib/googleReviews.ts:env",
-      message: "Env presence (no secrets)",
-      data: {
-        hasApiKey: Boolean(apiKey),
-        hasPlaceId: Boolean(placeId),
-        ttlSeconds,
-      },
-      timestamp: Date.now(),
-    }),
-  }).catch(() => {});
-  // #endregion
+  const safeLog = (hypothesisId: string, location: string, message: string, data: unknown) => {
+    try {
+      if (typeof fetch !== "function") return;
+      // #region agent log
+      fetch("http://127.0.0.1:7795/ingest/66c2885f-1421-4d80-ad50-1c0a8d3bdcd6", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "734526" },
+        body: JSON.stringify({
+          sessionId: "734526",
+          runId: "pre-fix",
+          hypothesisId,
+          location,
+          message,
+          data,
+          timestamp: Date.now(),
+        }),
+      }).catch(() => {});
+      // #endregion
+    } catch {
+      // ignore
+    }
+  };
+
+  safeLog("H2", "api/_lib/googleReviews.ts:env", "Env presence (no secrets)", {
+    hasApiKey: Boolean(apiKey),
+    hasPlaceId: Boolean(placeId),
+    ttlSeconds,
+    hasGlobalFetch: typeof fetch === "function",
+  });
 
   if (!apiKey) return { ok: false, status: 500, error: "Missing GOOGLE_PLACES_API_KEY" };
   if (!placeId) return { ok: false, status: 500, error: "Missing GOOGLE_PLACE_ID" };
 
   const now = Date.now();
   if (cache && cache.expiresAtMs > now) {
-    // #region agent log
-    fetch("http://127.0.0.1:7795/ingest/66c2885f-1421-4d80-ad50-1c0a8d3bdcd6", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "734526" },
-      body: JSON.stringify({
-        sessionId: "734526",
-        runId: "pre-fix",
-        hypothesisId: "H4",
-        location: "api/_lib/googleReviews.ts:cache-hit",
-        message: "Returning cached value",
-        data: { expiresInMs: cache.expiresAtMs - now },
-        timestamp: Date.now(),
-      }),
-    }).catch(() => {});
-    // #endregion
+    safeLog("H4", "api/_lib/googleReviews.ts:cache-hit", "Returning cached value", {
+      expiresInMs: cache.expiresAtMs - now,
+    });
     return { ok: true, value: cache.value, cacheTtlSeconds: ttlSeconds };
   }
 
