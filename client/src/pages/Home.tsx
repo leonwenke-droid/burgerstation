@@ -1,8 +1,10 @@
+import { motion, useReducedMotion } from "framer-motion";
 import { Phone, MapPin, Instagram, ChevronRight, Star, Clock, Flame } from "lucide-react";
 import { Link } from "wouter";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import GoogleReviewsSection from "@/components/GoogleReviewsSection";
+import { RevealOnScroll } from "@/components/RevealOnScroll";
 
 const PHONE = "tel:+4949199755279";
 const PHONE_DISPLAY = "0491 99 755 279";
@@ -49,6 +51,7 @@ const BESTSELLERS = [
 ];
 
 export default function Home() {
+  const reduce = useReducedMotion();
   return (
     <div className="min-h-screen bg-bs-cream text-bs-ink overflow-x-hidden">
       <Header />
@@ -161,12 +164,14 @@ export default function Home() {
 
         <div className="container relative">
           <div className="flex justify-between items-end mb-12">
-            <div>
-              <span className="badge-neon badge-yellow-fill">DIE FAVORITEN</span>
-              <h2 className="text-headline text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-bs-ink mt-3 uppercase drop-shadow-[2px_2px_0px_#40e0d0] md:drop-shadow-[3px_3px_0px_#40e0d0]">
-                DINER<br />FAVORITES
-              </h2>
-            </div>
+            <RevealOnScroll>
+              <div>
+                <span className="badge-neon badge-yellow-fill">DIE FAVORITEN</span>
+                <h2 className="text-headline text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-bs-ink mt-3 uppercase drop-shadow-[2px_2px_0px_#40e0d0] md:drop-shadow-[3px_3px_0px_#40e0d0]">
+                  DINER<br />FAVORITES
+                </h2>
+              </div>
+            </RevealOnScroll>
             <Link href="/menu" className="text-label-caps text-bs-teal border-b-2 border-bs-teal hover:text-bs-ink hover:border-bs-ink transition-colors uppercase hidden md:inline-flex items-center gap-1">
               Alle ansehen <ChevronRight size={16} />
             </Link>
@@ -174,9 +179,15 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {BESTSELLERS.map((b, i) => (
-              <div
+              <motion.div
                 key={i}
                 className="bg-white border-[3px] border-bs-ink rounded-xl flex flex-col shadow-[4px_4px_0_var(--bs-ink)] md:shadow-[8px_8px_0_var(--bs-ink)] relative group hover:-translate-y-1 transition-transform"
+                {...(!reduce ? {
+                  initial: { opacity: 0, y: 20 },
+                  whileInView: { opacity: 1, y: 0 },
+                  viewport: { once: true, margin: "-60px" },
+                  transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1], delay: i * 0.08 },
+                } : {})}
               >
                 {/* Image area */}
                 <div className="h-56 border-b-[3px] border-bs-ink rounded-t-xl overflow-hidden relative bg-bs-pink-cream">
@@ -213,7 +224,7 @@ export default function Home() {
                 >
                   {b.plate}
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
 
@@ -262,12 +273,14 @@ export default function Home() {
       {/* ════════════════════ USPs ════════════════════ */}
       <section className="py-20 md:py-24 bg-bs-surface-hi">
         <div className="container">
-          <div className="text-center mb-14">
-            <span className="badge-neon badge-cyan-fill">WARUM BURGER STATION?</span>
-            <h2 className="text-headline text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-bs-ink mt-4 uppercase">
-              VIER GUTE GRÜNDE.
-            </h2>
-          </div>
+          <RevealOnScroll>
+            <div className="text-center mb-14">
+              <span className="badge-neon badge-cyan-fill">WARUM BURGER STATION?</span>
+              <h2 className="text-headline text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-bs-ink mt-4 uppercase">
+                VIER GUTE GRÜNDE.
+              </h2>
+            </div>
+          </RevealOnScroll>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
@@ -294,22 +307,24 @@ export default function Home() {
       <section id="erlebnis" className="py-20 md:py-28 bg-bs-cream relative overflow-hidden">
         <div className="container relative">
           <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center mb-16">
-            <div className="space-y-5">
-              <span className="badge-neon badge-pink-fill">DAS ERLEBNIS</span>
-              <h2 className="text-headline text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-bs-ink uppercase">
-                Mehr als nur<br />
-                <span className="text-bs-teal drop-shadow-[2px_2px_0px_#40e0d0] md:drop-shadow-[3px_3px_0px_#40e0d0]">ein Burger.</span>
-              </h2>
-              <p className="text-lg text-bs-ink-v leading-relaxed max-w-lg">
-                Pinke Wände. Neonlicht. US-Nummernschilder. Vinyl an den Wänden. Burger Station ist kein normaler Imbiss — es ist der Foodspot, an dem du isst, fotografierst und wiederkommst.
-              </p>
-              <div className="flex flex-wrap gap-3 pt-2">
-                <Link href="/about" className="btn-pink btn-sm">Unsere Story</Link>
-                <a href={INSTAGRAM} target="_blank" rel="noopener noreferrer" className="btn-ghost-ink btn-sm">
-                  <Instagram size={16} /> @burgerstationleer
-                </a>
+            <RevealOnScroll>
+              <div className="space-y-5">
+                <span className="badge-neon badge-pink-fill">DAS ERLEBNIS</span>
+                <h2 className="text-headline text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-bs-ink uppercase">
+                  Mehr als nur<br />
+                  <span className="text-bs-teal drop-shadow-[2px_2px_0px_#40e0d0] md:drop-shadow-[3px_3px_0px_#40e0d0]">ein Burger.</span>
+                </h2>
+                <p className="text-lg text-bs-ink-v leading-relaxed max-w-lg">
+                  Pinke Wände. Neonlicht. US-Nummernschilder. Vinyl an den Wänden. Burger Station ist kein normaler Imbiss — es ist der Foodspot, an dem du isst, fotografierst und wiederkommst.
+                </p>
+                <div className="flex flex-wrap gap-3 pt-2">
+                  <Link href="/about" className="btn-pink btn-sm">Unsere Story</Link>
+                  <a href={INSTAGRAM} target="_blank" rel="noopener noreferrer" className="btn-ghost-ink btn-sm">
+                    <Instagram size={16} /> @burgerstationleer
+                  </a>
+                </div>
               </div>
-            </div>
+            </RevealOnScroll>
 
             <div className="grid grid-cols-2 gap-4">
               <img
@@ -373,18 +388,20 @@ export default function Home() {
       <section className="py-20 md:py-24 bg-white">
         <div className="container">
           <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center mb-12">
-            <div>
-              <span className="badge-neon badge-yellow-fill">@BURGERSTATIONLEER</span>
-              <h2 className="text-headline text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-bs-ink mt-4 uppercase">
-                Dein nächster <span className="text-bs-teal drop-shadow-[2px_2px_0px_#40e0d0] md:drop-shadow-[3px_3px_0px_#40e0d0]">Foodspot</span> in Leer.
-              </h2>
-              <p className="text-lg text-bs-ink-v mt-5 leading-relaxed">
-                Burger, Neonlicht, Behind-the-Scenes. Folge uns für Aktionen, neue Menüs und den ehrlichsten Blick hinter die Theke.
-              </p>
-              <a href={INSTAGRAM} target="_blank" rel="noopener noreferrer" className="btn-pink mt-6 inline-flex">
-                <Instagram size={18} /> Auf Instagram folgen
-              </a>
-            </div>
+            <RevealOnScroll>
+              <div>
+                <span className="badge-neon badge-yellow-fill">@BURGERSTATIONLEER</span>
+                <h2 className="text-headline text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-bs-ink mt-4 uppercase">
+                  Dein nächster <span className="text-bs-teal drop-shadow-[2px_2px_0px_#40e0d0] md:drop-shadow-[3px_3px_0px_#40e0d0]">Foodspot</span> in Leer.
+                </h2>
+                <p className="text-lg text-bs-ink-v mt-5 leading-relaxed">
+                  Burger, Neonlicht, Behind-the-Scenes. Folge uns für Aktionen, neue Menüs und den ehrlichsten Blick hinter die Theke.
+                </p>
+                <a href={INSTAGRAM} target="_blank" rel="noopener noreferrer" className="btn-pink mt-6 inline-flex">
+                  <Instagram size={18} /> Auf Instagram folgen
+                </a>
+              </div>
+            </RevealOnScroll>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {[
@@ -417,12 +434,14 @@ export default function Home() {
       {/* ════════════════════ STANDORT ════════════════════ */}
       <section id="standort" className="py-20 md:py-28 bg-bs-surface-hi relative overflow-hidden">
         <div className="container">
-          <div className="text-center mb-12">
-            <span className="badge-neon badge-cyan-fill">UNSER STANDORT</span>
-            <h2 className="text-headline text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-bs-ink mt-4 uppercase drop-shadow-[2px_2px_0px_#40e0d0] md:drop-shadow-[3px_3px_0px_#40e0d0]">
-              FIND US.
-            </h2>
-          </div>
+          <RevealOnScroll>
+            <div className="text-center mb-12">
+              <span className="badge-neon badge-cyan-fill">UNSER STANDORT</span>
+              <h2 className="text-headline text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-bs-ink mt-4 uppercase drop-shadow-[2px_2px_0px_#40e0d0] md:drop-shadow-[3px_3px_0px_#40e0d0]">
+                FIND US.
+              </h2>
+            </div>
+          </RevealOnScroll>
 
           <div className="grid lg:grid-cols-5 gap-6 max-w-6xl mx-auto">
             {/* Map */}
@@ -490,26 +509,28 @@ export default function Home() {
         {/* Teal checker strip at very top */}
         <div className="checker-strip absolute top-0 inset-x-0" aria-hidden="true"></div>
 
-        <div className="container relative text-center max-w-3xl mx-auto">
-          <Flame size={48} className="text-bs-teal mx-auto mb-4" aria-hidden="true" />
-          <h2 className="text-display text-5xl sm:text-6xl md:text-8xl text-bs-ink uppercase drop-shadow-[2px_2px_0px_#006a62] md:drop-shadow-[4px_4px_0px_#006a62]">
-            LUST AUF BURGER?
-          </h2>
-          <p className="text-xl text-bs-ink-v mt-6 leading-relaxed">
-            Ruf an. Komm vorbei. Folg uns. So einfach.
-          </p>
-          <div className="flex flex-wrap gap-3 justify-center mt-8">
-            <a href={PHONE} className="btn-pink pulse-pink">
-              <Phone size={18} /> {PHONE_DISPLAY}
-            </a>
-            <a href={MAPS} target="_blank" rel="noopener noreferrer" className="btn-cyan">
-              <MapPin size={18} /> Route starten
-            </a>
-            <a href={INSTAGRAM} target="_blank" rel="noopener noreferrer" className="btn-ghost-ink">
-              <Instagram size={18} /> Instagram
-            </a>
+        <RevealOnScroll>
+          <div className="container relative text-center max-w-3xl mx-auto">
+            <Flame size={48} className="text-bs-teal mx-auto mb-4" aria-hidden="true" />
+            <h2 className="text-display text-5xl sm:text-6xl md:text-8xl text-bs-ink uppercase drop-shadow-[2px_2px_0px_#006a62] md:drop-shadow-[4px_4px_0px_#006a62]">
+              LUST AUF BURGER?
+            </h2>
+            <p className="text-xl text-bs-ink-v mt-6 leading-relaxed">
+              Ruf an. Komm vorbei. Folg uns. So einfach.
+            </p>
+            <div className="flex flex-wrap gap-3 justify-center mt-8">
+              <a href={PHONE} className="btn-pink pulse-pink">
+                <Phone size={18} /> {PHONE_DISPLAY}
+              </a>
+              <a href={MAPS} target="_blank" rel="noopener noreferrer" className="btn-cyan">
+                <MapPin size={18} /> Route starten
+              </a>
+              <a href={INSTAGRAM} target="_blank" rel="noopener noreferrer" className="btn-ghost-ink">
+                <Instagram size={18} /> Instagram
+              </a>
+            </div>
           </div>
-        </div>
+        </RevealOnScroll>
       </section>
 
       <Footer />
