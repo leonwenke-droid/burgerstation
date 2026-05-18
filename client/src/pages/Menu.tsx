@@ -295,45 +295,6 @@ export default function Menu() {
             </div>
           </section>
 
-          {/* ── Real Deal Photo Gallery ── */}
-          <div className="mt-12 mb-2">
-            {/* Header row */}
-            <div className="flex flex-wrap items-center gap-3 mb-6">
-              <div className="inline-block bg-bs-ink px-4 py-1.5 -rotate-1">
-                <span className="font-body font-black text-bs-yellow text-xs tracking-[0.2em] uppercase">
-                  Real Deal
-                </span>
-              </div>
-              <p className="text-bs-ink-v text-sm font-body leading-snug">
-                Illustriert oben — und hier: wie sie wirklich aussehen.
-              </p>
-            </div>
-
-            {/* Photo frame */}
-            <div className="border-[3px] border-bs-ink rounded-2xl overflow-hidden shadow-[4px_4px_0_var(--bs-ink)] md:shadow-[8px_8px_0_var(--bs-ink)] bg-white">
-              {/* Label bar */}
-              <div className="bg-bs-teal border-b-[3px] border-bs-ink px-5 py-2 flex items-center justify-between">
-                <span className="text-label-caps text-white text-[11px] tracking-[0.2em] font-bold uppercase">
-                  Beef Burgers — Produktfotos
-                </span>
-                <span className="text-label-caps text-white text-[11px] tracking-[0.2em] font-bold uppercase opacity-70">
-                  100 % Halal · Handmade
-                </span>
-              </div>
-              <img
-                src="/images/menu/burger-collage-real.png"
-                alt="Burger Station Beef Burger Produktfotos — Single Smash, Double Smash, Long Chili Cheese, BBQ Smash, Croissant Smash und mehr"
-                className="w-full object-cover"
-              />
-              {/* License plate footer */}
-              <div className="bg-bs-yellow border-t-[3px] border-bs-ink px-5 py-2 text-center">
-                <span className="text-label-caps text-bs-ink text-[11px] tracking-[0.25em] font-bold uppercase">
-                  BAHNHOFSRING 30 · LEER · SMASH · HALAL · HANDMADE
-                </span>
-              </div>
-            </div>
-          </div>
-
           <CheckerDivider />
 
           {/* CHICKEN */}
