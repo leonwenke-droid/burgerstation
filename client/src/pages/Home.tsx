@@ -326,23 +326,16 @@ export default function Home() {
               </div>
             </RevealOnScroll>
 
-            <div className="flex flex-col gap-4">
-              <div className="grid grid-cols-2 gap-4">
-                <img
-                  src="/images/foodspot/foodspot-2.png"
-                  alt="Burger Station Milkshake im Retro-Stil"
-                  className="rounded-2xl border-2 border-bs-ink shadow-[4px_4px_0_var(--bs-ink)] aspect-square object-contain w-full bg-transparent"
-                />
-                <img
-                  src="/images/foodspot/foodspot-3.png"
-                  alt="Burger Station Neon-Schild und Diner-Elemente"
-                  className="rounded-2xl border-2 border-bs-ink shadow-[4px_4px_0_var(--bs-teal)] aspect-square object-contain w-full mt-8 bg-transparent"
-                />
-              </div>
+            <div className="grid grid-cols-2 gap-4">
               <img
-                src="/images/foodspot/shake-neon.png"
-                alt="Burger Station Chocolate Shake und beleuchtetes Neon-Schild"
-                className="rounded-2xl border-2 border-bs-ink shadow-[4px_4px_0_var(--bs-ink)] w-full object-cover bg-white"
+                src="/images/foodspot/foodspot-2.png"
+                alt="Burger Station Milkshake im Retro-Stil"
+                className="rounded-2xl border-2 border-bs-ink shadow-[4px_4px_0_var(--bs-ink)] aspect-square object-contain w-full bg-transparent"
+              />
+              <img
+                src="/images/foodspot/foodspot-3.png"
+                alt="Burger Station Neon-Schild und Diner-Elemente"
+                className="rounded-2xl border-2 border-bs-ink shadow-[4px_4px_0_var(--bs-teal)] aspect-square object-contain w-full mt-8 bg-transparent"
               />
             </div>
           </div>
