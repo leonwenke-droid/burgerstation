@@ -374,6 +374,14 @@ export default function Menu() {
 
           {/* SHAKES & DRINKS */}
           <section>
+            {/* Shake photo feature */}
+            <div className="mb-8 border-[3px] border-bs-ink rounded-2xl overflow-hidden shadow-[4px_4px_0_var(--bs-ink)] md:shadow-[8px_8px_0_var(--bs-ink)] bg-white">
+              <img
+                src="/images/foodspot/shake-neon.png"
+                alt="Burger Station Chocolate Shake mit Sahne und Kirsche sowie beleuchtetem Neon-Schild"
+                className="w-full object-cover max-h-64 md:max-h-80"
+              />
+            </div>
             <CategoryHeader title="Shakes & Drinks" accent="cyan" />
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
               {SHAKES.map((item) => (

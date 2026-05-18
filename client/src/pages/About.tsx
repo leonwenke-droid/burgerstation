@@ -89,6 +89,26 @@ export default function About() {
           aria-hidden="true"
         />
 
+        {/* ── Brand Collage ── */}
+        <section className="max-w-5xl mx-auto px-4 pt-12 pb-4">
+          <div className="border-[3px] border-bs-ink rounded-2xl overflow-hidden shadow-[4px_4px_0_var(--bs-ink)] md:shadow-[8px_8px_0_var(--bs-ink)]">
+            {/* Label bar */}
+            <div className="bg-bs-ink px-5 py-2 flex items-center justify-between">
+              <span className="font-body font-black text-bs-yellow text-[11px] tracking-[0.2em] uppercase">
+                Burger Station Leer
+              </span>
+              <span className="font-body font-bold text-bs-primary-c text-[11px] tracking-[0.2em] uppercase">
+                Est. 2026
+              </span>
+            </div>
+            <img
+              src="/images/foodspot/brand-collage.png"
+              alt="Burger Station Brand Collage — Smash Burger, Chocolate Shake, Fries, Neon-Schild, Nummernschild LER 26789 und Retro-Deko"
+              className="w-full object-cover"
+            />
+          </div>
+        </section>
+
         {/* ── The Story ── */}
         <section className="max-w-5xl mx-auto px-4 py-20 relative">
           <div className="bg-bs-pink-cream border-4 border-bs-ink shadow-[4px_4px_0_var(--bs-ink)] md:shadow-[8px_8px_0_var(--bs-ink)] p-8 md:p-14 relative">
