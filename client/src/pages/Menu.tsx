@@ -162,11 +162,11 @@ function BurgerCard({ item, img }: { item: MenuItem; img?: string }) {
         </div>
       )}
       {img && (
-        <div className="h-44 w-full border-b-[3px] border-bs-ink overflow-hidden bg-bs-peach rounded-t-2xl">
+        <div className="h-44 w-full border-b-[3px] border-bs-ink overflow-hidden bg-white rounded-t-2xl">
           <img
             src={img}
             alt={item.name}
-            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
         </div>
       )}
@@ -273,66 +273,27 @@ export default function Menu() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-2">
               <BurgerCard
                 item={BEEF[0]}
-                img="/images/menu/single-smash.png"
+                img="/images/menu/real-single-smash.png"
               />
               <BurgerCard
                 item={BEEF[1]}
-                img="/images/menu/double-smash.png"
+                img="/images/menu/real-double-smash.png"
               />
               <BurgerCard
                 item={BEEF[2]}
-                img="/images/menu/long-chili-cheese.png"
+                img="/images/menu/real-long-chili-cheese.png"
               />
               <BurgerCard
                 item={BEEF[3]}
-                img="/images/menu/bbq-smash.png"
+                img="/images/menu/real-bbq-smash.png"
               />
               <BurgerCard
                 item={BEEF[4]}
-                img="/images/menu/croissant-smash.png"
+                img="/images/menu/real-croissant-smash.png"
               />
-              <BurgerCard item={BEEF[5]} img="/images/menu/sucuk-burger.png" />
+              <BurgerCard item={BEEF[5]} img="/images/menu/real-sucuk-burger.png" />
             </div>
           </section>
-
-          {/* ── Real Deal Photo Gallery ── */}
-          <div className="mt-12 mb-2">
-            {/* Header row */}
-            <div className="flex flex-wrap items-center gap-3 mb-6">
-              <div className="inline-block bg-bs-ink px-4 py-1.5 -rotate-1">
-                <span className="font-body font-black text-bs-yellow text-xs tracking-[0.2em] uppercase">
-                  Real Deal
-                </span>
-              </div>
-              <p className="text-bs-ink-v text-sm font-body leading-snug">
-                Illustriert oben — und hier: wie sie wirklich aussehen.
-              </p>
-            </div>
-
-            {/* Photo frame */}
-            <div className="border-[3px] border-bs-ink rounded-2xl overflow-hidden shadow-[4px_4px_0_var(--bs-ink)] md:shadow-[8px_8px_0_var(--bs-ink)] bg-white">
-              {/* Label bar */}
-              <div className="bg-bs-teal border-b-[3px] border-bs-ink px-5 py-2 flex items-center justify-between">
-                <span className="text-label-caps text-white text-[11px] tracking-[0.2em] font-bold uppercase">
-                  Beef Burgers — Produktfotos
-                </span>
-                <span className="text-label-caps text-white text-[11px] tracking-[0.2em] font-bold uppercase opacity-70">
-                  100 % Halal · Handmade
-                </span>
-              </div>
-              <img
-                src="/images/menu/burger-collage-real.png"
-                alt="Burger Station Beef Burger Produktfotos — Single Smash, Double Smash, Long Chili Cheese, BBQ Smash, Croissant Smash und mehr"
-                className="w-full object-cover"
-              />
-              {/* License plate footer */}
-              <div className="bg-bs-yellow border-t-[3px] border-bs-ink px-5 py-2 text-center">
-                <span className="text-label-caps text-bs-ink text-[11px] tracking-[0.25em] font-bold uppercase">
-                  BAHNHOFSRING 30 · LEER · SMASH · HALAL · HANDMADE
-                </span>
-              </div>
-            </div>
-          </div>
 
           <CheckerDivider />
 
@@ -374,14 +335,6 @@ export default function Menu() {
 
           {/* SHAKES & DRINKS */}
           <section>
-            {/* Shake photo feature */}
-            <div className="mb-8 border-[3px] border-bs-ink rounded-2xl overflow-hidden shadow-[4px_4px_0_var(--bs-ink)] md:shadow-[8px_8px_0_var(--bs-ink)] bg-white">
-              <img
-                src="/images/foodspot/shake-neon.png"
-                alt="Burger Station Chocolate Shake mit Sahne und Kirsche sowie beleuchtetem Neon-Schild"
-                className="w-full object-cover max-h-64 md:max-h-80"
-              />
-            </div>
             <CategoryHeader title="Shakes & Drinks" accent="cyan" />
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
               {SHAKES.map((item) => (

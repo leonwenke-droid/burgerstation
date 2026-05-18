@@ -17,7 +17,7 @@ const BESTSELLERS = [
     price: "9,40",
     desc: "Zwei knackig gesmashte Beef Patties, Cheddar, Pickles, Burger Sauce.",
     badge: "Top Seller",
-    img: "/images/menu/double-smash.png",
+    img: "/images/menu/real-double-smash.png",
     plate: "DBL-SMSH-001",
     plateBg: "var(--bs-primary-f)",
   },
@@ -26,7 +26,7 @@ const BESTSELLERS = [
     price: "11,90",
     desc: "Doppelt Beef, Chili Cheese und Jalapeños — würzig, intensiv, lang.",
     badge: "Spicy",
-    img: "/images/menu/long-chili-cheese.png",
+    img: "/images/menu/real-long-chili-cheese.png",
     plate: "LNG-CHI-002",
     plateBg: "var(--bs-peach)",
   },
@@ -35,7 +35,7 @@ const BESTSELLERS = [
     price: "9,90",
     desc: "Bacon, Onion Rings, rauchige BBQ Sauce. Crunchy bis zum letzten Bissen.",
     badge: "Smoky",
-    img: "/images/menu/bbq-smash.png",
+    img: "/images/menu/real-bbq-smash.png",
     plate: "BBQ-SMS-003",
     plateBg: "var(--bs-yellow)",
   },
@@ -44,7 +44,7 @@ const BESTSELLERS = [
     price: "11,40",
     desc: "Buttriges Croissant trifft Double Beef. Unser Signature Move.",
     badge: "Signature",
-    img: "/images/menu/croissant-smash.png",
+    img: "/images/menu/real-croissant-smash.png",
     plate: "CRS-SMS-004",
     plateBg: "var(--bs-primary-f)",
   },
@@ -194,7 +194,7 @@ export default function Home() {
                   <img
                     src={b.img}
                     alt={`${b.name} Smash Burger`}
-                    className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                   <div className="absolute top-3 left-3 -rotate-2">
                     <span className="badge-neon badge-yellow-fill">{b.badge}</span>
@@ -326,23 +326,16 @@ export default function Home() {
               </div>
             </RevealOnScroll>
 
-            <div className="flex flex-col gap-4">
-              <div className="grid grid-cols-2 gap-4">
-                <img
-                  src="/images/foodspot/foodspot-2.png"
-                  alt="Burger Station Milkshake im Retro-Stil"
-                  className="rounded-2xl border-2 border-bs-ink shadow-[4px_4px_0_var(--bs-ink)] aspect-square object-contain w-full bg-transparent"
-                />
-                <img
-                  src="/images/foodspot/foodspot-3.png"
-                  alt="Burger Station Neon-Schild und Diner-Elemente"
-                  className="rounded-2xl border-2 border-bs-ink shadow-[4px_4px_0_var(--bs-teal)] aspect-square object-contain w-full mt-8 bg-transparent"
-                />
-              </div>
+            <div className="grid grid-cols-2 gap-4">
               <img
-                src="/images/foodspot/shake-neon.png"
-                alt="Burger Station Chocolate Shake und beleuchtetes Neon-Schild"
-                className="rounded-2xl border-2 border-bs-ink shadow-[4px_4px_0_var(--bs-ink)] w-full object-cover bg-white"
+                src="/images/foodspot/real-shake.png"
+                alt="Burger Station Chocolate Shake mit Sahne und Kirsche"
+                className="rounded-2xl border-2 border-bs-ink shadow-[4px_4px_0_var(--bs-ink)] aspect-square object-cover w-full bg-white"
+              />
+              <img
+                src="/images/foodspot/real-neon-sign.png"
+                alt="Burger Station Neon-Schild — Smash Burgers · Leer"
+                className="rounded-2xl border-2 border-bs-ink shadow-[4px_4px_0_var(--bs-teal)] aspect-square object-cover w-full mt-8 bg-white"
               />
             </div>
           </div>
@@ -412,12 +405,12 @@ export default function Home() {
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {[
-                { src: "/images/menu/double-smash.png", alt: "Double Smash Burger" },
+                { src: "/images/menu/real-double-smash.png", alt: "Double Smash Burger" },
                 { src: "/images/foodspot/foodspot-2.png", alt: "Burger Station Neon-Schild im Retro-Stil" },
                 { src: "/images/foodspot/foodspot-1.png", alt: "Burger Station Milkshake im Retro-Stil" },
                 { src: "/images/foodspot/foodspot-3.png", alt: "Burger Station Leuchtschild mit Diner-Elementen" },
-                { src: "/images/menu/long-chili-cheese.png", alt: "Long Chili Cheese Burger" },
-                { src: "/images/foodspot/foodspot-4.png", alt: "Burger Station Fries im Retro-Stil" },
+                { src: "/images/menu/real-long-chili-cheese.png", alt: "Long Chili Cheese Burger" },
+                { src: "/images/foodspot/real-fries.png", alt: "Burger Station Fries im BS-Box" },
               ].map((p, i) => (
                 <a
                   key={i}
