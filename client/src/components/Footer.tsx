@@ -29,7 +29,7 @@ export default function Footer() {
                     BURGER STATION
                   </div>
                   <div className="text-label-caps text-xs text-bs-teal mt-0.5">
-                    Est. 2025 · Leer
+                    Est. 2026 · Leer
                   </div>
                 </div>
               </div>

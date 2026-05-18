@@ -35,7 +35,7 @@ export default function Header() {
               BURGER STATION
             </div>
             <div className="text-label-caps text-[10px] md:text-xs text-bs-teal mt-0.5">
-              Leer · Est. 2025
+              Leer · Est. 2026
             </div>
           </div>
         </Link>
@@ -78,7 +78,7 @@ export default function Header() {
 
         {/* Mobile hamburger */}
         <button
-          className="lg:hidden bg-white border-2 border-bs-ink rounded-full p-2 shadow-[3px_3px_0_var(--bs-ink)]"
+          className="lg:hidden bg-white border-2 border-bs-ink rounded-full p-2.5 min-w-[44px] min-h-[44px] shadow-[3px_3px_0_var(--bs-ink)]"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label={mobileOpen ? "Menü schließen" : "Menü öffnen"}
         >

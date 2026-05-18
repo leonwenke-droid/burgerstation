@@ -50,7 +50,7 @@ const BESTSELLERS = [
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-bs-cream text-bs-ink">
+    <div className="min-h-screen bg-bs-cream text-bs-ink overflow-x-hidden">
       <Header />
 
       {/* ════════════════════ HERO ════════════════════ */}
@@ -61,11 +61,11 @@ export default function Home() {
             {/* Left — Copy */}
             <div className="flex-1 flex flex-col gap-6 z-20">
               <div className="inline-flex items-center gap-2 bg-bs-primary-c border-2 border-bs-ink rounded-full px-4 py-2 text-label-caps shadow-[2px_2px_0_var(--bs-ink)] self-start -rotate-1">
-                SEIT MAI 2025 GEÖFFNET · LEER
+                SEIT MAI 2026 GEÖFFNET · LEER
               </div>
 
               <h1 className="text-display leading-[0.95]">
-                <span className="block text-5xl md:text-7xl lg:text-8xl text-bs-ink uppercase drop-shadow-[4px_4px_0px_#006a62]">
+                <span className="block text-4xl sm:text-5xl md:text-7xl lg:text-8xl text-bs-ink uppercase drop-shadow-[2px_2px_0px_#006a62] md:drop-shadow-[4px_4px_0px_#006a62]">
                   SMASH BURGER
                 </span>
                 <span className="block text-3xl md:text-5xl lg:text-6xl mt-2 uppercase">
@@ -101,7 +101,7 @@ export default function Home() {
             </div>
 
             {/* Right — Hero image */}
-            <div className="flex-1 relative flex justify-center items-center h-[380px] md:h-[480px] lg:h-[520px] w-full">
+            <div className="flex-1 relative flex justify-center items-center h-[320px] sm:h-[380px] md:h-[480px] lg:h-[520px] w-full">
               {/* Peach glow backdrop */}
               <div className="absolute inset-0 bg-bs-peach rounded-full blur-[100px] opacity-30 z-0" aria-hidden="true"></div>
               {/* Circular framed image */}
@@ -114,7 +114,7 @@ export default function Home() {
               </div>
               {/* Rotating price sticker */}
               <div
-                className="absolute top-8 right-4 md:right-8 z-20 w-24 h-24 md:w-28 md:h-28 bg-bs-yellow rounded-full border-[3px] border-bs-ink shadow-[4px_4px_0_var(--bs-ink)] flex flex-col items-center justify-center rotate-12"
+                className="absolute top-8 right-2 sm:right-4 md:right-8 z-20 w-24 h-24 md:w-28 md:h-28 bg-bs-yellow rounded-full border-[3px] border-bs-ink shadow-[4px_4px_0_var(--bs-ink)] flex flex-col items-center justify-center rotate-12"
               >
                 <span className="text-xs tracking-widest text-bs-ink font-bold uppercase">AB</span>
                 <span className="text-3xl md:text-4xl text-bs-ink font-display font-black leading-none">6,90</span>
@@ -163,7 +163,7 @@ export default function Home() {
           <div className="flex justify-between items-end mb-12">
             <div>
               <span className="badge-neon badge-yellow-fill">DIE FAVORITEN</span>
-              <h2 className="text-headline text-5xl md:text-6xl lg:text-7xl text-bs-ink mt-3 uppercase drop-shadow-[3px_3px_0px_#40e0d0]">
+              <h2 className="text-headline text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-bs-ink mt-3 uppercase drop-shadow-[2px_2px_0px_#40e0d0] md:drop-shadow-[3px_3px_0px_#40e0d0]">
                 DINER<br />FAVORITES
               </h2>
             </div>
@@ -176,7 +176,7 @@ export default function Home() {
             {BESTSELLERS.map((b, i) => (
               <div
                 key={i}
-                className="bg-white border-[3px] border-bs-ink rounded-xl flex flex-col shadow-[8px_8px_0_var(--bs-ink)] relative group hover:-translate-y-1 transition-transform"
+                className="bg-white border-[3px] border-bs-ink rounded-xl flex flex-col shadow-[4px_4px_0_var(--bs-ink)] md:shadow-[8px_8px_0_var(--bs-ink)] relative group hover:-translate-y-1 transition-transform"
               >
                 {/* Image area */}
                 <div className="h-56 border-b-[3px] border-bs-ink rounded-t-xl overflow-hidden relative bg-bs-pink-cream">
@@ -198,7 +198,7 @@ export default function Home() {
                     <span className="text-headline text-2xl text-bs-teal">{b.price}€</span>
                     <Link
                       href="/menu"
-                      className="w-10 h-10 rounded-full border-2 border-bs-ink bg-bs-primary-c flex items-center justify-center shadow-[2px_2px_0_var(--bs-ink)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all text-bs-ink"
+                      className="w-11 h-11 rounded-full border-2 border-bs-ink bg-bs-primary-c flex items-center justify-center shadow-[2px_2px_0_var(--bs-ink)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all text-bs-ink"
                       aria-label={`${b.name} im Menü ansehen`}
                     >
                       <ChevronRight size={18} />
@@ -231,17 +231,17 @@ export default function Home() {
         <div className="absolute inset-0 bg-bs-cream/80 backdrop-blur-sm" aria-hidden="true"></div>
 
         <div className="container relative z-10">
-          <div className="max-w-4xl mx-auto bg-bs-peach border-[4px] border-bs-ink rounded-2xl p-8 md:p-12 shadow-[12px_12px_0_var(--bs-ink)] text-center">
+          <div className="max-w-4xl mx-auto bg-bs-peach border-[4px] border-bs-ink rounded-2xl p-8 md:p-12 shadow-[6px_6px_0_var(--bs-ink)] md:shadow-[12px_12px_0_var(--bs-ink)] text-center">
             <div className="inline-block bg-white border-[3px] border-bs-yellow rounded-2xl px-6 py-2 mb-6 -rotate-2 shadow-[5px_5px_0_var(--bs-ink)]">
               <span className="font-body italic font-extrabold text-bs-ink text-2xl">Menü-Deal</span>
             </div>
 
-            <h2 className="text-display text-5xl md:text-7xl text-bs-ink uppercase">
+            <h2 className="text-display text-4xl sm:text-5xl md:text-7xl text-bs-ink uppercase">
               <span className="block">MACH DEIN</span>
-              <span className="block drop-shadow-[3px_3px_0px_#006a62]">MENÜ KOMPLETT</span>
+              <span className="block drop-shadow-[2px_2px_0px_#006a62] md:drop-shadow-[3px_3px_0px_#006a62]">MENÜ KOMPLETT</span>
             </h2>
 
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-4 md:gap-8 text-display text-3xl md:text-5xl">
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-4 md:gap-8 text-display text-2xl sm:text-3xl md:text-5xl">
               <span className="bg-bs-teal text-white px-5 py-3 rounded-2xl border-[3px] border-bs-ink shadow-[4px_4px_0_var(--bs-ink)]">BURGER</span>
               <span className="text-bs-ink text-4xl font-display font-black">+</span>
               <span className="bg-bs-primary-c text-bs-ink px-5 py-3 rounded-2xl border-[3px] border-bs-ink shadow-[4px_4px_0_var(--bs-ink)]">FRIES</span>
@@ -264,7 +264,7 @@ export default function Home() {
         <div className="container">
           <div className="text-center mb-14">
             <span className="badge-neon badge-cyan-fill">WARUM BURGER STATION?</span>
-            <h2 className="text-headline text-5xl md:text-6xl lg:text-7xl text-bs-ink mt-4 uppercase">
+            <h2 className="text-headline text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-bs-ink mt-4 uppercase">
               VIER GUTE GRÜNDE.
             </h2>
           </div>
@@ -296,9 +296,9 @@ export default function Home() {
           <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center mb-16">
             <div className="space-y-5">
               <span className="badge-neon badge-pink-fill">DAS ERLEBNIS</span>
-              <h2 className="text-headline text-5xl md:text-6xl lg:text-7xl text-bs-ink uppercase">
+              <h2 className="text-headline text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-bs-ink uppercase">
                 Mehr als nur<br />
-                <span className="text-bs-teal drop-shadow-[3px_3px_0px_#40e0d0]">ein Burger.</span>
+                <span className="text-bs-teal drop-shadow-[2px_2px_0px_#40e0d0] md:drop-shadow-[3px_3px_0px_#40e0d0]">ein Burger.</span>
               </h2>
               <p className="text-lg text-bs-ink-v leading-relaxed max-w-lg">
                 Pinke Wände. Neonlicht. US-Nummernschilder. Vinyl an den Wänden. Burger Station ist kein normaler Imbiss — es ist der Foodspot, an dem du isst, fotografierst und wiederkommst.
@@ -375,8 +375,8 @@ export default function Home() {
           <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center mb-12">
             <div>
               <span className="badge-neon badge-yellow-fill">@BURGERSTATIONLEER</span>
-              <h2 className="text-headline text-5xl md:text-6xl lg:text-7xl text-bs-ink mt-4 uppercase">
-                Dein nächster <span className="text-bs-teal drop-shadow-[3px_3px_0px_#40e0d0]">Foodspot</span> in Leer.
+              <h2 className="text-headline text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-bs-ink mt-4 uppercase">
+                Dein nächster <span className="text-bs-teal drop-shadow-[2px_2px_0px_#40e0d0] md:drop-shadow-[3px_3px_0px_#40e0d0]">Foodspot</span> in Leer.
               </h2>
               <p className="text-lg text-bs-ink-v mt-5 leading-relaxed">
                 Burger, Neonlicht, Behind-the-Scenes. Folge uns für Aktionen, neue Menüs und den ehrlichsten Blick hinter die Theke.
@@ -419,7 +419,7 @@ export default function Home() {
         <div className="container">
           <div className="text-center mb-12">
             <span className="badge-neon badge-cyan-fill">UNSER STANDORT</span>
-            <h2 className="text-headline text-5xl md:text-6xl lg:text-7xl text-bs-ink mt-4 uppercase drop-shadow-[3px_3px_0px_#40e0d0]">
+            <h2 className="text-headline text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-bs-ink mt-4 uppercase drop-shadow-[2px_2px_0px_#40e0d0] md:drop-shadow-[3px_3px_0px_#40e0d0]">
               FIND US.
             </h2>
           </div>
@@ -429,7 +429,7 @@ export default function Home() {
             <div className="lg:col-span-3 retro-card overflow-hidden aspect-[4/3] lg:aspect-auto">
               <iframe
                 src="https://www.openstreetmap.org/export/embed.html?bbox=7.4505%2C53.2275%2C7.4665%2C53.2375&layer=mapnik&marker=53.2325%2C7.4585"
-                className="w-full h-full min-h-[400px] border-0"
+                className="w-full h-full min-h-[300px] md:min-h-[400px] border-0"
                 loading="lazy"
                 title="Burger Station Standort Leer Bahnhofsring 30"
               />
@@ -492,7 +492,7 @@ export default function Home() {
 
         <div className="container relative text-center max-w-3xl mx-auto">
           <Flame size={48} className="text-bs-teal mx-auto mb-4" aria-hidden="true" />
-          <h2 className="text-display text-6xl md:text-8xl text-bs-ink uppercase drop-shadow-[4px_4px_0px_#006a62]">
+          <h2 className="text-display text-5xl sm:text-6xl md:text-8xl text-bs-ink uppercase drop-shadow-[2px_2px_0px_#006a62] md:drop-shadow-[4px_4px_0px_#006a62]">
             LUST AUF BURGER?
           </h2>
           <p className="text-xl text-bs-ink-v mt-6 leading-relaxed">

@@ -155,7 +155,7 @@ function CategoryHeader({
 
 function BurgerCard({ item, img }: { item: MenuItem; img?: string }) {
   return (
-    <div className="bg-white border-[3px] border-bs-ink rounded-2xl overflow-visible relative flex flex-col shadow-[6px_6px_0_var(--bs-ink)] group hover:-translate-y-1 transition-transform duration-300">
+    <div className="bg-white border-[3px] border-bs-ink rounded-2xl overflow-visible relative flex flex-col shadow-[3px_3px_0_var(--bs-ink)] md:shadow-[6px_6px_0_var(--bs-ink)] group hover:-translate-y-1 transition-transform duration-300">
       {item.badge && (
         <div className="absolute -top-4 -right-4 bg-bs-yellow text-bs-ink text-label-caps w-16 h-16 rounded-full flex items-center justify-center border-[3px] border-bs-ink rotate-12 z-10 shadow-[3px_3px_0_var(--bs-ink)] text-[11px] font-bold uppercase leading-none text-center">
           {item.badge}
@@ -239,7 +239,7 @@ function ShakeCard({ item }: { item: MenuItem }) {
 
 export default function Menu() {
   return (
-    <div className="min-h-screen bg-bs-cream text-bs-ink">
+    <div className="min-h-screen bg-bs-cream text-bs-ink overflow-x-hidden">
       <Header />
 
       <main className="w-full pb-20">
@@ -251,7 +251,7 @@ export default function Menu() {
                 100% Halal · Handmade Daily
               </span>
             </div>
-            <h1 className="text-display text-6xl md:text-8xl text-bs-ink uppercase relative">
+            <h1 className="text-display text-5xl sm:text-6xl md:text-8xl text-bs-ink uppercase relative">
               DIE KARTE
               <div className="absolute -top-3 -right-8 md:-right-12 bg-bs-yellow text-bs-ink text-label-caps px-3 py-1 rounded-full border-2 border-bs-ink rotate-12 shadow-[2px_2px_0_var(--bs-ink)] text-xs font-bold uppercase hidden md:block">
                 FRISCH!
@@ -372,11 +372,11 @@ export default function Menu() {
 
           {/* Bottom CTA */}
           <section className="text-center py-4">
-            <div className="relative overflow-hidden rounded-3xl border-[4px] border-bs-ink shadow-[12px_12px_0_var(--bs-ink)] max-w-3xl mx-auto checker-teal">
+            <div className="relative overflow-hidden rounded-3xl border-[4px] border-bs-ink shadow-[6px_6px_0_var(--bs-ink)] md:shadow-[12px_12px_0_var(--bs-ink)] max-w-3xl mx-auto checker-teal">
               <div className="absolute inset-0 bg-bs-cream/80 backdrop-blur-sm" aria-hidden="true"></div>
-              <div className="relative z-10 bg-bs-peach border-[4px] border-bs-ink rounded-2xl m-4 p-8 md:p-12 shadow-[6px_6px_0_var(--bs-ink)]">
+              <div className="relative z-10 bg-bs-peach border-[4px] border-bs-ink rounded-2xl m-4 p-8 md:p-12 shadow-[3px_3px_0_var(--bs-ink)] md:shadow-[6px_6px_0_var(--bs-ink)]">
                 <span className="badge-neon badge-yellow-fill">VOR ORT BESTELLEN</span>
-                <h2 className="text-display text-4xl md:text-6xl text-bs-ink mt-4 mb-3 drop-shadow-[3px_3px_0px_#006a62]">
+                <h2 className="text-display text-3xl sm:text-4xl md:text-6xl text-bs-ink mt-4 mb-3 drop-shadow-[2px_2px_0px_#006a62] md:drop-shadow-[3px_3px_0px_#006a62]">
                   KOMM VORBEI.
                 </h2>
                 <p className="text-bs-ink-v text-lg leading-relaxed mb-8">

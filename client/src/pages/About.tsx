@@ -15,7 +15,7 @@ export default function About() {
         <section className="max-w-7xl mx-auto px-4 pt-16 pb-12 relative overflow-hidden">
           {/* Floating sticker */}
           <div className="absolute top-8 right-1/4 rotate-12 bg-bs-yellow text-bs-ink text-subhead px-6 py-2 border-3 border-bs-ink shadow-[4px_4px_0_var(--bs-ink)] rounded-full z-20 hidden md:block" style={{ borderWidth: "3px" }}>
-            Est. 2025
+            Est. 2026
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
@@ -24,7 +24,7 @@ export default function About() {
               <div>
                 <span className="badge-neon badge-pink-fill">UNSERE STORY</span>
               </div>
-              <h1 className="text-display text-5xl md:text-6xl lg:text-7xl text-bs-ink leading-tight">
+              <h1 className="text-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-bs-ink leading-tight">
                 Leer bekommt seinen{" "}
                 <span className="bg-bs-pink text-white px-2 relative inline-block border-b-4 border-bs-ink">
                   Diner.
@@ -54,7 +54,7 @@ export default function About() {
             {/* Scrapbook photo collage */}
             <div className="relative w-full aspect-[4/3] flex justify-center items-center mt-8 lg:mt-0">
               {/* Photo frame 1 — background */}
-              <div className="absolute w-[58%] aspect-square bg-white p-1.5 pb-8 border-4 border-bs-ink shadow-[8px_8px_0_var(--bs-ink)] -rotate-6 z-0 left-0 top-8">
+              <div className="absolute w-[58%] aspect-square bg-white p-1.5 pb-8 border-4 border-bs-ink shadow-[4px_4px_0_var(--bs-ink)] md:shadow-[8px_8px_0_var(--bs-ink)] -rotate-6 z-0 left-0 top-8">
                 <img
                   src="/patterns/interior-1.svg"
                   alt="Burger Station Neon-Wand und Innenraum"
@@ -62,7 +62,7 @@ export default function About() {
                 />
               </div>
               {/* Photo frame 2 — foreground */}
-              <div className="absolute w-[63%] aspect-square bg-white p-1.5 pb-8 border-4 border-bs-ink shadow-[8px_8px_0_var(--bs-ink)] rotate-3 z-10 right-0 bottom-0">
+              <div className="absolute w-[63%] aspect-square bg-white p-1.5 pb-8 border-4 border-bs-ink shadow-[4px_4px_0_var(--bs-ink)] md:shadow-[8px_8px_0_var(--bs-ink)] rotate-3 z-10 right-0 bottom-0">
                 <img
                   src="/patterns/interior-2.svg"
                   alt="Burger Station Diner Booth und Retro-Ambiente"
@@ -70,7 +70,7 @@ export default function About() {
                 />
                 {/* License plate detail */}
                 <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-bs-pink text-white text-label-caps px-4 py-1 border-2 border-bs-ink text-xs font-bold uppercase tracking-widest">
-                  LEER · 2025
+                  LEER · 2026
                 </div>
               </div>
             </div>
@@ -91,7 +91,7 @@ export default function About() {
 
         {/* ── The Story ── */}
         <section className="max-w-5xl mx-auto px-4 py-20 relative">
-          <div className="bg-bs-pink-cream border-4 border-bs-ink shadow-[8px_8px_0_var(--bs-ink)] p-8 md:p-14 relative">
+          <div className="bg-bs-pink-cream border-4 border-bs-ink shadow-[4px_4px_0_var(--bs-ink)] md:shadow-[8px_8px_0_var(--bs-ink)] p-8 md:p-14 relative">
             {/* Rotated sticker */}
             <div className="absolute -top-5 -left-5 -rotate-12 bg-bs-cyan text-bs-ink text-label-caps px-5 py-2 border-3 border-bs-ink shadow-[4px_4px_0_var(--bs-ink)] rounded-full z-20" style={{ borderWidth: "3px" }}>
               Halal &amp; Handmade
@@ -133,7 +133,7 @@ export default function About() {
 
           <div className="container pt-6 pb-6">
             <div className="text-center mb-12">
-              <h2 className="text-headline text-5xl md:text-6xl text-bs-ink uppercase drop-shadow-[3px_3px_0px_#40e0d0]">
+              <h2 className="text-headline text-4xl sm:text-5xl md:text-6xl text-bs-ink uppercase drop-shadow-[2px_2px_0px_#40e0d0] md:drop-shadow-[3px_3px_0px_#40e0d0]">
                 WAS UNS AUSMACHT.
               </h2>
             </div>

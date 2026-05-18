@@ -16,7 +16,7 @@ export default function Locations() {
       <main className="w-full pb-20">
         {/* Page header */}
         <section className="w-full pt-14 pb-6 px-4 max-w-7xl mx-auto flex justify-center">
-          <h1 className="text-display text-5xl sm:text-6xl md:text-8xl text-center relative inline-block drop-shadow-[4px_4px_0px_#40e0d0]">
+          <h1 className="text-display text-5xl sm:text-6xl md:text-8xl text-center relative inline-block drop-shadow-[2px_2px_0px_#40e0d0] md:drop-shadow-[4px_4px_0px_#40e0d0]">
             <span className="relative z-10 uppercase text-bs-ink">Find Us.</span>
             <span className="absolute -bottom-2 left-0 w-full h-4 bg-bs-yellow -z-10 border-2 border-bs-ink"></span>
           </h1>
@@ -39,7 +39,7 @@ export default function Locations() {
           {/* Left: Map + Address Card */}
           <div className="col-span-12 lg:col-span-8 flex flex-col gap-6">
             {/* Map embed */}
-            <div className="w-full border-4 border-bs-ink shadow-[8px_8px_0_var(--bs-ink)] relative overflow-hidden bg-bs-surface-hi aspect-[4/3] sm:aspect-video md:aspect-[21/9]">
+            <div className="w-full border-4 border-bs-ink shadow-[4px_4px_0_var(--bs-ink)] md:shadow-[8px_8px_0_var(--bs-ink)] relative overflow-hidden bg-bs-surface-hi aspect-[4/3] sm:aspect-video md:aspect-[21/9]">
               <iframe
                 src="https://www.openstreetmap.org/export/embed.html?bbox=7.4505%2C53.2275%2C7.4665%2C53.2375&layer=mapnik&marker=53.2325%2C7.4585"
                 className="w-full h-full border-0 min-h-[240px] sm:min-h-[300px]"
@@ -58,7 +58,7 @@ export default function Locations() {
             {/* Location detail cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {/* Address card */}
-              <div className="bg-white border-[3px] border-bs-ink shadow-[5px_5px_0_var(--bs-ink)] flex flex-col group hover:-translate-y-1 hover:-translate-x-1 hover:shadow-[8px_8px_0_var(--bs-ink)] transition-all duration-200">
+              <div className="bg-white border-[3px] border-bs-ink shadow-[5px_5px_0_var(--bs-ink)] flex flex-col group hover:-translate-y-1 hover:-translate-x-1 hover:shadow-[4px_4px_0_var(--bs-ink)] md:shadow-[8px_8px_0_var(--bs-ink)] transition-all duration-200">
                 <div className="h-36 sm:h-40 border-b-[3px] border-bs-ink overflow-hidden bg-bs-peach relative">
                   <img
                     src="/images/foodspot/foodspot-3.png"
@@ -94,7 +94,7 @@ export default function Locations() {
               </div>
 
               {/* Phone / Info card */}
-              <div className="bg-white border-[3px] border-bs-ink shadow-[5px_5px_0_var(--bs-ink)] flex flex-col group hover:-translate-y-1 hover:-translate-x-1 hover:shadow-[8px_8px_0_var(--bs-ink)] transition-all duration-200">
+              <div className="bg-white border-[3px] border-bs-ink shadow-[5px_5px_0_var(--bs-ink)] flex flex-col group hover:-translate-y-1 hover:-translate-x-1 hover:shadow-[4px_4px_0_var(--bs-ink)] md:shadow-[8px_8px_0_var(--bs-ink)] transition-all duration-200">
                 <div className="h-36 sm:h-40 border-b-[3px] border-bs-ink overflow-hidden bg-bs-primary-c relative">
                   <img
                     src="/images/foodspot/foodspot-2.png"
@@ -137,7 +137,7 @@ export default function Locations() {
           {/* Right sidebar: Hours + CTA */}
           <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
             {/* Hours card */}
-            <div className="bg-white border-4 border-bs-ink p-6 flex flex-col items-center justify-center shadow-[8px_8px_0_var(--bs-ink)]">
+            <div className="bg-white border-4 border-bs-ink p-6 flex flex-col items-center justify-center shadow-[4px_4px_0_var(--bs-ink)] md:shadow-[8px_8px_0_var(--bs-ink)]">
               <div className="w-full border-b-2 border-dashed border-bs-ink pb-4 mb-4 text-center">
                 <span className="text-label-caps text-bs-teal tracking-[0.2em] text-sm font-bold uppercase">
                   NOW SERVING
@@ -181,7 +181,7 @@ export default function Locations() {
               href={MAPS}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full bg-bs-yellow text-bs-ink border-4 border-bs-ink rounded-full py-4 sm:py-5 text-headline text-xl sm:text-2xl shadow-[6px_6px_0_var(--bs-ink)] hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-[2px_2px_0_var(--bs-ink)] transition-all flex items-center justify-center gap-3 group font-bold uppercase tracking-wider"
+              className="w-full bg-bs-yellow text-bs-ink border-4 border-bs-ink rounded-full py-4 sm:py-5 text-headline text-xl sm:text-2xl shadow-[3px_3px_0_var(--bs-ink)] md:shadow-[6px_6px_0_var(--bs-ink)] hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-[2px_2px_0_var(--bs-ink)] transition-all flex items-center justify-center gap-3 group font-bold uppercase tracking-wider"
             >
               Route starten
               <MapPin
@@ -192,7 +192,7 @@ export default function Locations() {
 
             <a
               href={PHONE}
-              className="w-full btn-pink py-4 sm:py-5 text-lg sm:text-xl rounded-full border-4 border-bs-ink shadow-[6px_6px_0_var(--bs-ink)] flex items-center justify-center gap-3 pulse-pink"
+              className="w-full btn-pink py-4 sm:py-5 text-lg sm:text-xl rounded-full border-4 border-bs-ink shadow-[3px_3px_0_var(--bs-ink)] md:shadow-[6px_6px_0_var(--bs-ink)] flex items-center justify-center gap-3 pulse-pink"
             >
               <Phone size={24} /> {PHONE_DISPLAY}
             </a>
