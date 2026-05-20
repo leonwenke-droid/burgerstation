@@ -167,7 +167,8 @@ export async function handleCreateCheckout(req: Request, res: Response) {
   // Amount always calculated server-side
   const amount = Math.round(items.reduce((s, i) => s + i.price * i.quantity, 0) * 100) / 100;
 
-  const checkoutReference = `BS-${Date.now()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
+  const datePart = new Date().toISOString().slice(2, 10).replace(/-/g, ""); // YYMMDD
+  const checkoutReference = `BS-${datePart}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
 
   pendingOrders.set(checkoutReference, items);
 

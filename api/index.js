@@ -22568,7 +22568,8 @@ async function handleCreateCheckout(req, res) {
     return;
   }
   const amount = Math.round(items.reduce((s, i) => s + i.price * i.quantity, 0) * 100) / 100;
-  const checkoutReference = `BS-${Date.now()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
+  const datePart = (/* @__PURE__ */ new Date()).toISOString().slice(2, 10).replace(/-/g, "");
+  const checkoutReference = `BS-${datePart}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
   pendingOrders.set(checkoutReference, items);
   try {
     const sumupRes = await fetch("https://api.sumup.com/v0.1/checkouts", {
