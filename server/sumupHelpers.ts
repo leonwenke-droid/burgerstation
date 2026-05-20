@@ -141,6 +141,9 @@ function appendOrderLog(entry: object) {
  * Non-catalog items fall back to the provided name/price.
  */
 export async function handleCreateCheckout(req: Request, res: Response) {
+  // #region agent log – handler entry
+  console.log("[handleCreateCheckout] REACHED – body keys:", Object.keys(req.body ?? {}));
+  // #endregion
   const { orderedItems, items: legacyItems, currency = "EUR" } = req.body as CreateCheckoutBody;
 
   const raw = orderedItems ?? legacyItems;
@@ -187,6 +190,9 @@ export async function handleCreateCheckout(req: Request, res: Response) {
       }),
     });
 
+    // #region agent log – SumUp API response
+    console.log("[SumUp] Checkout API responded:", sumupRes.status, sumupRes.statusText);
+    // #endregion
     if (!sumupRes.ok) {
       pendingOrders.delete(checkoutReference);
       const detail = await sumupRes.text();

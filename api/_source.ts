@@ -13,6 +13,18 @@ import { getGoogleReviewsNormalized } from "../server/googleReviews";
 const app = express();
 app.use(express.json());
 
+// #region agent log – request diagnostics
+app.use((req, _res, next) => {
+  console.log(`[API] ${req.method} ${req.url} | path=${req.path}`);
+  next();
+});
+// #endregion
+
+// Health check — lets us verify the function is reachable at all
+app.get(["/api/health", "/health"], (_req, res) => {
+  res.json({ ok: true, ts: new Date().toISOString() });
+});
+
 app.post("/api/create-sandbox-checkout", handleCreateCheckout);
 app.post("/api/webhooks/sumup",           handleSumUpWebhook);
 app.get("/api/verify-checkout/:checkoutId", handleVerifyCheckout);
