@@ -1,106 +1,171 @@
+import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Phone, MapPin } from "lucide-react";
+import { Check, Egg, Fish, Milk, Nut, Phone, MapPin, Plus, Wheat } from "lucide-react";
+import { useCart } from "@/contexts/CartContext";
+
+type Allergen = "gluten" | "lactose" | "egg" | "fish" | "nuts";
+
+const ALLERGEN_ICONS: Record<
+  Allergen,
+  { icon: React.ComponentType<{ size?: number; className?: string }>; label: string }
+> = {
+  gluten:  { icon: Wheat, label: "Gluten (Weizen)" },
+  lactose: { icon: Milk,  label: "Laktose (Milch)" },
+  egg:     { icon: Egg,   label: "Eier" },
+  fish:    { icon: Fish,  label: "Fisch" },
+  nuts:    { icon: Nut,   label: "Nüsse" },
+};
+
+const parsePrice = (s: string) => parseFloat(s.replace(",", "."));
 
 const PHONE = "tel:+4949199755279";
 const MAPS =
   "https://www.google.com/maps/search/?api=1&query=Burger+Station+Bahnhofsring+30+26789+Leer";
 
-type MenuItem = { name: string; price: string; desc?: string; badge?: string };
+type MenuItem = {
+  name: string;
+  /** Exact name as entered in the SumUp item catalogue. Defaults to `name` when omitted. */
+  sumup_name?: string;
+  /** SumUp Artikelnummer (SKU) as shown in the dashboard, e.g. "DBL-SMSH-001". */
+  sumup_sku?: string;
+  /** SumUp Variant-ID from the official product CSV export. */
+  variant_id?: string;
+  price: string;
+  desc?: string;
+  badge?: string;
+  allergens?: Allergen[];
+};
 
 const BEEF: MenuItem[] = [
   {
     name: "Single Smash",
+    sumup_name: "Single Smash",
     price: "6,90",
     desc: "Brioche Bun, Single Beef Patty, Cheddar, Onion, Lettuce, Pickles, Burger Sauce",
+    allergens: ["gluten", "lactose", "egg"],
   },
   {
     name: "Double Smash",
+    sumup_name: "Double Smash",                              // ← SumUp Artikelname
+    sumup_sku:  "DBL-SMSH-001",                              // ← Artikelnummer (SKU)
+    variant_id: "7569a6cd-268f-4d16-b86f-09676f4dcfaa",     // ← Variant-ID aus CSV-Export
     price: "9,40",
     desc: "Doppeltes Beef Patty, geschmolzener Cheddar, Pickles, Burger Sauce",
     badge: "Top Seller",
+    allergens: ["gluten", "lactose", "egg"],
   },
   {
     name: "Long Chili Cheese",
+    sumup_name: "Long Chili Cheese",
+    sumup_sku:  "LNG-CHI-002",
+    variant_id: "42194cc3-fe98-4a6d-b5fa-04d333730d96",
     price: "11,90",
     desc: "Doppeltes Beef, Chili Cheese, Jalapeños, Burger Sauce",
     badge: "Spicy",
+    allergens: ["gluten", "lactose", "egg"],
   },
   {
     name: "BBQ Smash",
+    sumup_name: "BBQ Smash",
     price: "9,90",
     desc: "Beef Patty, Bacon, Cheddar, Onion Rings, BBQ Sauce",
     badge: "Smoky",
+    allergens: ["gluten", "lactose", "egg"],
   },
   {
     name: "Croissant Smash",
+    sumup_name: "Croissant Smash",
     price: "11,40",
     desc: "Croissant Bun, doppeltes Beef Patty, Cheddar, Burger Sauce",
     badge: "Signature",
+    allergens: ["gluten", "lactose", "egg"],
   },
   {
     name: "Sucuk Burger",
+    sumup_name: "Sucuk Burger",
     price: "8,90",
     desc: "Sucuk, Cheddar, Onion, Lettuce, Pickles, Garlic Sauce",
+    allergens: ["gluten", "lactose"],
   },
 ];
 
 const CHICKEN: MenuItem[] = [
   {
     name: "Classic Chicken",
+    sumup_name: "Classic Chicken",
     price: "9,00",
     desc: "Knuspriges Chicken Patty, Buttermilk-Mariniert, Cheddar, Lettuce, Pickles, Burger Sauce",
+    allergens: ["gluten", "egg"],
   },
   {
     name: "Garlic Chicken",
+    sumup_name: "Garlic Chicken",
     price: "9,00",
     desc: "Chicken Patty, Cheddar, Garlic Sauce",
+    allergens: ["gluten", "egg"],
   },
   {
     name: "Long Chicken",
+    sumup_name: "Long Chicken",
     price: "11,50",
     desc: "Doppelt Chicken Patty, Cheddar, Lettuce, Onion, Pickles, Burger Sauce",
+    allergens: ["gluten", "egg"],
   },
 ];
 
 const VEGAN: MenuItem[] = [
   {
     name: "Vegan Burger",
+    sumup_name: "Vegan Burger",
     price: "8,70",
     desc: "Vegan Patty, Lettuce, Onion, Pickles, Vegan Sauce",
+    allergens: ["gluten"],
   },
   {
     name: "Falafel Burger",
+    sumup_name: "Falafel Burger",
     price: "8,70",
     desc: "Hausgemachte Falafel, Lettuce, Onion, Pickles, Vegan Sauce",
+    allergens: ["gluten"],
   },
 ];
 
 const SIDES: MenuItem[] = [
-  { name: "Fries", price: "3,50" },
+  { name: "Fries", sumup_name: "Fries", price: "3,50", allergens: ["gluten"] },
   {
     name: "Beef & Cheese Fries",
+    sumup_name: "Beef & Cheese Fries",
     price: "7,90",
     desc: "Fries mit Smash Beef und Cheese Sauce",
+    allergens: ["gluten", "lactose"],
   },
-  { name: "Sweet Potato Fries", price: "4,50" },
-  { name: "8 Chicken Nuggets", price: "6,00" },
-  { name: "Chicken Tenders", price: "6,60" },
-  { name: "Onion Rings", price: "6,20" },
+  { name: "Sweet Potato Fries", sumup_name: "Sweet Potato Fries", price: "4,50" },
+  { name: "8 Chicken Nuggets", sumup_name: "8 Chicken Nuggets", price: "6,00", allergens: ["gluten", "egg"] },
+  { name: "Chicken Tenders", sumup_name: "Chicken Tenders", price: "6,60", allergens: ["gluten", "egg"] },
+  { name: "Onion Rings", sumup_name: "Onion Rings", price: "6,20", allergens: ["gluten", "egg"] },
 ];
 
 const SHAKES: MenuItem[] = [
   {
     name: "Chocolate Shake",
+    sumup_name: "Chocolate Shake",
     price: "4,00",
     desc: "Cremig, kalt, klassisch",
+    allergens: ["lactose", "egg"],
   },
-  { name: "Vanilla Shake", price: "4,00", desc: "Vanille, dick, eiskalt" },
+  {
+    name: "Vanilla Shake",
+    sumup_name: "Vanilla Shake",
+    price: "4,00",
+    desc: "Vanille, dick, eiskalt",
+    allergens: ["lactose", "egg"],
+  },
 ];
 
 const DRINKS: MenuItem[] = [
-  { name: "Water", price: "2,00" },
-  { name: "Fritz Limo", price: "3,30", desc: "Cola · Orange · Zitrone" },
+  { name: "Water", sumup_name: "Water", price: "2,00", desc: "Wasser" },
+  { name: "Fritz Limo", sumup_name: "Fritz Limo", price: "3,30", desc: "Cola · Orange · Zitrone" },
 ];
 
 const SAUCES: MenuItem[] = [
@@ -154,6 +219,15 @@ function CategoryHeader({
 }
 
 function BurgerCard({ item, img }: { item: MenuItem; img?: string }) {
+  const { addItem } = useCart();
+  const [added, setAdded] = useState(false);
+
+  function handleAdd() {
+    addItem({ id: item.name, name: item.name, sumup_name: item.sumup_name ?? item.name, sumup_sku: item.sumup_sku, variant_id: item.variant_id, price: parsePrice(item.price) });
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1200);
+  }
+
   return (
     <div className="bg-white border-[3px] border-bs-ink rounded-2xl overflow-visible relative flex flex-col shadow-[3px_3px_0_var(--bs-ink)] md:shadow-[6px_6px_0_var(--bs-ink)] group hover:-translate-y-1 transition-transform duration-300">
       {item.badge && (
@@ -177,23 +251,61 @@ function BurgerCard({ item, img }: { item: MenuItem; img?: string }) {
             {item.desc}
           </p>
         )}
+        {item.allergens && item.allergens.length > 0 && (
+          <div className="flex items-center gap-2 pt-1">
+            {item.allergens.map((a) => {
+              const al = ALLERGEN_ICONS[a];
+              const Icon = al.icon;
+              return (
+                <span
+                  key={a}
+                  title={al.label}
+                  aria-label={al.label}
+                  className="text-bs-ink/35 hover:text-bs-ink-v transition-colors cursor-help"
+                >
+                  <Icon size={13} />
+                </span>
+              );
+            })}
+          </div>
+        )}
       </div>
-      {/* Price "license plate" footer */}
-      <div className="flex justify-center pb-5 px-5">
-        <div
-          className="bg-bs-yellow text-bs-ink border-2 border-bs-ink px-5 py-2 shadow-[3px_3px_0_var(--bs-ink)] inline-block"
-          style={{ borderRadius: "4px" }}
-        >
-          <span className="font-body font-bold text-lg tracking-wider">
-            {item.price} €
-          </span>
+      {/* Price + cart */}
+      <div className="px-5 pb-5 flex flex-col gap-2">
+        <div className="flex justify-center">
+          <div
+            className="bg-bs-yellow text-bs-ink border-2 border-bs-ink px-5 py-2 shadow-[3px_3px_0_var(--bs-ink)] inline-block"
+            style={{ borderRadius: "4px" }}
+          >
+            <span className="font-body font-bold text-lg tracking-wider">
+              {item.price} €
+            </span>
+          </div>
         </div>
+        <button
+          type="button"
+          onClick={handleAdd}
+          className={`w-full py-2.5 rounded-xl border-[3px] border-bs-ink font-body font-bold text-sm tracking-wide transition-all shadow-[3px_3px_0_var(--bs-ink)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 ${
+            added ? "bg-bs-teal text-white" : "bg-bs-yellow text-bs-ink"
+          }`}
+        >
+          {added ? "✓ Hinzugefügt!" : "In den Warenkorb"}
+        </button>
       </div>
     </div>
   );
 }
 
 function HorizontalCard({ item }: { item: MenuItem }) {
+  const { addItem } = useCart();
+  const [added, setAdded] = useState(false);
+
+  function handleAdd() {
+    addItem({ id: item.name, name: item.name, sumup_name: item.sumup_name ?? item.name, sumup_sku: item.sumup_sku, variant_id: item.variant_id, price: parsePrice(item.price) });
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1200);
+  }
+
   return (
     <div className="bg-white border-2 border-bs-ink rounded-xl overflow-visible relative flex flex-row items-center p-4 shadow-[4px_4px_0_var(--bs-ink)] gap-4 group hover:-translate-y-1 transition-transform duration-300">
       {item.badge && (
@@ -201,38 +313,108 @@ function HorizontalCard({ item }: { item: MenuItem }) {
           {item.badge}
         </div>
       )}
-      <div className="flex-1">
+      <div className="flex-1 min-w-0">
         <h3 className="text-subhead text-lg text-bs-ink mb-0.5">
           {item.name}
         </h3>
         {item.desc && (
           <p className="text-sm text-bs-ink/70 leading-relaxed">{item.desc}</p>
         )}
+        {item.allergens && item.allergens.length > 0 && (
+          <div className="flex items-center gap-1.5 mt-1">
+            {item.allergens.map((a) => {
+              const al = ALLERGEN_ICONS[a];
+              const Icon = al.icon;
+              return (
+                <span
+                  key={a}
+                  title={al.label}
+                  aria-label={al.label}
+                  className="text-bs-ink/35 hover:text-bs-ink-v transition-colors cursor-help"
+                >
+                  <Icon size={12} />
+                </span>
+              );
+            })}
+          </div>
+        )}
       </div>
-      <div
-        className="bg-bs-yellow text-bs-ink border-2 border-bs-ink px-3 py-1.5 shadow-[2px_2px_0_var(--bs-ink)] shrink-0 whitespace-nowrap"
-        style={{ borderRadius: "4px" }}
-      >
-        <span className="font-body font-bold tracking-wider">
-          {item.price} €
-        </span>
+      <div className="flex items-center gap-2 shrink-0">
+        <div
+          className="bg-bs-yellow text-bs-ink border-2 border-bs-ink px-3 py-1.5 shadow-[2px_2px_0_var(--bs-ink)] whitespace-nowrap"
+          style={{ borderRadius: "4px" }}
+        >
+          <span className="font-body font-bold tracking-wider">
+            {item.price} €
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={handleAdd}
+          aria-label={`${item.name} in den Warenkorb`}
+          className={`w-9 h-9 rounded-full border-2 border-bs-ink flex items-center justify-center shadow-[2px_2px_0_var(--bs-ink)] transition-all hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 ${
+            added ? "bg-bs-teal text-white" : "bg-bs-primary-c text-bs-ink"
+          }`}
+        >
+          {added ? <Check size={14} /> : <Plus size={14} />}
+        </button>
       </div>
     </div>
   );
 }
 
 function ShakeCard({ item }: { item: MenuItem }) {
+  const { addItem } = useCart();
+  const [added, setAdded] = useState(false);
+
+  function handleAdd() {
+    addItem({ id: item.name, name: item.name, sumup_name: item.sumup_name ?? item.name, sumup_sku: item.sumup_sku, variant_id: item.variant_id, price: parsePrice(item.price) });
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1200);
+  }
+
   return (
-    <div className="bg-white border-2 border-bs-ink rounded-full px-4 pt-4 pb-6 flex flex-col items-center shadow-[4px_4px_0_var(--bs-ink)] group hover:-translate-y-1 transition-transform duration-300 text-center">
+    <div className="bg-white border-2 border-bs-ink rounded-full px-4 pt-4 pb-5 flex flex-col items-center shadow-[4px_4px_0_var(--bs-ink)] group hover:-translate-y-1 transition-transform duration-300 text-center">
       <h3 className="text-subhead text-lg text-bs-ink mt-2">{item.name}</h3>
       {item.desc && (
         <p className="text-xs text-bs-ink/60 mt-1">{item.desc}</p>
       )}
-      <div className="mt-4 bg-bs-cyan text-bs-ink border-2 border-bs-ink px-4 py-1.5 rounded-full shadow-[2px_2px_0_var(--bs-ink)]">
+      <div className="mt-3 bg-bs-cyan text-bs-ink border-2 border-bs-ink px-4 py-1.5 rounded-full shadow-[2px_2px_0_var(--bs-ink)]">
         <span className="font-body font-bold tracking-wider">
           {item.price} €
         </span>
       </div>
+      <button
+        type="button"
+        onClick={handleAdd}
+        className={`mt-2.5 w-[calc(100%-2rem)] py-2 rounded-full border-2 border-bs-ink font-body font-bold text-xs tracking-wide transition-all shadow-[2px_2px_0_var(--bs-ink)] hover:shadow-none ${
+          added ? "bg-bs-teal text-white" : "bg-bs-yellow text-bs-ink"
+        }`}
+      >
+        {added ? "✓" : "+ Warenkorb"}
+      </button>
+      {item.allergens && item.allergens.length > 0 && (
+        <div className="flex items-center gap-1.5 mt-2 justify-center">
+          {item.allergens.map((a) => {
+            const al = ALLERGEN_ICONS[a];
+            const Icon = al.icon;
+            return (
+              <span
+                key={a}
+                title={al.label}
+                aria-label={al.label}
+                className="text-bs-ink/30 hover:text-bs-ink-v transition-colors cursor-help"
+              >
+                <Icon size={12} />
+              </span>
+            );
+          })}
+        </div>
+      )}
+      {/* Reserve space so cards without allergens stay the same height */}
+      {(!item.allergens || item.allergens.length === 0) && (
+        <div className="mt-2 h-[20px]" aria-hidden="true" />
+      )}
     </div>
   );
 }

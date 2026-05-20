@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RETRO BITES - Home</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,100..900;1,100..900&amp;family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS with Config -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-lowest": "#ffffff",
+                        "surface": "#fefccf",
+                        "surface-container-high": "#eceabe",
+                        "primary-fixed": "#61f9e9",
+                        "primary": "#006a62",
+                        "primary-container": "#40e0d0",
+                        "primary-fixed-dim": "#3adccc",
+                        "on-surface-variant": "#3c4a47",
+                        "error-container": "#ffdad6",
+                        "inverse-primary": "#3adccc",
+                        "inverse-surface": "#323214",
+                        "on-secondary-fixed-variant": "#5d4037",
+                        "background": "#fefccf",
+                        "tertiary-fixed-dim": "#e9c400",
+                        "surface-container-highest": "#e6e5b9",
+                        "surface-dim": "#dedcb1",
+                        "on-secondary-container": "#795950",
+                        "surface-bright": "#fefccf",
+                        "surface-container-low": "#f8f6c9",
+                        "on-surface": "#1d1d03",
+                        "on-background": "#1d1d03",
+                        "inverse-on-surface": "#f5f3c7",
+                        "surface-tint": "#006a62",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#544600",
+                        "on-secondary": "#ffffff",
+                        "tertiary-fixed": "#ffe16d",
+                        "on-tertiary-fixed": "#221b00",
+                        "secondary-fixed": "#ffdbd0",
+                        "on-tertiary-container": "#645300",
+                        "secondary-fixed-dim": "#e6beb2",
+                        "surface-variant": "#e6e5b9",
+                        "on-error-container": "#93000a",
+                        "on-primary-fixed": "#00201d",
+                        "on-primary-fixed-variant": "#005049",
+                        "secondary-container": "#fed4c8",
+                        "on-error": "#ffffff",
+                        "on-primary-container": "#006058",
+                        "tertiary": "#705d00",
+                        "secondary": "#76574e",
+                        "on-secondary-fixed": "#2c160f",
+                        "surface-container": "#f2f0c4",
+                        "error": "#ba1a1a",
+                        "outline": "#6b7a77",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-container": "#ecc700",
+                        "outline-variant": "#bacac6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "xl": "64px",
+                        "md": "24px",
+                        "gutter": "20px",
+                        "base": "8px",
+                        "lg": "40px",
+                        "margin": "24px",
+                        "sm": "12px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Plus Jakarta Sans"],
+                        "h3-subhead": ["Epilogue"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "label-caps": ["Plus Jakarta Sans"],
+                        "h2-headline": ["Epilogue"],
+                        "h1-display": ["Epilogue"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "h3-subhead": ["24px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "500" }],
+                        "label-caps": ["14px", { "lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "h2-headline": ["32px", { "lineHeight": "1.2", "fontWeight": "800" }],
+                        "h1-display": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "900" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background antialiased overflow-x-hidden selection:bg-primary-container selection:text-on-surface">
+<!-- TopNavBar Component -->
+<header class="bg-surface docked full-width top-0 border-b-4 border-on-surface shadow-[4px_4px_0px_0px_rgba(29,29,3,1)] z-50 sticky">
+<div class="flex justify-between items-center w-full px-margin py-sm max-w-7xl mx-auto">
+<!-- Brand Logo -->
+<a class="font-h2-headline text-h2-headline font-black text-primary italic tracking-tighter" href="#">
+                RETRO BITES
+            </a>
+<!-- Desktop Navigation -->
+<nav class="hidden md:flex items-center gap-margin">
+<a class="text-primary border-b-4 border-primary pb-1 font-bold font-h3-subhead text-h3-subhead" href="#">Home</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors font-h3-subhead text-h3-subhead" href="#">Menu</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors font-h3-subhead text-h3-subhead" href="#">About Us</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors font-h3-subhead text-h3-subhead" href="#">Locations</a>
+</nav>
+<!-- Trailing Actions -->
+<div class="flex items-center gap-sm">
+<!-- Icon Action -->
+<button class="p-2 border-[3px] border-on-surface rounded-full shadow-[4px_4px_0px_0px_#1d1d03] hover:translate-y-0.5 hover:translate-x-0.5 hover:shadow-none transition-all bg-surface-container-lowest text-on-surface flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">shopping_cart</span>
+</button>
+<!-- Primary Action -->
+<button class="hidden md:block rounded-full border-[3px] border-on-surface shadow-[4px_4px_0px_0px_#1d1d03] hover:translate-x-1 hover:translate-y-1 hover:shadow-none hover:shadow-[0_0_20px_#fed4c8] transition-all bg-secondary-container text-on-surface font-label-caps text-label-caps px-md py-sm">
+                    Order Now
+                </button>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="w-full relative">
+<!-- Hero Section -->
+<section class="w-full max-w-7xl mx-auto px-margin py-xl md:py-[120px] flex flex-col md:flex-row items-center gap-xl relative z-10">
+<!-- Text Content -->
+<div class="flex-1 flex flex-col gap-md z-20">
+<div class="inline-block px-sm py-xs bg-primary-container border-2 border-on-surface rounded-full shadow-[2px_2px_0px_0px_#1d1d03] self-start transform -rotate-2">
+<span class="font-label-caps text-label-caps text-on-surface uppercase">Est. 1954</span>
+</div>
+<h1 class="font-h1-display text-h1-display md:text-[80px] md:leading-[1] text-on-surface uppercase drop-shadow-[4px_4px_0px_#006a62]">
+                    Bite Into<br/>The <span class="text-secondary-container drop-shadow-[4px_4px_0px_#1d1d03] relative inline-block"><span class="absolute inset-0 blur-[20px] bg-secondary-container opacity-50"></span>Future</span>
+</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-md">
+                    Experience the ultimate collision of 1950s diner nostalgia and hyper-modern flavor profiles. Fresh, bold, and heavily outlined for your pleasure.
+                </p>
+<div class="flex gap-sm pt-base">
+<button class="rounded-full border-[3px] border-on-surface shadow-[6px_6px_0px_0px_#1d1d03] hover:translate-x-1.5 hover:translate-y-1.5 hover:shadow-none hover:shadow-[0_0_30px_#40e0d0] transition-all bg-primary text-on-primary font-label-caps text-label-caps px-xl py-sm uppercase tracking-widest text-lg">
+                        View Menu
+                    </button>
+</div>
+</div>
+<!-- Giant Neon Burger Graphic -->
+<div class="flex-1 relative flex justify-center items-center h-[500px] w-full">
+<!-- Decorative backdrop element -->
+<div class="absolute inset-0 bg-primary-container rounded-full blur-[100px] opacity-30 z-0"></div>
+<!-- Main Image -->
+<div class="relative z-10 w-full h-full max-w-[500px] bg-center bg-no-repeat bg-contain shadow-[0_0_40px_rgba(254,212,200,0.8)] border-4 border-on-surface rounded-full overflow-hidden hover:scale-105 transition-transform duration-500" data-alt="A highly stylized, pop-art illustration of a massive, mouth-watering hamburger floating in a retro-futuristic void. The burger features impossibly vibrant colors: bright yellow cheese, shocking green lettuce, and a glossy pastel pink bun. Every element is defined by a thick, hand-drawn style dark outline, giving it a tactile 'sticker' quality. The lighting is intensely synthetic, emitting a soft but powerful neon pink and turquoise glow against a clean, light cream background, perfectly capturing a modern diner aesthetic designed for high-contrast social media environments." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCpvXgI7ArADBJchGoIDqNpGcBToF1ur_Y1hQqA_GZZUsTxvc49YDtJagh2PN31tRQnbOhjQrpP13aisMI1LnaAOqe4NcP3EOE-EsifT2EdcBvm2aaKdkhnZO59W3DtoAG_EDaqSi-DTevi6BrntQNfXBM-dlwTfWXDss3wiShHJ7U-1tMjjYQgod87HyYbvzb43hk0cBKeCDcJPQKK3J-yQlzY15VDqTAICn9VkCcUgRe7wNBNJXBOUPCKeSRNQ-ntF7oRNph2yBM');">
+</div>
+<!-- Floating Sticker -->
+<div class="absolute top-10 right-10 z-20 w-24 h-24 bg-tertiary-fixed rounded-full border-[3px] border-on-surface shadow-[4px_4px_0px_0px_#1d1d03] flex items-center justify-center transform rotate-12">
+<span class="font-h3-subhead text-h3-subhead text-on-surface text-center leading-none">100%<br/>RAD</span>
+</div>
+</div>
+</section>
+<!-- Static Ticker Tape (No Animation) -->
+<section class="w-full border-y-4 border-on-surface bg-surface-container-high py-sm overflow-hidden flex whitespace-nowrap [background-image:linear-gradient(45deg,#006a62_25%,transparent_25%,transparent_75%,#006a62_75%,#006a62),linear-gradient(45deg,#006a62_25%,#eceabe_25%,#eceabe_75%,#006a62_75%,#006a62)] [background-size:16px_16px] relative">
+<div class="bg-surface-container-high py-xs px-margin border-y-2 border-on-surface w-full shadow-[0_0_15px_rgba(64,224,208,0.4)]">
+<p class="font-label-caps text-label-caps text-on-surface uppercase tracking-widest flex gap-lg justify-center">
+<span>✨ Always Fresh</span>
+<span class="hidden md:inline">✨ 100% Beef</span>
+<span class="hidden lg:inline">✨ Neon Vibes</span>
+<span>✨ Diner Classics</span>
+<span class="hidden md:inline">✨ Milkshake Magic</span>
+<span class="hidden lg:inline">✨ Always Fresh</span>
+</p>
+</div>
+</section>
+<!-- Best Sellers Section (Bento Grid Style) -->
+<section class="w-full max-w-7xl mx-auto px-margin py-xl relative z-10">
+<div class="flex justify-between items-end mb-lg">
+<h2 class="font-h2-headline text-h2-headline text-on-surface uppercase drop-shadow-[3px_3px_0px_#40e0d0]">
+                    Diner<br/>Favorites
+                </h2>
+<a class="font-label-caps text-label-caps text-primary border-b-2 border-primary hover:text-on-surface transition-colors uppercase" href="#">See All</a>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-lg">
+<!-- Product Card 1 -->
+<div class="bg-surface-container-lowest border-[3px] border-on-surface rounded-xl flex flex-col shadow-[8px_8px_0px_0px_#1d1d03] relative group hover:-translate-y-1 transition-transform">
+<!-- Image Area -->
+<div class="h-64 border-b-[3px] border-on-surface rounded-t-lg overflow-hidden relative bg-secondary-container">
+<div class="absolute inset-0 bg-center bg-cover bg-no-repeat group-hover:scale-105 transition-transform duration-300" data-alt="A vivid, high-contrast pop-art photograph of a classic diner cheeseburger resting on a checkerboard paper wrapper. The burger sits against a flat pastel pink background. The image has a hyper-real, almost plastic quality with deep, thick shadows and a subtle turquoise ambient rim light. The cheese looks perfectly melted, and the sesame seeds on the bun are sharply defined, embodying a polished, modern retro aesthetic." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCqD8Kr2kg2-zXlc0v1catFYJCznWXjQCuXdbtFy1t0HI6yU9ZLALC4JkrP3jrOZwd6Wb4rW7q_HQSONRpLIkJ54kItAdwbz-wOgq_L3AO_CLe9wJoy-LOYQ1lbzoSBEuVbJDd9U1BGabXtczU2hC-tOoDrsXfwGmneNqUblJCabsdMReza74atAiev_47RD2hjmpCd_6Jrk9IpMFNIre4uwLB81vWYcHCK7koJmgWX6Fg1h6kVdGVJOAOPf9BIt7QvrlNjvNxA1hM');">
+</div>
+<!-- Sticker -->
+<div class="absolute top-4 left-4 bg-tertiary-container text-on-tertiary-container border-2 border-on-surface rounded-full px-sm py-xs transform -rotate-12 shadow-[2px_2px_0px_0px_#1d1d03]">
+<span class="font-label-caps text-label-caps uppercase">#1 Pick</span>
+</div>
+</div>
+<!-- Content -->
+<div class="p-margin flex-1 flex flex-col justify-between bg-surface">
+<div>
+<h3 class="font-h3-subhead text-h3-subhead text-on-surface mb-xs">The Atomic Smash</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Double patty, melted American, neon relish, brioche bun.</p>
+</div>
+<div class="mt-md flex justify-between items-center">
+<span class="font-h3-subhead text-h3-subhead text-primary">$12.50</span>
+<button class="w-10 h-10 rounded-full border-2 border-on-surface bg-primary-container flex items-center justify-center shadow-[2px_2px_0px_0px_#1d1d03] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all text-on-surface">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</div>
+<!-- License Plate Detail -->
+<div class="w-full bg-primary-fixed border-t-[3px] border-on-surface rounded-b-lg py-xs flex justify-center items-center shadow-[inset_0_2px_0_rgba(255,255,255,0.3)]">
+<span class="font-label-caps text-[12px] text-on-primary-fixed uppercase tracking-[0.2em]">ITEM-001-ATMC</span>
+</div>
+</div>
+<!-- Product Card 2 -->
+<div class="bg-surface-container-lowest border-[3px] border-on-surface rounded-xl flex flex-col shadow-[8px_8px_0px_0px_#1d1d03] relative group hover:-translate-y-1 transition-transform">
+<div class="h-64 border-b-[3px] border-on-surface rounded-t-lg overflow-hidden relative bg-primary-container">
+<div class="absolute inset-0 bg-center bg-cover bg-no-repeat group-hover:scale-105 transition-transform duration-300" data-alt="A tall, vintage-style fluted glass filled with a bright pink strawberry milkshake, overflowing with impossibly fluffy whipped cream and a single, unnaturally bright red cherry on top. The glass sits on a turquoise surface against a light cream background. The scene is illuminated with a harsh, high-contrast flash aesthetic typical of modern pop-art, emphasizing thick black outlines around the glass and creating a vibrant, glowing 1950s Americana vibe." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDUIDvSu9P_F336GZgOBarxau2t95fciHPCqqNyDkloZHymYkVRpCQOYztBKF7eHzmkJGHVlFkM9wTpnKVFGs33hJ3ZVRuNpoxs_LiyhTFhHnCl7XAhPgD8s3ED5LfgIKz0yk_-3CUXpA6U7KXBcX-KHcA4HyFPK1G3gmjtj-4Jm-Trrnd7nToehzEEo6A1LSbm9FoRaGgmYydzyeP92v4YZGdHLOU0iPYTxRk1HQlrjtJEMM44DaHTpDEOVZ_8lSjDrEQhCxxgTY0');">
+</div>
+</div>
+<div class="p-margin flex-1 flex flex-col justify-between bg-surface">
+<div>
+<h3 class="font-h3-subhead text-h3-subhead text-on-surface mb-xs">Pink Cadillac Shake</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Strawberry blast with a cloud of whipped cream and a neon cherry.</p>
+</div>
+<div class="mt-md flex justify-between items-center">
+<span class="font-h3-subhead text-h3-subhead text-primary">$6.00</span>
+<button class="w-10 h-10 rounded-full border-2 border-on-surface bg-primary-container flex items-center justify-center shadow-[2px_2px_0px_0px_#1d1d03] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all text-on-surface">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</div>
+<div class="w-full bg-secondary-container border-t-[3px] border-on-surface rounded-b-lg py-xs flex justify-center items-center shadow-[inset_0_2px_0_rgba(255,255,255,0.3)]">
+<span class="font-label-caps text-[12px] text-on-surface uppercase tracking-[0.2em]">ITEM-002-PNK</span>
+</div>
+</div>
+<!-- Product Card 3 (Asymmetric layout hint) -->
+<div class="bg-surface-container-lowest border-[3px] border-on-surface rounded-xl flex flex-col shadow-[8px_8px_0px_0px_#1d1d03] relative group hover:-translate-y-1 transition-transform lg:col-span-1 md:col-span-2">
+<div class="h-64 border-b-[3px] border-on-surface rounded-t-lg overflow-hidden relative bg-surface-dim">
+<div class="absolute inset-0 bg-center bg-cover bg-no-repeat group-hover:scale-105 transition-transform duration-300" data-alt="A stylized cardboard boat overflowing with golden crinkle-cut french fries. The fries are perfectly uniform and seemingly emit a warm, golden aura. The container sits against a soft yellow 'surface-dim' background. Thick, comic-book style dark outlines trace the edges of the fries and the container, separating the elements sharply from the background and reinforcing the graphic, premium digital diner aesthetic." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCvpbVIHk8lruOoQRo7bBdh1sDTuZFDNfO6GCGw0e4Wvx3SQfma32tC_YyGv6_LiUzWZl4nxrpXYXtcnY8AgUMHWp75DdrrRfmXxV-jOz943SWn9XsRALxjTHQZkJby3LjiKOmiwdRUE6pvauEaL_panqR0dJ_w18wr4mDhBp9_C7mrBPOIqiwC2eJlMZb-jlV2aPhkJvJIEGH6BTerW2RtbIpuT8bq44YM6Vv7ckgqu5Qu8jchXuXjce9BgUkp6JznUmhY3R-lTXc');">
+</div>
+<div class="absolute bottom-4 right-4 bg-error-container text-on-error-container border-2 border-on-surface rounded-full px-sm py-xs transform rotate-6 shadow-[2px_2px_0px_0px_#1d1d03]">
+<span class="font-label-caps text-label-caps uppercase">Hot!</span>
+</div>
+</div>
+<div class="p-margin flex-1 flex flex-col justify-between bg-surface">
+<div>
+<h3 class="font-h3-subhead text-h3-subhead text-on-surface mb-xs">Crinkle Cut Chaos</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Crispy on the outside, fluffy on the inside. Served with our secret neon sauce.</p>
+</div>
+<div class="mt-md flex justify-between items-center">
+<span class="font-h3-subhead text-h3-subhead text-primary">$4.50</span>
+<button class="w-10 h-10 rounded-full border-2 border-on-surface bg-primary-container flex items-center justify-center shadow-[2px_2px_0px_0px_#1d1d03] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all text-on-surface">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</div>
+<div class="w-full bg-tertiary-fixed border-t-[3px] border-on-surface rounded-b-lg py-xs flex justify-center items-center shadow-[inset_0_2px_0_rgba(255,255,255,0.3)]">
+<span class="font-label-caps text-[12px] text-on-tertiary-fixed uppercase tracking-[0.2em]">ITEM-003-FRY</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Order Online Banner (Checkerboard Intensive) -->
+<section class="w-full my-xl border-y-[8px] border-on-surface relative py-[80px] px-margin [background-image:linear-gradient(45deg,#006a62_25%,transparent_25%,transparent_75%,#006a62_75%,#006a62),linear-gradient(45deg,#006a62_25%,#fefccf_25%,#fefccf_75%,#006a62_75%,#006a62)] [background-size:32px_32px]">
+<div class="absolute inset-0 bg-surface/80 backdrop-blur-sm"></div> <!-- Overlay to make text readable -->
+<div class="relative z-10 max-w-4xl mx-auto bg-secondary-container border-[4px] border-on-surface rounded-2xl p-xl shadow-[12px_12px_0px_0px_#1d1d03] flex flex-col md:flex-row items-center justify-between gap-lg">
+<div class="flex-1">
+<h2 class="font-h1-display text-h1-display text-on-surface uppercase mb-sm drop-shadow-[2px_2px_0px_#ffffff]">Skip The Line</h2>
+<p class="font-body-lg text-body-lg text-on-secondary-container mb-md">
+                        Get your retro fix faster. Order online and pick up at the counter. The future is now, and it tastes delicious.
+                    </p>
+</div>
+<div>
+<button class="rounded-full border-[3px] border-on-surface shadow-[6px_6px_0px_0px_#1d1d03] hover:translate-x-1.5 hover:translate-y-1.5 hover:shadow-none hover:shadow-[0_0_30px_#ffffff] transition-all bg-surface text-on-surface font-h3-subhead text-h3-subhead px-xl py-md uppercase flex items-center gap-sm">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">electric_bolt</span>
+                        Start Order
+                    </button>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer Component -->
+<footer class="bg-surface-container-highest full-width relative pt-xl border-t-8 border-repeat [background-image:linear-gradient(45deg,#006a62_25%,transparent_25%,transparent_75%,#006a62_75%,#006a62),linear-gradient(45deg,#006a62_25%,#fefccf_25%,#fefccf_75%,#006a62_75%,#006a62)] [background-size:16px_16px] flat z-10">
+<div class="bg-surface-container-highest border-t-4 border-on-surface flex flex-col md:flex-row justify-between items-center w-full px-margin py-lg mt-sm shadow-[0_-10px_20px_rgba(64,224,208,0.1)] relative">
+<!-- Brand Logo -->
+<div class="font-h3-subhead text-h3-subhead font-bold text-on-surface mb-md md:mb-0">
+                RETRO BITES
+            </div>
+<!-- Links -->
+<div class="flex flex-wrap justify-center gap-margin mb-md md:mb-0">
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface hover:text-primary transition-colors" href="#">Careers</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface hover:text-primary transition-colors" href="#">Press Kit</a>
+</div>
+<!-- Copyright Text -->
+<div class="font-body-md text-body-md text-on-surface text-center md:text-right">
+                © 1954 RETRO BITES DINER - FROM LEER WITH LOVE
+            </div>
+</div>
+</footer>
+</body></html>

@@ -4,6 +4,8 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { getGoogleReviewsNormalized } from "./googleReviews";
 import { loadEnvLocal } from "./loadEnvLocal";
+import { handleCreateCheckout, handleSumUpWebhook, handleVerifyCheckout } from "./sumupHelpers";
+import { handleCreatePosOrder } from "./posHelpers";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -12,6 +14,15 @@ async function startServer() {
   loadEnvLocal();
   const app = express();
   const server = createServer(app);
+
+  app.use(express.json());
+
+  // ── SumUp routes ──────────────────────────────────────────────────────────
+  app.post("/api/create-sandbox-checkout", handleCreateCheckout);
+  app.post("/api/webhooks/sumup", handleSumUpWebhook);
+  app.get("/api/verify-checkout/:checkoutId", handleVerifyCheckout);
+  app.post("/api/create-pos-order", handleCreatePosOrder);
+  // ─────────────────────────────────────────────────────────────────────────
 
   app.get("/api/google-reviews", async (_req, res) => {
     const result = await getGoogleReviewsNormalized();

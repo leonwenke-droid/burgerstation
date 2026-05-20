@@ -47,16 +47,18 @@ function formatNumberDE(n: number) {
 }
 
 function selectReviews(reviews: GoogleReview[]) {
-  const max = googleReviewsConfig.maxDisplayedReviews;
-  const minRating = googleReviewsConfig.minimumRating;
-  const preferNames = googleReviewsConfig.preferredAuthorNames.map((s) => s.toLowerCase());
-  const preferSnippets = googleReviewsConfig.preferredTextSnippets.map((s) => s.toLowerCase());
+  const max              = googleReviewsConfig.maxDisplayedReviews;
+  const minRating        = googleReviewsConfig.minimumRating;
+  const minFallbackCount = googleReviewsConfig.minimumFallbackCount;
+  const preferNames      = googleReviewsConfig.preferredAuthorNames.map((s) => s.toLowerCase());
+  const preferSnippets   = googleReviewsConfig.preferredTextSnippets.map((s) => s.toLowerCase());
 
+  // Score reviews by preferred author / snippet matches
   const scored = reviews.map((r) => {
-    const name = r.authorName.toLowerCase();
-    const text = r.text.toLowerCase();
-    const nameMatch = preferNames.some((p) => p && name.includes(p));
-    const snippetMatch = preferSnippets.some((p) => p && text.includes(p));
+    const name          = r.authorName.toLowerCase();
+    const text          = r.text.toLowerCase();
+    const nameMatch     = preferNames.some((p) => p && name.includes(p));
+    const snippetMatch  = preferSnippets.some((p) => p && text.includes(p));
     const preferredScore = (nameMatch ? 2 : 0) + (snippetMatch ? 1 : 0);
     return { r, preferredScore };
   });
@@ -67,19 +69,26 @@ function selectReviews(reviews: GoogleReview[]) {
     .map((x) => x.r);
 
   const returnedOrder = reviews.slice();
+  const baseOrder     = preferred.length > 0
+    ? [...preferred, ...returnedOrder.filter((r) => !preferred.includes(r))]
+    : returnedOrder;
 
-  const baseOrder =
-    preferred.length > 0
-      ? [...preferred, ...returnedOrder.filter((r) => !preferred.includes(r))]
-      : googleReviewsConfig.fallbackToReturnedOrder
-        ? returnedOrder
-        : returnedOrder;
-
-  // Filter low ratings unless we'd drop below 3 reviews.
+  // Hard filter: rating >= minimumRating — no fallback to lower-rated reviews.
+  // Low-rated reviews are NEVER shown, even if this leaves fewer cards.
   const filtered = baseOrder.filter((r) => r.rating >= minRating);
-  const finalList = (filtered.length >= 3 ? filtered : baseOrder).slice(0, max);
 
-  return finalList;
+  // If live results are sparse, pad with static fallback reviews (4–5 ★ only).
+  // To add fallback cards, fill `fallbackReviews` in src/config/googleReviews.ts.
+  const liveIds   = new Set(filtered.map((r) => r.id));
+  const fallbacks = (googleReviewsConfig.fallbackReviews as GoogleReview[]).filter(
+    (r) => !liveIds.has(r.id) && r.rating >= minRating,
+  );
+  const padded =
+    filtered.length < minFallbackCount
+      ? [...filtered, ...fallbacks].slice(0, max)
+      : filtered.slice(0, max);
+
+  return padded;
 }
 
 function StarsRow({ rating }: { rating: number }) {

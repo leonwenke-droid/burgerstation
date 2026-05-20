@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Retro Bites Menu</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,700;0,800;0,900;1,900&amp;family=Plus+Jakarta+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-lowest": "#ffffff",
+                        "surface": "#fefccf",
+                        "surface-container-high": "#eceabe",
+                        "primary-fixed": "#61f9e9",
+                        "primary": "#006a62",
+                        "primary-container": "#40e0d0",
+                        "primary-fixed-dim": "#3adccc",
+                        "on-surface-variant": "#3c4a47",
+                        "error-container": "#ffdad6",
+                        "inverse-primary": "#3adccc",
+                        "inverse-surface": "#323214",
+                        "on-secondary-fixed-variant": "#5d4037",
+                        "background": "#fefccf",
+                        "tertiary-fixed-dim": "#e9c400",
+                        "surface-container-highest": "#e6e5b9",
+                        "surface-dim": "#dedcb1",
+                        "on-secondary-container": "#795950",
+                        "surface-bright": "#fefccf",
+                        "surface-container-low": "#f8f6c9",
+                        "on-surface": "#1d1d03",
+                        "on-background": "#1d1d03",
+                        "inverse-on-surface": "#f5f3c7",
+                        "surface-tint": "#006a62",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#544600",
+                        "on-secondary": "#ffffff",
+                        "tertiary-fixed": "#ffe16d",
+                        "on-tertiary-fixed": "#221b00",
+                        "secondary-fixed": "#ffdbd0",
+                        "on-tertiary-container": "#645300",
+                        "secondary-fixed-dim": "#e6beb2",
+                        "surface-variant": "#e6e5b9",
+                        "on-error-container": "#93000a",
+                        "on-primary-fixed": "#00201d",
+                        "on-primary-fixed-variant": "#005049",
+                        "secondary-container": "#fed4c8",
+                        "on-error": "#ffffff",
+                        "on-primary-container": "#006058",
+                        "tertiary": "#705d00",
+                        "secondary": "#76574e",
+                        "on-secondary-fixed": "#2c160f",
+                        "surface-container": "#f2f0c4",
+                        "error": "#ba1a1a",
+                        "outline": "#6b7a77",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-container": "#ecc700",
+                        "outline-variant": "#bacac6",
+                        "brand-outline": "#2D2926",
+                        "brand-neon-pink": "#FF1493",
+                        "brand-neon-blue": "#00FFFF"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "xl": "64px",
+                        "md": "24px",
+                        "gutter": "20px",
+                        "base": "8px",
+                        "lg": "40px",
+                        "margin": "24px",
+                        "sm": "12px"
+                    },
+                    "fontFamily": {
+                        "body-md": [
+                            "Plus Jakarta Sans"
+                        ],
+                        "h3-subhead": [
+                            "Epilogue"
+                        ],
+                        "body-lg": [
+                            "Plus Jakarta Sans"
+                        ],
+                        "label-caps": [
+                            "Plus Jakarta Sans"
+                        ],
+                        "h2-headline": [
+                            "Epilogue"
+                        ],
+                        "h1-display": [
+                            "Epilogue"
+                        ]
+                    },
+                    "fontSize": {
+                        "body-md": [
+                            "16px",
+                            {
+                                "lineHeight": "1.6",
+                                "fontWeight": "400"
+                            }
+                        ],
+                        "h3-subhead": [
+                            "24px",
+                            {
+                                "lineHeight": "1.2",
+                                "fontWeight": "700"
+                            }
+                        ],
+                        "body-lg": [
+                            "18px",
+                            {
+                                "lineHeight": "1.6",
+                                "fontWeight": "500"
+                            }
+                        ],
+                        "label-caps": [
+                            "14px",
+                            {
+                                "lineHeight": "1",
+                                "letterSpacing": "0.05em",
+                                "fontWeight": "700"
+                            }
+                        ],
+                        "h2-headline": [
+                            "32px",
+                            {
+                                "lineHeight": "1.2",
+                                "fontWeight": "800"
+                            }
+                        ],
+                        "h1-display": [
+                            "48px",
+                            {
+                                "lineHeight": "1.1",
+                                "letterSpacing": "-0.04em",
+                                "fontWeight": "900"
+                            }
+                        ]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .checkerboard-strip {
+            background-image: linear-gradient(45deg, #006a62 25%, transparent 25%, transparent 75%, #006a62 75%, #006a62), 
+                              linear-gradient(45deg, #006a62 25%, #fefccf 25%, #fefccf 75%, #006a62 75%, #006a62);
+            background-size: 16px 16px;
+            background-position: 0 0, 8px 8px;
+        }
+        .pop-shadow {
+            box-shadow: 4px 4px 0px 0px #2D2926;
+        }
+        .pop-shadow-lg {
+            box-shadow: 8px 8px 0px 0px #2D2926;
+        }
+        .neon-glow-pink {
+            box-shadow: 0 0 20px 0px #FF1493;
+        }
+        .neon-glow-blue {
+            box-shadow: 0 0 20px 0px #00FFFF;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background antialiased min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<nav class="bg-surface dark:bg-inverse-surface text-primary dark:text-primary-fixed font-h3-subhead text-h3-subhead docked full-width top-0 border-b-4 border-on-surface border-b-4 border-on-surface shadow-[4px_4px_0px_0px_rgba(29,29,3,1)] shadow-[0px_0px_20px_rgba(64,224,208,0.5)] flex justify-between items-center w-full px-margin py-sm max-w-7xl mx-auto z-50">
+<div class="flex items-center gap-margin">
+<a class="font-h2-headline text-h2-headline font-black text-primary italic tracking-tighter" href="#">RETRO BITES</a>
+</div>
+<div class="hidden md:flex gap-margin">
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors" href="#">Home</a>
+<a class="text-primary border-b-4 border-primary pb-1 font-bold" href="#">Menu</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors" href="#">About Us</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors" href="#">Locations</a>
+</div>
+<div class="flex items-center gap-margin">
+<button class="hidden md:block bg-primary text-on-primary font-label-caps text-label-caps px-md py-sm rounded-full border-[3px] border-[#2D2926] pop-shadow hover:translate-y-0.5 hover:translate-x-0.5 hover:shadow-none hover:neon-glow-pink transition-all">Order Now</button>
+<button aria-label="shopping_cart" class="text-primary hover:text-primary-fixed-dim transition-colors">
+<span class="material-symbols-outlined" style="font-size: 32px;">shopping_cart</span>
+</button>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-grow w-full max-w-7xl mx-auto px-margin py-xl flex flex-col gap-xl">
+<!-- Header Section -->
+<header class="text-center mb-lg relative">
+<h1 class="font-h1-display text-h1-display text-primary mb-sm relative inline-block">
+                THE MENU
+                <div class="absolute -top-4 -right-8 bg-tertiary-fixed text-on-tertiary-fixed font-label-caps text-label-caps px-sm py-xs rounded-full border-2 border-[#2D2926] rotate-12 pop-shadow">FRESH!</div>
+</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto">Diner classics redefined. High-fidelity flavor, strictly retro vibes.</p>
+</header>
+<!-- Category: Big Burgers -->
+<section class="flex flex-col gap-lg">
+<div class="flex items-center gap-sm">
+<h2 class="font-h2-headline text-h2-headline text-on-surface bg-primary-container px-sm py-xs border-2 border-[#2D2926] pop-shadow inline-block">Big Burgers</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-lg">
+<!-- Burger Card 1 -->
+<div class="bg-surface border-2 border-[#2D2926] rounded-xl overflow-visible relative flex flex-col pop-shadow group hover:translate-y-[-4px] transition-transform duration-300">
+<div class="absolute -top-4 -right-4 bg-brand-neon-pink text-white font-label-caps text-label-caps w-16 h-16 rounded-full flex items-center justify-center border-2 border-[#2D2926] rotate-12 z-10 pop-shadow">100%<br/>BEEF</div>
+<div class="h-48 w-full border-b-2 border-[#2D2926] overflow-hidden bg-surface-container-high">
+<img alt="Classic Cheeseburger" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A highly detailed, vibrant retro-pop-art style illustration of a massive, juicy double cheeseburger. The burger features melted neon-yellow cheese dripping over thick, charred beef patties, nestled between glossy, sesame-seed buns. The scene is brightly lit with high-contrast, bold shadows. The background is a stark, solid pastel cream color. The overall aesthetic is energetic, nostalgic 1950s Americana infused with a modern, high-fidelity digital gloss, emphasizing rich textures and appetizing colors." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBIYfmCxqQPiQYcDXy9sLD1oZXcwNkUAMYVjc6_RXAUANPAInSM6OESdsaAYvMDtyt19jmJC92aGXKGL6CzpRIfSO4oyxWkRF8I4nH6DfxW45NWP2IaAErzaddxveDrTT1O2JMyNVI8jf7UCvk71j9J2vSthgo-rGubuUQCsxcCTOSw7wDeQGKo2sa61y9HUNrPh3tRCkM2d9fJUlq9qjUeMy5JDQeXq9AwVbfZqppB_RngIaZz-NKvV9A_qjfLquoau-Tkl18n7R8"/>
+</div>
+<div class="p-md flex-grow flex flex-col gap-sm">
+<h3 class="font-h3-subhead text-h3-subhead text-on-surface">The Cadillac</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Double patty, triple cheese, secret sauce, crispy onions on a toasted brioche bun.</p>
+</div>
+<div class="flex justify-center -mb-4 z-10">
+<div class="bg-primary-container border-2 border-[#2D2926] px-md py-xs rounded-sm pop-shadow">
+<span class="font-body-md text-body-md font-bold text-on-surface tracking-widest">$12.99</span>
+</div>
+</div>
+</div>
+<!-- Burger Card 2 -->
+<div class="bg-surface border-2 border-[#2D2926] rounded-xl overflow-visible relative flex flex-col pop-shadow group hover:translate-y-[-4px] transition-transform duration-300">
+<div class="h-48 w-full border-b-2 border-[#2D2926] overflow-hidden bg-surface-container-high">
+<img alt="Spicy Burger" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A dynamic, high-contrast digital illustration of a spicy chicken sandwich. The sandwich boasts a thick, crispy, golden-fried chicken breast, bright red jalapeño slices, and a generous dollop of spicy orange mayo, all enclosed in a buttery bun. The lighting is dramatic, casting deep, hard-edged shadows against a flat pastel cream background. The style is a modern, high-fidelity take on retro diner art, with bold outlines and vibrant, appetizing colors designed for a premium fast-food aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAwIH5yODezH29e3YtrdueYb9KBjD22sT2M8r1zxRJsZEEcT2EzPPJuV9Wyy69VmNpZQLEqec79d_HHwEK2x_eVuDjS6isKlhH7rTUQg9hiql81WBxetTKue1Vch-3yzLqlZiynBHf03u3xaiS4K7cmJL0BdTxnX0g7rM_hMrpvrQnZlJvZi_rerDCzPvIVJGCOpTze_OUmFxly-xsFnwL60-_m7I7vgqmDLLVTLl09CKlnRMdls-1ujPhdn8yhxEUvhB9oES-vzR4"/>
+</div>
+<div class="p-md flex-grow flex flex-col gap-sm">
+<h3 class="font-h3-subhead text-h3-subhead text-on-surface">Atomic Chicken</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Crispy fried chicken breast, ghost pepper jack, atomic slaw, pickles.</p>
+</div>
+<div class="flex justify-center -mb-4 z-10">
+<div class="bg-primary-container border-2 border-[#2D2926] px-md py-xs rounded-sm pop-shadow">
+<span class="font-body-md text-body-md font-bold text-on-surface tracking-widest">$11.50</span>
+</div>
+</div>
+</div>
+<!-- Burger Card 3 -->
+<div class="bg-surface border-2 border-[#2D2926] rounded-xl overflow-visible relative flex flex-col pop-shadow group hover:translate-y-[-4px] transition-transform duration-300">
+<div class="absolute -top-4 -right-4 bg-tertiary-fixed text-on-tertiary-fixed font-label-caps text-label-caps w-16 h-16 rounded-full flex items-center justify-center border-2 border-[#2D2926] -rotate-12 z-10 pop-shadow">VEGAN</div>
+<div class="h-48 w-full border-b-2 border-[#2D2926] overflow-hidden bg-surface-container-high">
+<img alt="Veggie Burger" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A stylized, vibrant digital rendering of a premium veggie burger. The patty looks hearty and textured, topped with crisp green lettuce, bright red tomato slices, and a vibrant green avocado smash. The bun is perfectly round and toasted. The scene is illuminated with a hard, artificial studio light, creating sharp, dark shadows that give a 2D-sticker pop effect against a solid cream background. The aesthetic combines mid-century diner graphics with ultra-modern, high-resolution rendering." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBe92DFIAUuhgKQAOTiyvkM9z1jfKUqXYasCl8l0qYpfQAfT6VNtpwNBO5Qbt_WS17DKiMfEMZL-TBOjTjZVhviKudopmbvt3SfGBD4eqC-bWEC_akM38rAy4V_Q1wCPzt4swhM-b2R1LojHA9lTu-ZDboioj1HALmts7Qj4GsGy2mqBkw7gqxJkoLOm93KcCyKOPUoBFrNk6K2my_E04bcsXg0tjKM1TAvaX45kqAg3rd0YixfpXP8XN-nHXlGyahaL8f4QpLg8iA"/>
+</div>
+<div class="p-md flex-grow flex flex-col gap-sm">
+<h3 class="font-h3-subhead text-h3-subhead text-on-surface">The Green Machine</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Plant-based patty, avocado smash, crisp lettuce, tomato, vegan mayo.</p>
+</div>
+<div class="flex justify-center -mb-4 z-10">
+<div class="bg-primary-container border-2 border-[#2D2926] px-md py-xs rounded-sm pop-shadow">
+<span class="font-body-md text-body-md font-bold text-on-surface tracking-widest">$13.00</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Divider -->
+<div class="h-4 w-full checkerboard-strip my-md border-y-2 border-[#2D2926]"></div>
+<!-- Category: Crispy Fries -->
+<section class="flex flex-col gap-lg">
+<div class="flex items-center gap-sm">
+<h2 class="font-h2-headline text-h2-headline text-on-surface bg-tertiary-fixed px-sm py-xs border-2 border-[#2D2926] pop-shadow inline-block">Crispy Fries</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-lg">
+<!-- Fries Card 1 -->
+<div class="bg-surface border-2 border-[#2D2926] rounded-xl overflow-visible relative flex flex-row items-center p-md pop-shadow gap-md group hover:translate-y-[-4px] transition-transform duration-300">
+<div class="h-32 w-32 border-2 border-[#2D2926] rounded-lg overflow-hidden bg-surface-container-high flex-shrink-0">
+<img alt="Classic Fries" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="A close-up, high-contrast illustration of a red and white striped paper basket overflowing with perfectly golden, crinkle-cut french fries. The fries look crispy on the outside and fluffy on the inside. The lighting is intense, creating sharp, dark outlines around the fries, giving them a pop-art sticker quality. The background is a smooth, solid cream color. The mood is nostalgic diner food presented with high-fidelity digital crispness." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDMdqcSyFV0IppqtgncIYOwd7O_tjMnZXoI8b1eDS986kXTS7UXOH64nrGrcNjt9aI3gN5JW66VZyuRLPW9oY8y5rsUoDKNNAcShXEj1V3yQJvlXrbGJUTv8Uj_UJUjvzZM6MM0cbYPJnxPBz_54eQIUQ7E7LQTD92gGMGKQWBsonNU6aTNHDfqledYbIvMvWVVnRcaSq3DUKd_HzMlC_Zoumb-Qbm-n7BtaATPf-tswNuuinEhqdUq5Dc65sgYItxSYa2w9e1-Izo"/>
+</div>
+<div class="flex-grow flex flex-col gap-sm">
+<h3 class="font-h3-subhead text-h3-subhead text-on-surface">Crinkle Cut Classic</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-auto">Golden, salty, perfection. Served with our signature dip.</p>
+<div class="self-start mt-2">
+<div class="bg-primary border-2 border-[#2D2926] px-sm py-xs rounded-sm pop-shadow inline-block">
+<span class="font-body-md text-body-md font-bold text-surface tracking-widest">$4.50</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Fries Card 2 -->
+<div class="bg-surface border-2 border-[#2D2926] rounded-xl overflow-visible relative flex flex-row items-center p-md pop-shadow gap-md group hover:translate-y-[-4px] transition-transform duration-300">
+<div class="absolute -top-3 -right-3 bg-brand-neon-pink text-white font-label-caps text-label-caps w-12 h-12 rounded-full flex items-center justify-center border-2 border-[#2D2926] rotate-12 z-10 pop-shadow">HOT</div>
+<div class="h-32 w-32 border-2 border-[#2D2926] rounded-lg overflow-hidden bg-surface-container-high flex-shrink-0">
+<img alt="Loaded Fries" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="A vibrant, stylized digital painting of loaded french fries served in a retro metal basket. The thick-cut fries are smothered in gooey neon-yellow cheese sauce, crispy dark bacon bits, and chopped green scallions. The lighting is stark and dramatic, producing a hard-edged, sticker-like drop shadow against a plain pastel cream background. The overall style is bold, 1950s pop-art meets modern high-resolution food rendering." src="https://lh3.googleusercontent.com/aida-public/AB6AXuABTuZVF9L9_I17G2XHf1mnZ0PQJEt6-B2XFgaZnG2atFTsy75Y0_bb2Wz2BXTLB3gHQzS3JTihRwGyA5wMtSd4h0R9lIqvTmsucSMrwLCE6APil0CuVXTvMoSYNUEL4Go5PdmOXwV8dyJ5ABxn0CQiDWB0z8YR0xKtKyfg2WTMKysZ2FAUFL-YQMHBfsLRTfwLvVMWSpZhc8SgkQ3bP-m1zXAtAlCldSm_ibdx44aHzXVUpuILXk0s0A1Fok5LeCVsaME3avgAsY8"/>
+</div>
+<div class="flex-grow flex flex-col gap-sm">
+<h3 class="font-h3-subhead text-h3-subhead text-on-surface">Loaded Drive-In</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-auto">Smothered in liquid gold cheese, bacon dust, and scallions.</p>
+<div class="self-start mt-2">
+<div class="bg-primary border-2 border-[#2D2926] px-sm py-xs rounded-sm pop-shadow inline-block">
+<span class="font-body-md text-body-md font-bold text-surface tracking-widest">$6.99</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Divider -->
+<div class="h-4 w-full checkerboard-strip my-md border-y-2 border-[#2D2926]"></div>
+<!-- Category: Thick Shakes -->
+<section class="flex flex-col gap-lg pb-xl">
+<div class="flex items-center gap-sm">
+<h2 class="font-h2-headline text-h2-headline text-on-surface bg-brand-neon-blue px-sm py-xs border-2 border-[#2D2926] pop-shadow inline-block">Thick Shakes</h2>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-lg">
+<!-- Shake 1 -->
+<div class="bg-surface border-2 border-[#2D2926] rounded-full p-sm flex flex-col items-center pop-shadow group hover:translate-y-[-4px] transition-transform duration-300 relative pt-12 pb-8">
+<div class="absolute -top-8 w-24 h-24 border-2 border-[#2D2926] rounded-full overflow-hidden bg-surface-container-high z-10 pop-shadow">
+<img alt="Vanilla Shake" class="w-full h-full object-cover" data-alt="A stylized illustration of a classic vanilla milkshake in a tall, fluted glass diner cup. The shake is pure white and topped with a towering swirl of whipped cream and a single, bright red maraschino cherry. A red and white striped paper straw sticks out. The lighting creates a bold, hard drop shadow, emphasizing a 2D-sticker aesthetic against a soft pastel cream background. The mood is nostalgic and vibrant." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDJroTm_vm4iyd360MsmooMvQfrbfWMa7_FCb6j7Cs8FLm9-jWOYGEkKq9zjVK3vUHXgagYeM724nex7HpNGyUfrBT_t6azy5oCaLy5Fx5rFk7QGD0lzV9o-W6vdRtQmidN54Gz1ZodEdkxwXqqWMH8KhVe4XtSfozFjm4kQPRUXmItlCyqheZIHFjMZWWHBQ29XuqAPJE-K2os8ba4hGSZP2TyOBVcJKQ3jpo2GlA60YXgrtkm5LmUuy4ZTuq0C-td-riwqVyhaEA"/>
+</div>
+<h3 class="font-h3-subhead text-h3-subhead text-on-surface text-center mt-6">Vanilla Bean</h3>
+<div class="mt-4 bg-surface-container-highest border-2 border-[#2D2926] px-sm py-xs rounded-full">
+<span class="font-body-md text-body-md font-bold text-on-surface tracking-widest">$5.50</span>
+</div>
+</div>
+<!-- Shake 2 -->
+<div class="bg-surface border-2 border-[#2D2926] rounded-full p-sm flex flex-col items-center pop-shadow group hover:translate-y-[-4px] transition-transform duration-300 relative pt-12 pb-8">
+<div class="absolute -top-8 w-24 h-24 border-2 border-[#2D2926] rounded-full overflow-hidden bg-surface-container-high z-10 pop-shadow">
+<img alt="Chocolate Shake" class="w-full h-full object-cover" data-alt="A stylized digital drawing of a rich chocolate milkshake in a retro diner glass. The shake is a deep, velvety brown, topped generously with whipped cream, chocolate syrup drizzle, and chocolate shavings. A blue and white striped straw is visible. The scene is brightly lit with a hard, thick black outline around the glass, giving it a distinct pop-art sticker look on a pale cream canvas." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAaWnVsCTiktPPTvF7vqcdisu1_O1QFXrTOvaEZPmGhIX4kS8b5FD8hVUcatoprmwYj6XJpXDuegZP8rFeevNpsmkgYWVbjf7rcqyXwQKRQb20l876elJJE0tGLtLVrF5qGqS3aXHbdGkK5tPNu41n82SGktzjbEQ3lbsE5GLAlSbEH3py8D9sH2MeipNeHQK4YNNpPNectC_AJ9QaM1xZEOpf6LI799_xMjkEReKP75hQyDaPpBjF88mOOcWwuwpxvBC5-Y5KdT9o"/>
+</div>
+<h3 class="font-h3-subhead text-h3-subhead text-on-surface text-center mt-6">Double Choc</h3>
+<div class="mt-4 bg-surface-container-highest border-2 border-[#2D2926] px-sm py-xs rounded-full">
+<span class="font-body-md text-body-md font-bold text-on-surface tracking-widest">$6.00</span>
+</div>
+</div>
+<!-- Shake 3 -->
+<div class="bg-surface border-2 border-[#2D2926] rounded-full p-sm flex flex-col items-center pop-shadow group hover:translate-y-[-4px] transition-transform duration-300 relative pt-12 pb-8">
+<div class="absolute -top-8 w-24 h-24 border-2 border-[#2D2926] rounded-full overflow-hidden bg-surface-container-high z-10 pop-shadow">
+<img alt="Strawberry Shake" class="w-full h-full object-cover" data-alt="A vibrant, high-contrast digital illustration of a strawberry milkshake in a tall diner glass. The shake is a bright, artificial pastel pink, crowned with fluffy white whipped cream and a fresh strawberry slice. A thick, dark outline surrounds the illustration, creating a sticker-like pop-art effect. A heavy, hard-edged shadow falls to the bottom right on the solid cream background. The aesthetic is energetic 1950s retro-modern." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAtGEfLLrH0MKAY-deF1O6MOiyDk0bWrQ1zpAU523DTOglLvAa_X7CXzgtK1Oxnx3fQx4cIx448S-4wC5MaEYmb55-qt4exBbPGJgkt2hhAJQ1Em97AoutnKBGYkqnVRxE7s5S4nLP3GD_LtUqD-SZHBsLA51l2MadjzWq3y9aWHZRUPhk--AVZr1zp9TIYOOmPfykQkE7xKJxz43K16K-yIlRxpvt_dFInVVFbf9a7BWl93SgmtHYuQWt8N0QeBsC0zkcXf3KSEB8"/>
+</div>
+<h3 class="font-h3-subhead text-h3-subhead text-on-surface text-center mt-6">Pink Berry</h3>
+<div class="mt-4 bg-surface-container-highest border-2 border-[#2D2926] px-sm py-xs rounded-full">
+<span class="font-body-md text-body-md font-bold text-on-surface tracking-widest">$6.00</span>
+</div>
+</div>
+<!-- Shake 4 -->
+<div class="bg-surface border-2 border-[#2D2926] rounded-full p-sm flex flex-col items-center pop-shadow group hover:translate-y-[-4px] transition-transform duration-300 relative pt-12 pb-8">
+<div class="absolute -top-8 w-24 h-24 border-2 border-[#2D2926] rounded-full overflow-hidden bg-surface-container-high z-10 pop-shadow">
+<img alt="Mint Shake" class="w-full h-full object-cover" data-alt="A high-fidelity retro pop-art illustration of a mint chocolate chip milkshake in a classic fluted glass. The shake is a vibrant, unnatural neon mint green, speckled with dark chocolate chips. It's topped with whipped cream and a sprig of fresh mint. The graphic features a thick dark boundary line and a sharp offset shadow, placed over a plain pastel cream background. The look is tactile, vibrant, and fun." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHpvgTSndCfbq-jAo0DyIapDGZy_KGBK4iGq-umJN4OkX5-wvx2FMra73TteL77eqnju3BDnlI_wfEVNR9ltu7iHk0QC7mlw4idusoIEHu_87eeSSKy1gZ9kSJwOqV0JeultVyI_xMTLtd4Ve_Z1gZVJjt1ofp2_qyefmaxvWCBD_xgIYKxd2DaGeN9-EFGfZLizLvghfF7kPcIHsQkpgKgOEI9NZjlraJfZLHBSZFqQQfoLev95Rmk9QBSurcnB8xq83WVoX5VQs"/>
+</div>
+<h3 class="font-h3-subhead text-h3-subhead text-on-surface text-center mt-6">Neon Mint</h3>
+<div class="mt-4 bg-surface-container-highest border-2 border-[#2D2926] px-sm py-xs rounded-full">
+<span class="font-body-md text-body-md font-bold text-on-surface tracking-widest">$6.50</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-highest dark:bg-inverse-surface text-on-surface dark:text-inverse-on-surface font-body-md text-body-md full-width relative pt-xl border-t-8 border-repeat [background-image:linear-gradient(45deg,#006a62_25%,transparent_25%,transparent_75%,#006a62_75%,#006a62),linear-gradient(45deg,#006a62_25%,#fefccf_25%,#fefccf_75%,#006a62_75%,#006a62)] [background-size:16px_16px] flat flex flex-col md:flex-row justify-between items-center w-full px-margin py-lg border-t-4 border-on-surface">
+<div class="mb-sm md:mb-0">
+<span class="font-h3-subhead text-h3-subhead font-bold text-on-surface">RETRO BITES</span>
+</div>
+<div class="flex flex-wrap justify-center gap-margin mb-sm md:mb-0">
+<a class="text-on-surface-variant hover:text-on-surface hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="text-on-surface-variant hover:text-on-surface hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="text-on-surface-variant hover:text-on-surface hover:text-primary transition-colors" href="#">Careers</a>
+<a class="text-on-surface-variant hover:text-on-surface hover:text-primary transition-colors" href="#">Press Kit</a>
+</div>
+<div class="text-sm font-label-caps text-label-caps opacity-70">
+            © 1954 RETRO BITES DINER - FROM LEER WITH LOVE
+        </div>
+</footer>
+</body></html>

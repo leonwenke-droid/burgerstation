@@ -130,6 +130,32 @@ export default function Impressum() {
               schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers.
             </p>
           </div>
+
+          <div className="border-t-2 border-dashed border-bs-ink/20 pt-8">
+            <h2 className="text-subhead text-2xl text-bs-ink mb-3">
+              Websitegestaltung &amp; technische Umsetzung
+            </h2>
+            <p>
+              Design, Entwicklung, Online-Bestellsystem und digitale Infrastruktur
+              dieser Website wurden realisiert von:
+            </p>
+            <p className="mt-3">
+              <strong className="text-bs-ink">LYNIQ Media</strong>
+              <br />
+              Inhaber: Leon Wenke
+              <br />
+              Ostfriesland
+              <br />
+              <a
+                href="https://lyniqmedia.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-bs-teal underline hover:text-bs-ink transition-colors"
+              >
+                lyniqmedia.com
+              </a>
+            </p>
+          </div>
         </div>
       </main>
 

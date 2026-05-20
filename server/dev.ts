@@ -1,12 +1,22 @@
 import express from "express";
 import { getGoogleReviewsNormalized } from "./googleReviews";
 import { loadEnvLocal } from "./loadEnvLocal";
+import { handleCreateCheckout, handleSumUpWebhook, handleVerifyCheckout } from "./sumupHelpers";
+import { handleCreatePosOrder } from "./posHelpers";
 
 const port = Number(process.env.GOOGLE_REVIEWS_DEV_PORT || 8787);
 
 async function main() {
   loadEnvLocal();
   const app = express();
+  app.use(express.json());
+
+  // ── SumUp routes ──────────────────────────────────────────────────────────
+  app.post("/api/create-sandbox-checkout", handleCreateCheckout);
+  app.post("/api/webhooks/sumup", handleSumUpWebhook);
+  app.get("/api/verify-checkout/:checkoutId", handleVerifyCheckout);
+  app.post("/api/create-pos-order", handleCreatePosOrder);
+  // ─────────────────────────────────────────────────────────────────────────
 
   app.get("/api/google-reviews", async (_req, res) => {
     const result = await getGoogleReviewsNormalized();
