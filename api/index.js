@@ -22550,7 +22550,6 @@ function appendOrderLog(entry) {
   }
 }
 async function handleCreateCheckout(req, res) {
-  console.log("[handleCreateCheckout] REACHED \u2013 body keys:", Object.keys(req.body ?? {}));
   const { orderedItems, items: legacyItems, currency = "EUR" } = req.body;
   const raw = orderedItems ?? legacyItems;
   if (!Array.isArray(raw) || raw.length === 0) {
@@ -22586,7 +22585,6 @@ async function handleCreateCheckout(req, res) {
         description: buildDescription(items)
       })
     });
-    console.log("[SumUp] Checkout API responded:", sumupRes.status, sumupRes.statusText);
     if (!sumupRes.ok) {
       pendingOrders.delete(checkoutReference);
       const detail = await sumupRes.text();
@@ -22865,13 +22863,6 @@ async function getGoogleReviewsNormalized() {
 // api/_source.ts
 var app = (0, import_express.default)();
 app.use(import_express.default.json());
-app.use((req, _res, next) => {
-  console.log(`[API] ${req.method} ${req.url} | path=${req.path}`);
-  next();
-});
-app.get(["/api/health", "/health"], (_req, res) => {
-  res.json({ ok: true, ts: (/* @__PURE__ */ new Date()).toISOString() });
-});
 app.post("/api/create-sandbox-checkout", handleCreateCheckout);
 app.post("/api/webhooks/sumup", handleSumUpWebhook);
 app.get("/api/verify-checkout/:checkoutId", handleVerifyCheckout);
