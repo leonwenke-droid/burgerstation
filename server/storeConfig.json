@@ -1,4 +1,5 @@
 {
+  "_comment": "Öffnungszeiten nur hier im Code ändern, dann deployen. Schlüssel: 0=So, 1=Mo … 6=Sa. Fr+Sa: close 02:00 = Folgetag.",
   "store_closed_override": false,
   "hours": {
     "1": { "open": "11:00", "close": "23:00" },

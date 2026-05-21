@@ -3,7 +3,7 @@ import { getGoogleReviewsNormalized } from "./googleReviews";
 import { loadEnvLocal } from "./loadEnvLocal";
 import { handleCreateCheckout, handleSumUpWebhook, handleVerifyCheckout } from "./sumupHelpers";
 import { handleCreatePosOrder } from "./posHelpers";
-import { handleStoreStatus, handleSetStoreOverride, handleGetStoreConfig, handleSetHours } from "./storeStatusHelper";
+import { handleStoreStatus, handleSetStoreOverride } from "./storeStatusHelper";
 import { handleSnapshot, handleCartSync, handleHeartbeat, handleDisconnect, trackActiveUser } from "./analyticsHelper";
 
 const port = Number(process.env.GOOGLE_REVIEWS_DEV_PORT || 8787);
@@ -16,8 +16,6 @@ async function main() {
 
   app.get("/api/store-status",              handleStoreStatus);
   app.post("/api/admin/store-override",     handleSetStoreOverride);
-  app.get("/api/admin/store-config",        handleGetStoreConfig);
-  app.post("/api/admin/set-hours",          handleSetHours);
   app.get("/api/analytics/snapshot",        handleSnapshot);
   app.post("/api/analytics/heartbeat",      handleHeartbeat);
   app.post("/api/analytics/disconnect",     handleDisconnect);

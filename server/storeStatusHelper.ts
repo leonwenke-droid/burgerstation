@@ -1,19 +1,16 @@
 /**
  * Store open/closed status helper.
  *
- * Öffnungszeiten stehen in server/storeConfig.json (Schlüssel = JS getDay()-Wert,
- * 0=Sonntag … 6=Samstag). Freitag+Samstag schließen um 02:00 Uhr des Folgetages
- * → Cross-Midnight-Logik beachten.
+ * Öffnungszeiten: ausschließlich in server/storeConfig.json pflegen (wird beim
+ * Build eingebunden). Schlüssel = JS getDay(): 0=So … 6=Sa.
+ * Fr+Sa schließen um 02:00 Uhr am Folgetag → Cross-Midnight-Logik.
  *
- * Notaus (Vercel-Produktion): Env-Variable STORE_CLOSED_OVERRIDE=true setzen
- * und die Funktion neu deployen (~30 Sek.) — schneller als eine JSON-Datei
- * ändern. Lokal genügt store_closed_override:true in storeConfig.json.
+ * Notaus (Ausverkauf): POST /api/admin/store-override — persistiert in Upstash KV
+ * wenn konfiguriert, sonst In-Memory-Fallback (lokal).
  */
-import fs   from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import type { Request, Response } from "express";
 import { kvSet, kvGet } from "./kvStore";
+import storeConfigFile from "./storeConfig.json";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -28,58 +25,20 @@ export interface StoreStatus {
   nextOpen: string;
 }
 
-// ── Default config (kept in sync with storeConfig.json) ──────────────────────
+/** Beim Build aus server/storeConfig.json eingebunden — auf Vercel die Quelle der Wahrheit. */
+const BUNDLED_CONFIG = storeConfigFile as StoreConfig;
 
-const DEFAULT_CONFIG: StoreConfig = {
-  store_closed_override: false,
-  hours: {
-    "1": { open: "11:00", close: "23:00" },
-    "2": { open: "11:00", close: "23:00" },
-    "3": { open: "11:00", close: "23:00" },
-    "4": { open: "11:00", close: "23:00" },
-    "5": { open: "11:00", close: "02:00" },
-    "6": { open: "11:00", close: "02:00" },
-    "0": { open: "11:00", close: "23:00" },
-  },
-};
-
-// ── KV keys ───────────────────────────────────────────────────────────────────
 const KV_OVERRIDE = "bs:store_force_closed";
-const KV_HOURS    = "bs:runtime_hours";
 
-// ── Config loader (async, reads from KV) ─────────────────────────────────────
+// ── Config loader ─────────────────────────────────────────────────────────────
 
 async function loadConfig(): Promise<StoreConfig> {
-  const [overrideRaw, hoursRaw] = await Promise.all([
-    kvGet(KV_OVERRIDE),
-    kvGet(KV_HOURS),
-  ]);
+  const overrideRaw = await kvGet(KV_OVERRIDE);
   const forceClosed = overrideRaw === "true";
-  const hours = hoursRaw
-    ? (JSON.parse(hoursRaw) as Record<string, DayHours>)
-    : (readFileHours() ?? DEFAULT_CONFIG.hours);
-  return { store_closed_override: forceClosed, hours };
-}
-
-function readFileHours(): Record<string, DayHours> | null {
-  try {
-    let configPath: string;
-    try {
-      configPath = fileURLToPath(new URL("./storeConfig.json", import.meta.url));
-    } catch {
-      configPath = path.join(__dirname, "storeConfig.json");
-    }
-    const raw = JSON.parse(fs.readFileSync(configPath, "utf-8")) as StoreConfig;
-    return raw.hours ?? null;
-  } catch {
-    return null;
-  }
-}
-
-/** Returns the currently effective hours (for the admin editor). */
-async function getEffectiveHours(): Promise<Record<string, DayHours>> {
-  const raw = await kvGet(KV_HOURS);
-  return raw ? (JSON.parse(raw) as Record<string, DayHours>) : (readFileHours() ?? DEFAULT_CONFIG.hours);
+  return {
+    store_closed_override: forceClosed,
+    hours: BUNDLED_CONFIG.hours,
+  };
 }
 
 // ── Time helpers ──────────────────────────────────────────────────────────────
@@ -89,7 +48,6 @@ function toMinutes(time: string): number {
   return h * 60 + m;
 }
 
-/** Returns current time in Europe/Berlin. */
 function getBerlinTime(): { day: number; totalMinutes: number } {
   const now   = new Date();
   const parts = new Intl.DateTimeFormat("en-US", {
@@ -107,25 +65,17 @@ function getBerlinTime(): { day: number; totalMinutes: number } {
   const weekday = parts.find(p => p.type === "weekday")?.value ?? "Mon";
   let   hour    = parseInt(parts.find(p => p.type === "hour")?.value   ?? "0", 10);
   const minute  = parseInt(parts.find(p => p.type === "minute")?.value ?? "0", 10);
-  if (hour === 24) hour = 0; // Intl may return 24 for midnight
+  if (hour === 24) hour = 0;
 
   return { day: DAY_MAP[weekday] ?? 0, totalMinutes: hour * 60 + minute };
 }
 
-/**
- * True if `currentMinutes` falls inside the *pre-midnight* portion of `hours`.
- * For cross-midnight days (close < open), only the "≥ open" part is checked
- * here; the "≤ close (after midnight)" part is handled via yesterday's session.
- */
 function isInPreMidnightSession(hours: DayHours, currentMinutes: number): boolean {
   const openMin  = toMinutes(hours.open);
   const closeMin = toMinutes(hours.close);
-
   if (closeMin > openMin) {
-    // Same-day session  e.g. 11:00–23:00
     return currentMinutes >= openMin && currentMinutes <= closeMin;
   }
-  // Cross-midnight: only the "before midnight" portion (≥ open until 23:59)
   return currentMinutes >= openMin;
 }
 
@@ -137,8 +87,6 @@ function nextOpeningLabel(config: StoreConfig, day: number): string {
   }
   return "11:00 Uhr";
 }
-
-// ── Core logic ────────────────────────────────────────────────────────────────
 
 async function computeStatus(): Promise<StoreStatus> {
   const config = await loadConfig();
@@ -174,8 +122,10 @@ async function computeStatus(): Promise<StoreStatus> {
 // ── Express handlers ──────────────────────────────────────────────────────────
 
 export async function handleStoreStatus(_req: Request, res: Response): Promise<void> {
-  const status = await computeStatus();
-  const overrideRaw = await kvGet(KV_OVERRIDE);
+  const [status, overrideRaw] = await Promise.all([
+    computeStatus(),
+    kvGet(KV_OVERRIDE),
+  ]);
   res.json({ ...status, overrideActive: overrideRaw === "true" });
 }
 
@@ -189,38 +139,4 @@ export async function handleSetStoreOverride(req: Request, res: Response): Promi
   await kvSet(KV_OVERRIDE, String(closed));
   console.log(`[Admin] Store override set to: ${closed ? "CLOSED" : "OPEN"}`);
   res.json({ ok: true, closed });
-}
-
-/** GET /api/admin/store-config — returns current effective hours + override state. */
-export async function handleGetStoreConfig(_req: Request, res: Response): Promise<void> {
-  const [hours, overrideRaw, status] = await Promise.all([
-    getEffectiveHours(),
-    kvGet(KV_OVERRIDE),
-    computeStatus(),
-  ]);
-  res.json({
-    hours,
-    overrideActive: overrideRaw === "true",
-    isOpen:         status.isOpen,
-  });
-}
-
-/** POST /api/admin/set-hours  body: { hours: Record<string, {open,close}> } */
-export async function handleSetHours(req: Request, res: Response): Promise<void> {
-  const { hours } = req.body as { hours?: Record<string, DayHours> };
-  if (!hours || typeof hours !== "object") {
-    res.status(400).json({ error: "hours object required" });
-    return;
-  }
-  // Basic validation: each entry needs HH:MM strings
-  const HH_MM = /^\d{2}:\d{2}$/;
-  for (const [day, h] of Object.entries(hours)) {
-    if (!["0","1","2","3","4","5","6"].includes(day) || !HH_MM.test(h.open) || !HH_MM.test(h.close)) {
-      res.status(400).json({ error: `Ungültiger Eintrag für Tag ${day}` });
-      return;
-    }
-  }
-  await kvSet(KV_HOURS, JSON.stringify(hours));
-  console.log("[Admin] Öffnungszeiten aktualisiert:", hours);
-  res.json({ ok: true, hours });
 }

@@ -1,11 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { Search, RefreshCw, TrendingUp, ShoppingCart, Users, Save, Check, AlertTriangle } from "lucide-react";
+import { Search, RefreshCw, TrendingUp, ShoppingCart, Users } from "lucide-react";
 
 const ADMIN_PIN = import.meta.env.VITE_ADMIN_PIN ?? "burgerstation";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-interface DayHours  { open: string; close: string }
 interface OrderItem { name: string; quantity: number; price: number }
 interface OrderRecord {
   id: string; timestamp: string; total: number;
@@ -16,17 +15,12 @@ interface Snapshot {
   activeUsers: number; totalCartItems: number;
   orders: OrderRecord[]; ordersToday: number; revenueToday: number;
 }
-interface StoreConfig {
-  hours: Record<string, DayHours>;
-  overrideActive: boolean | null;
+interface StoreStatus {
   isOpen: boolean;
+  overrideActive?: boolean;
+  reason?: "OVERLOAD" | "CLOSED";
+  nextOpen?: string;
 }
-
-const DAY_LABELS: Record<string, string> = {
-  "1": "Montag", "2": "Dienstag", "3": "Mittwoch",
-  "4": "Donnerstag", "5": "Freitag", "6": "Samstag", "0": "Sonntag",
-};
-const DAY_ORDER = ["1","2","3","4","5","6","0"];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -62,73 +56,60 @@ function PinGate({ onAuth }: { onAuth: () => void }) {
 // ── Emergency Stop ─────────────────────────────────────────────────────────────
 
 function EmergencyStop() {
-  const [cfg, setCfg]     = useState<StoreConfig | null>(null);
+  const [status, setStatus] = useState<StoreStatus | null>(null);
   const [loading, setLoading] = useState(false);
   const [confirm, setConfirm] = useState(false);
 
   async function load() {
-    const r = await fetch("/api/admin/store-config");
-    const data = await r.json();
-    // #region agent log
-    fetch('http://127.0.0.1:7795/ingest/66c2885f-1421-4d80-ad50-1c0a8d3bdcd6',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a7a0af'},body:JSON.stringify({sessionId:'a7a0af',location:'AdminSettings.tsx:load',message:'store-config loaded',data:{status:r.status,cfg:data},hypothesisId:'A-D',timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
-    setCfg(data);
+    const r = await fetch("/api/store-status");
+    setStatus(await r.json());
   }
 
   useEffect(() => { load(); }, []);
 
   async function toggle() {
-    if (!cfg) return;
-    if (cfg.isOpen && !confirm) { setConfirm(true); return; }
+    if (!status) return;
+    const wantsClose = !status.overrideActive;
+    if (wantsClose && !confirm) { setConfirm(true); return; }
     setConfirm(false);
     setLoading(true);
-    const payload = { closed: cfg.isOpen };
-    // #region agent log
-    fetch('http://127.0.0.1:7795/ingest/66c2885f-1421-4d80-ad50-1c0a8d3bdcd6',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a7a0af'},body:JSON.stringify({sessionId:'a7a0af',location:'AdminSettings.tsx:toggle-before',message:'sending override',data:{payload,cfgIsOpen:cfg.isOpen,cfgOverrideActive:cfg.overrideActive},hypothesisId:'B-C',timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
-    const overrideRes = await fetch("/api/admin/store-override", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+    await fetch("/api/admin/store-override", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ closed: wantsClose }),
     });
-    const overrideData = await overrideRes.json();
-    // #region agent log
-    fetch('http://127.0.0.1:7795/ingest/66c2885f-1421-4d80-ad50-1c0a8d3bdcd6',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a7a0af'},body:JSON.stringify({sessionId:'a7a0af',location:'AdminSettings.tsx:toggle-after',message:'override response',data:{status:overrideRes.status,body:overrideData},hypothesisId:'B',timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     await load();
     setLoading(false);
   }
 
-  const isOverrideOff = cfg?.isOpen === true;
+  const notausActive = status?.overrideActive === true;
 
   return (
-    <div className={`border-[4px] border-bs-ink rounded-2xl shadow-[6px_6px_0_var(--bs-ink)] overflow-hidden ${isOverrideOff ? "bg-green-200" : "bg-red-200"}`}>
-      {/* Status bar */}
-      <div className={`px-6 py-4 flex items-center justify-between gap-4 flex-wrap ${isOverrideOff ? "bg-green-300" : "bg-red-400"}`}>
+    <div className={`border-[4px] border-bs-ink rounded-2xl shadow-[6px_6px_0_var(--bs-ink)] overflow-hidden ${notausActive ? "bg-red-200" : "bg-green-200"}`}>
+      <div className={`px-6 py-4 flex items-center justify-between gap-4 flex-wrap ${notausActive ? "bg-red-400" : "bg-green-300"}`}>
         <div className="flex items-center gap-3">
-          <span className={`w-4 h-4 rounded-full border-2 border-bs-ink animate-pulse ${isOverrideOff ? "bg-green-600" : "bg-red-700"}`} />
+          <span className={`w-4 h-4 rounded-full border-2 border-bs-ink animate-pulse ${notausActive ? "bg-red-700" : "bg-green-600"}`} />
           <span className="font-subhead text-xl text-bs-ink uppercase tracking-wider">
-            {isOverrideOff ? "✅ ONLINE-BESTELLUNGEN AKTIV" : "🛑 ONLINE-BESTELLUNGEN GESTOPPT"}
+            {notausActive ? "🛑 NOTAUS AKTIV" : "✅ NOTAUS INAKTIV"}
           </span>
         </div>
-        {cfg?.overrideActive === true && (
+        {notausActive && (
           <span className="bg-white border-2 border-bs-ink rounded-full px-3 py-1 font-subhead text-xs uppercase text-red-700">
-            Manuell gesperrt
+            Online-Kasse gesperrt
           </span>
         )}
       </div>
 
-      {/* Action area */}
       <div className="px-6 py-5 flex items-center gap-6 flex-wrap">
         <div className="flex-1">
-          {isOverrideOff ? (
+          {notausActive ? (
             <p className="font-body text-sm text-bs-ink leading-relaxed">
-              Kunden können gerade bestellen. Klicke den Button rechts um bei{" "}
-              <strong>Ausverkauf oder zu vielen Bestellungen</strong> sofort alle Online-Bestellungen zu stoppen.
+              Ausverkauf / Überlastung — Kunden sehen <em>„Online-Kasse kurzzeitig pausiert“</em>.
             </p>
           ) : (
             <p className="font-body text-sm text-bs-ink leading-relaxed">
-              Die Online-Kasse ist gesperrt. Kunden sehen die Meldung{" "}
-              <em>"Online-Kasse kurzzeitig pausiert"</em> und können nicht bestellen.
+              Notaus ist aus. Bei <strong>Ausverkauf oder zu vielen Bestellungen</strong> sofort stoppen.
+              Öffnungszeiten laufen automatisch über <code className="text-xs bg-white/60 px-1 rounded">server/storeConfig.json</code>.
             </p>
           )}
         </div>
@@ -150,128 +131,20 @@ function EmergencyStop() {
         ) : (
           <button
             onClick={toggle}
-            disabled={loading || cfg === null}
+            disabled={loading || status === null}
             className={`
               px-8 py-4 border-[4px] border-bs-ink rounded-2xl font-subhead text-lg uppercase
               shadow-[5px_5px_0_var(--bs-ink)] active:translate-x-1 active:translate-y-1 active:shadow-[2px_2px_0_var(--bs-ink)]
               transition-all disabled:opacity-50
-              ${isOverrideOff
-                ? "bg-red-600 text-white hover:bg-red-700"
-                : "bg-green-500 text-white hover:bg-green-600"}
+              ${notausActive
+                ? "bg-green-500 text-white hover:bg-green-600"
+                : "bg-red-600 text-white hover:bg-red-700"}
             `}
           >
-            {loading ? "…" : isOverrideOff ? "🛑 JETZT STOPPEN" : "✅ WIEDER ÖFFNEN"}
+            {loading ? "…" : notausActive ? "✅ WIEDER ÖFFNEN" : "🛑 JETZT STOPPEN"}
           </button>
         )}
       </div>
-    </div>
-  );
-}
-
-// ── Opening Hours Editor ───────────────────────────────────────────────────────
-
-function HoursEditor() {
-  const [hours, setHours]   = useState<Record<string, DayHours> | null>(null);
-  const [dirty, setDirty]   = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved]   = useState(false);
-  const [error, setError]   = useState<string | null>(null);
-
-  useEffect(() => {
-    fetch("/api/admin/store-config")
-      .then(r => r.json())
-      .then((d: StoreConfig) => setHours(d.hours));
-  }, []);
-
-  function update(day: string, field: "open" | "close", val: string) {
-    setHours(prev => prev ? { ...prev, [day]: { ...prev[day], [field]: val } } : prev);
-    setDirty(true);
-    setSaved(false);
-  }
-
-  async function save() {
-    if (!hours) return;
-    setSaving(true); setError(null);
-    const r = await fetch("/api/admin/set-hours", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ hours }),
-    });
-    const d = await r.json() as { ok?: boolean; error?: string };
-    setSaving(false);
-    if (d.ok) { setDirty(false); setSaved(true); setTimeout(() => setSaved(false), 3000); }
-    else setError(d.error ?? "Unbekannter Fehler");
-  }
-
-  return (
-    <div className="retro-card p-0 overflow-hidden">
-      <div className="px-5 py-4 border-b-[3px] border-bs-ink bg-white flex items-center justify-between gap-4 flex-wrap">
-        <h2 className="font-subhead text-lg text-bs-ink uppercase tracking-wide">🕐 Öffnungszeiten</h2>
-        <div className="flex items-center gap-3">
-          {dirty && (
-            <span className="flex items-center gap-1 text-amber-600 font-body text-xs">
-              <AlertTriangle size={12} /> Ungespeicherte Änderungen
-            </span>
-          )}
-          {saved && (
-            <span className="flex items-center gap-1 text-green-600 font-body text-xs">
-              <Check size={12} /> Gespeichert
-            </span>
-          )}
-          <button onClick={save} disabled={!dirty || saving}
-            className="flex items-center gap-2 px-4 py-2 border-[3px] border-bs-ink rounded-xl font-subhead text-sm uppercase bg-bs-teal text-white shadow-[3px_3px_0_var(--bs-ink)] hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-opacity">
-            <Save size={14} />
-            {saving ? "Speichern…" : "SPEICHERN"}
-          </button>
-        </div>
-      </div>
-
-      {error && (
-        <div className="px-5 py-3 bg-red-50 border-b border-red-200 text-sm text-red-700 font-body">{error}</div>
-      )}
-
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="bg-zinc-50 border-b-[2px] border-bs-ink">
-              <th className="px-5 py-3 text-left font-subhead text-xs uppercase tracking-wide text-bs-ink-v">Tag</th>
-              <th className="px-5 py-3 text-left font-subhead text-xs uppercase tracking-wide text-bs-ink-v">Öffnet</th>
-              <th className="px-5 py-3 text-left font-subhead text-xs uppercase tracking-wide text-bs-ink-v">Schließt</th>
-              <th className="px-5 py-3 text-left font-subhead text-xs uppercase tracking-wide text-bs-ink-v">Hinweis</th>
-            </tr>
-          </thead>
-          <tbody>
-            {hours === null ? (
-              <tr><td colSpan={4} className="px-5 py-8 text-center text-bs-ink-v font-body text-sm">Lade…</td></tr>
-            ) : (
-              DAY_ORDER.map(day => {
-                const h = hours[day];
-                const crossMidnight = h && h.close < h.open;
-                return (
-                  <tr key={day} className="border-b border-zinc-100 hover:bg-zinc-50 transition-colors">
-                    <td className="px-5 py-3 font-subhead text-sm text-bs-ink">{DAY_LABELS[day]}</td>
-                    <td className="px-5 py-3">
-                      <input type="time" value={h?.open ?? "11:00"}
-                        onChange={e => update(day, "open", e.target.value)}
-                        className="border-[2px] border-bs-ink rounded-lg px-3 py-1.5 font-body text-sm bg-white focus:outline-none focus:ring-2 focus:ring-bs-teal" />
-                    </td>
-                    <td className="px-5 py-3">
-                      <input type="time" value={h?.close ?? "23:00"}
-                        onChange={e => update(day, "close", e.target.value)}
-                        className="border-[2px] border-bs-ink rounded-lg px-3 py-1.5 font-body text-sm bg-white focus:outline-none focus:ring-2 focus:ring-bs-teal" />
-                    </td>
-                    <td className="px-5 py-3 text-xs text-bs-ink-v font-body">
-                      {crossMidnight ? "⚠️ Schließt nach Mitternacht (Folgetag)" : ""}
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
-      <p className="px-5 py-3 text-xs text-bs-ink-v font-body bg-zinc-50 border-t border-zinc-200">
-        Änderungen sind sofort aktiv · Bei Server-Neustart werden die Zeiten aus <code>server/storeConfig.json</code> neu geladen
-      </p>
     </div>
   );
 }
@@ -402,10 +275,7 @@ export default function AdminSettings() {
             sub={data ? `Umsatz: ${fmt(data.revenueToday)}` : undefined} color="bg-green-200" />
         </div>
 
-        {/* ── 3. OPENING HOURS EDITOR ── */}
-        <HoursEditor />
-
-        {/* ── 4. ORDER LIST ── */}
+        {/* ── 3. ORDER LIST ── */}
         <div className="retro-card p-0 overflow-hidden">
           <div className="px-4 py-4 border-b-[3px] border-bs-ink flex items-center gap-3 flex-wrap bg-white">
             <h2 className="font-subhead text-lg text-bs-ink uppercase tracking-wide flex-1">
