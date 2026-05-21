@@ -65,7 +65,11 @@ function EmergencyStop() {
     setStatus(await r.json());
   }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+    const t = setInterval(load, 60_000);
+    return () => clearInterval(t);
+  }, []);
 
   async function toggle() {
     if (!status) return;
@@ -83,67 +87,109 @@ function EmergencyStop() {
   }
 
   const notausActive = status?.overrideActive === true;
+  const hoursClosed  = !status?.isOpen && !notausActive;
+  const storeOpen    = status?.isOpen === true && !notausActive;
+
+  // Kunden-sichtbarer Gesamtstatus (Priorität: Notaus > Öffnungszeiten > Offen)
+  const boxBg = notausActive ? "bg-red-200" : hoursClosed ? "bg-bs-yellow/50" : "bg-green-200";
+  const barBg = notausActive ? "bg-red-400" : hoursClosed ? "bg-bs-yellow" : "bg-green-300";
+  const dotBg = notausActive ? "bg-red-700" : hoursClosed ? "bg-amber-600" : "bg-green-600";
+
+  const headline = notausActive
+    ? "🛑 NOTAUS — ONLINE-KASSE GESPERRT"
+    : hoursClosed
+      ? "🕐 STORE GESCHLOSSEN"
+      : "✅ STORE OFFEN";
+
+  const customerLabel = notausActive
+    ? "Kunden sehen: „Online-Kasse kurzzeitig pausiert“"
+    : hoursClosed
+      ? "Kunden sehen: „Der Lieferstore hat aktuell geschlossen“"
+      : "Kunden sehen: Bestellungen möglich";
 
   return (
-    <div className={`border-[4px] border-bs-ink rounded-2xl shadow-[6px_6px_0_var(--bs-ink)] overflow-hidden ${notausActive ? "bg-red-200" : "bg-green-200"}`}>
-      <div className={`px-6 py-4 flex items-center justify-between gap-4 flex-wrap ${notausActive ? "bg-red-400" : "bg-green-300"}`}>
-        <div className="flex items-center gap-3">
-          <span className={`w-4 h-4 rounded-full border-2 border-bs-ink animate-pulse ${notausActive ? "bg-red-700" : "bg-green-600"}`} />
-          <span className="font-subhead text-xl text-bs-ink uppercase tracking-wider">
-            {notausActive ? "🛑 NOTAUS AKTIV" : "✅ NOTAUS INAKTIV"}
-          </span>
+    <div className={`border-[4px] border-bs-ink rounded-2xl shadow-[6px_6px_0_var(--bs-ink)] overflow-hidden ${boxBg}`}>
+      <div className={`px-6 py-4 flex items-center justify-between gap-4 flex-wrap ${barBg}`}>
+        <div className="flex items-center gap-3 flex-wrap">
+          <span className={`w-4 h-4 rounded-full border-2 border-bs-ink shrink-0 ${storeOpen ? "animate-pulse" : ""} ${dotBg}`} />
+          <span className="font-subhead text-xl text-bs-ink uppercase tracking-wider">{headline}</span>
         </div>
-        {notausActive && (
-          <span className="bg-white border-2 border-bs-ink rounded-full px-3 py-1 font-subhead text-xs uppercase text-red-700">
-            Online-Kasse gesperrt
-          </span>
-        )}
+        <span className="bg-white/80 border-2 border-bs-ink rounded-full px-3 py-1 font-body text-xs text-bs-ink">
+          {customerLabel}
+        </span>
       </div>
 
-      <div className="px-6 py-5 flex items-center gap-6 flex-wrap">
-        <div className="flex-1">
+      <div className="px-6 py-5 space-y-4">
+        {/* Status-Detail */}
+        <p className="font-body text-sm text-bs-ink leading-relaxed">
           {notausActive ? (
-            <p className="font-body text-sm text-bs-ink leading-relaxed">
-              Ausverkauf / Überlastung — Kunden sehen <em>„Online-Kasse kurzzeitig pausiert“</em>.
-            </p>
+            <>
+              Ausverkauf oder zu hohes Bestellaufkommen — Online-Bestellungen sind manuell gestoppt.
+              {hoursClosed && " (Zusätzlich außerhalb der Öffnungszeiten.)"}
+            </>
+          ) : hoursClosed ? (
+            <>
+              Der Store ist laut Öffnungszeiten geschlossen
+              {status?.nextOpen ? ` — wieder ab ${status.nextOpen}.` : "."}
+              {" "}Zeiten in <code className="text-xs bg-white/60 px-1 rounded">server/storeConfig.json</code> anpassen.
+            </>
           ) : (
-            <p className="font-body text-sm text-bs-ink leading-relaxed">
-              Notaus ist aus. Bei <strong>Ausverkauf oder zu vielen Bestellungen</strong> sofort stoppen.
-              Öffnungszeiten laufen automatisch über <code className="text-xs bg-white/60 px-1 rounded">server/storeConfig.json</code>.
-            </p>
+            <>
+              Online-Bestellungen sind aktiv. Bei <strong>Ausverkauf oder Überlastung</strong> den Notaus unten nutzen.
+            </>
+          )}
+        </p>
+
+        {/* Notaus-Bereich — visuell abgetrennt */}
+        <div className="border-[3px] border-bs-ink rounded-xl bg-white/60 px-4 py-4 flex items-center gap-4 flex-wrap">
+          <div className="flex-1 min-w-[200px]">
+            <p className="font-subhead text-xs uppercase tracking-widest text-bs-ink-v mb-1">Notaus (Ausverkauf)</p>
+            {hoursClosed && !notausActive ? (
+              <p className="font-body text-sm text-bs-ink-v">
+                Nicht nötig — Store ist bereits geschlossen. Notaus greift während der Öffnungszeiten.
+              </p>
+            ) : notausActive ? (
+              <p className="font-body text-sm text-bs-ink">
+                Notaus ist aktiv. Klicke „Wieder öffnen“, um Bestellungen wieder freizugeben.
+              </p>
+            ) : (
+              <p className="font-body text-sm text-bs-ink">
+                Stoppt sofort alle Online-Bestellungen — unabhängig vom Warenkorb.
+              </p>
+            )}
+          </div>
+
+          {hoursClosed && !notausActive ? null : confirm ? (
+            <div className="flex flex-col items-end gap-2">
+              <p className="font-subhead text-sm text-bs-ink uppercase">Wirklich stoppen?</p>
+              <div className="flex gap-2">
+                <button onClick={() => setConfirm(false)}
+                  className="px-4 py-2 border-[3px] border-bs-ink rounded-xl font-subhead text-sm bg-white hover:bg-zinc-100 transition-colors shadow-[3px_3px_0_var(--bs-ink)]">
+                  ABBRECHEN
+                </button>
+                <button onClick={toggle} disabled={loading}
+                  className="px-4 py-2 border-[3px] border-bs-ink rounded-xl font-subhead text-sm bg-red-600 text-white hover:bg-red-700 transition-colors shadow-[3px_3px_0_var(--bs-ink)] disabled:opacity-50">
+                  JA, STOPPEN
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={toggle}
+              disabled={loading || status === null}
+              className={`
+                px-6 py-3 border-[3px] border-bs-ink rounded-xl font-subhead text-sm uppercase whitespace-nowrap
+                shadow-[4px_4px_0_var(--bs-ink)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[2px_2px_0_var(--bs-ink)]
+                transition-all disabled:opacity-50
+                ${notausActive
+                  ? "bg-green-500 text-white hover:bg-green-600"
+                  : "bg-red-600 text-white hover:bg-red-700"}
+              `}
+            >
+              {loading ? "…" : notausActive ? "✅ WIEDER ÖFFNEN" : "🛑 NOTAUS AKTIVIEREN"}
+            </button>
           )}
         </div>
-
-        {confirm ? (
-          <div className="flex flex-col items-end gap-2">
-            <p className="font-subhead text-sm text-bs-ink uppercase">Wirklich stoppen?</p>
-            <div className="flex gap-2">
-              <button onClick={() => setConfirm(false)}
-                className="px-4 py-2 border-[3px] border-bs-ink rounded-xl font-subhead text-sm bg-white hover:bg-zinc-100 transition-colors shadow-[3px_3px_0_var(--bs-ink)]">
-                ABBRECHEN
-              </button>
-              <button onClick={toggle} disabled={loading}
-                className="px-4 py-2 border-[3px] border-bs-ink rounded-xl font-subhead text-sm bg-red-600 text-white hover:bg-red-700 transition-colors shadow-[3px_3px_0_var(--bs-ink)] disabled:opacity-50">
-                JA, STOPPEN
-              </button>
-            </div>
-          </div>
-        ) : (
-          <button
-            onClick={toggle}
-            disabled={loading || status === null}
-            className={`
-              px-8 py-4 border-[4px] border-bs-ink rounded-2xl font-subhead text-lg uppercase
-              shadow-[5px_5px_0_var(--bs-ink)] active:translate-x-1 active:translate-y-1 active:shadow-[2px_2px_0_var(--bs-ink)]
-              transition-all disabled:opacity-50
-              ${notausActive
-                ? "bg-green-500 text-white hover:bg-green-600"
-                : "bg-red-600 text-white hover:bg-red-700"}
-            `}
-          >
-            {loading ? "…" : notausActive ? "✅ WIEDER ÖFFNEN" : "🛑 JETZT STOPPEN"}
-          </button>
-        )}
       </div>
     </div>
   );
