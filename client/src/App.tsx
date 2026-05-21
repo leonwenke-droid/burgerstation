@@ -14,6 +14,8 @@ import About from "./pages/About";
 import Locations from "./pages/Locations";
 import Impressum from "./pages/Impressum";
 import Datenschutz from "./pages/Datenschutz";
+import AGB from "./pages/AGB";
+import Widerruf from "./pages/Widerruf";
 import Checkout from "./pages/Checkout";
 import ThankYou from "./pages/ThankYou";
 import OrderSuccess from "./pages/OrderSuccess";
@@ -89,6 +91,8 @@ function Router() {
         <Route path="/locations" component={Locations} />
         <Route path="/impressum" component={Impressum} />
         <Route path="/datenschutz" component={Datenschutz} />
+        <Route path="/agb" component={AGB} />
+        <Route path="/widerrufsbelehrung" component={Widerruf} />
         <Route path="/bestellen/checkout" component={Checkout} />
         <Route path="/bestellen/danke" component={ThankYou} />
         <Route path="/order-success" component={OrderSuccess} />

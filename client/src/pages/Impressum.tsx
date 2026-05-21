@@ -1,6 +1,8 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
+import { LEGAL } from "@/data/legalConfig";
+
 export default function Impressum() {
   return (
     <div className="min-h-screen bg-[#FEFCCF] text-bs-ink">
@@ -38,10 +40,18 @@ export default function Impressum() {
             <p>
               Telefon:{" "}
               <a
-                href="tel:+4949199755279"
+                href={`tel:${LEGAL.phoneTel}`}
                 className="text-bs-pink hover:underline font-semibold"
               >
-                0491 99 755 279
+                {LEGAL.phone}
+              </a>
+              <br />
+              E-Mail:{" "}
+              <a
+                href={`mailto:${LEGAL.email}`}
+                className="text-bs-pink hover:underline font-semibold"
+              >
+                {LEGAL.email}
               </a>
               <br />
               Instagram:{" "}
@@ -87,9 +97,12 @@ export default function Impressum() {
               .
             </p>
             <p className="mt-2">
-              Unsere E-Mail-Adresse ist in diesem Impressum nicht aufgeführt, da
-              wir kein Online-Bestellsystem betreiben und Bestellungen
-              ausschließlich vor Ort entgegennehmen.
+              Unsere E-Mail-Adresse für Beschwerden lautet{" "}
+              <a href={`mailto:${LEGAL.email}`} className="text-bs-pink hover:underline">
+                {LEGAL.email}
+              </a>
+              . Weitere rechtliche Informationen findest du in unseren{" "}
+              <a href="/agb" className="text-bs-pink hover:underline">AGB</a>.
             </p>
           </div>
 

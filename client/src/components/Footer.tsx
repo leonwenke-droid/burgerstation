@@ -105,17 +105,17 @@ export default function Footer() {
             <p className="text-sm text-bs-ink/60">
               © 2026 Burger Station Leer. Alle Rechte vorbehalten.
             </p>
-            <div className="flex gap-5 text-sm">
-              <Link
-                href="/impressum"
-                className="text-bs-ink-v hover:text-bs-teal transition"
-              >
+            <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm justify-center md:justify-end">
+              <Link href="/impressum" className="text-bs-ink-v hover:text-bs-teal transition">
                 Impressum
               </Link>
-              <Link
-                href="/datenschutz"
-                className="text-bs-ink-v hover:text-bs-teal transition"
-              >
+              <Link href="/agb" className="text-bs-ink-v hover:text-bs-teal transition">
+                AGB
+              </Link>
+              <Link href="/widerrufsbelehrung" className="text-bs-ink-v hover:text-bs-teal transition">
+                Widerruf
+              </Link>
+              <Link href="/datenschutz" className="text-bs-ink-v hover:text-bs-teal transition">
                 Datenschutz
               </Link>
             </div>

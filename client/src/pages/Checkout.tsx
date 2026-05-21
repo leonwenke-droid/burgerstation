@@ -156,7 +156,7 @@ export default function Checkout() {
     setFormError(null);
 
     if (!agb) {
-      setFormError("Bitte akzeptiere die AGB und Datenschutzerklärung.");
+      setFormError("Bitte akzeptiere die AGB, Widerrufsbelehrung und Datenschutzerklärung.");
       return;
     }
 
@@ -552,10 +552,13 @@ export default function Checkout() {
                     onChange={(e) => setAgb(e.target.checked)}
                     className="mt-0.5 w-5 h-5 accent-bs-teal shrink-0" />
                   <span className="text-sm text-bs-ink-v leading-relaxed">
-                    Ich akzeptiere die{" "}
-                    <a href="/impressum" className="text-bs-teal underline hover:text-bs-ink transition-colors">AGB</a>
-                    {" "}und{" "}
-                    <a href="/datenschutz" className="text-bs-teal underline hover:text-bs-ink transition-colors">Datenschutzerklärung</a>. *
+                    Ich habe die{" "}
+                    <a href="/agb" target="_blank" rel="noopener noreferrer" className="text-bs-teal underline hover:text-bs-ink transition-colors">AGB</a>
+                    {", die "}
+                    <a href="/widerrufsbelehrung" target="_blank" rel="noopener noreferrer" className="text-bs-teal underline hover:text-bs-ink transition-colors">Widerrufsbelehrung</a>
+                    {" "}und die{" "}
+                    <a href="/datenschutz" target="_blank" rel="noopener noreferrer" className="text-bs-teal underline hover:text-bs-ink transition-colors">Datenschutzerklärung</a>
+                    {" "}zur Kenntnis genommen und akzeptiere diese. *
                   </span>
                 </label>
 
