@@ -22869,6 +22869,39 @@ async function handleCreatePosOrder(req, res) {
 import fs2 from "node:fs";
 import path2 from "node:path";
 import { fileURLToPath } from "node:url";
+
+// server/kvStore.ts
+var mem = /* @__PURE__ */ new Map();
+function upstashEnabled() {
+  return !!(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN);
+}
+async function upstashReq(command) {
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify(command)
+  });
+  const data = await res.json();
+  return data.result;
+}
+async function kvSet(key, value) {
+  if (upstashEnabled()) {
+    await upstashReq(["SET", key, value]);
+  } else {
+    mem.set(key, value);
+  }
+}
+async function kvGet(key) {
+  if (upstashEnabled()) {
+    const result = await upstashReq(["GET", key]);
+    return typeof result === "string" ? result : null;
+  }
+  return mem.get(key) ?? null;
+}
+
+// server/storeStatusHelper.ts
 var DEFAULT_CONFIG = {
   store_closed_override: false,
   hours: {
@@ -22881,17 +22914,16 @@ var DEFAULT_CONFIG = {
     "0": { open: "11:00", close: "23:00" }
   }
 };
-var isStoreForceClosed = false;
-var runtimeHours = null;
-function setRuntimeOverride(value) {
-  isStoreForceClosed = value;
-}
-function setRuntimeHours(hours) {
-  runtimeHours = hours;
-}
-function loadConfig() {
-  const hours = runtimeHours ?? readFileHours() ?? DEFAULT_CONFIG.hours;
-  return { store_closed_override: isStoreForceClosed, hours };
+var KV_OVERRIDE = "bs:store_force_closed";
+var KV_HOURS = "bs:runtime_hours";
+async function loadConfig() {
+  const [overrideRaw, hoursRaw] = await Promise.all([
+    kvGet(KV_OVERRIDE),
+    kvGet(KV_HOURS)
+  ]);
+  const forceClosed = overrideRaw === "true";
+  const hours = hoursRaw ? JSON.parse(hoursRaw) : readFileHours() ?? DEFAULT_CONFIG.hours;
+  return { store_closed_override: forceClosed, hours };
 }
 function readFileHours() {
   try {
@@ -22907,8 +22939,9 @@ function readFileHours() {
     return null;
   }
 }
-function getEffectiveHours() {
-  return runtimeHours ?? readFileHours() ?? DEFAULT_CONFIG.hours;
+async function getEffectiveHours() {
+  const raw = await kvGet(KV_HOURS);
+  return raw ? JSON.parse(raw) : readFileHours() ?? DEFAULT_CONFIG.hours;
 }
 function toMinutes(time) {
   const [h, m] = time.split(":").map(Number);
@@ -22954,8 +22987,8 @@ function nextOpeningLabel(config, day) {
   }
   return "11:00 Uhr";
 }
-function computeStatus() {
-  const config = loadConfig();
+async function computeStatus() {
+  const config = await loadConfig();
   if (config.store_closed_override) {
     return { isOpen: false, reason: "OVERLOAD", nextOpen: "bald" };
   }
@@ -22979,27 +23012,34 @@ function computeStatus() {
     nextOpen: nextOpeningLabel(config, day)
   };
 }
-function handleStoreStatus(_req, res) {
-  res.json({ ...computeStatus(), overrideActive: isStoreForceClosed });
+async function handleStoreStatus(_req, res) {
+  const status = await computeStatus();
+  const overrideRaw = await kvGet(KV_OVERRIDE);
+  res.json({ ...status, overrideActive: overrideRaw === "true" });
 }
-function handleSetStoreOverride(req, res) {
+async function handleSetStoreOverride(req, res) {
   const { closed } = req.body;
   if (typeof closed !== "boolean") {
     res.status(400).json({ error: "closed must be boolean" });
     return;
   }
-  setRuntimeOverride(closed);
+  await kvSet(KV_OVERRIDE, String(closed));
   console.log(`[Admin] Store override set to: ${closed ? "CLOSED" : "OPEN"}`);
   res.json({ ok: true, closed });
 }
-function handleGetStoreConfig(_req, res) {
+async function handleGetStoreConfig(_req, res) {
+  const [hours, overrideRaw, status] = await Promise.all([
+    getEffectiveHours(),
+    kvGet(KV_OVERRIDE),
+    computeStatus()
+  ]);
   res.json({
-    hours: getEffectiveHours(),
-    overrideActive: isStoreForceClosed,
-    isOpen: computeStatus().isOpen
+    hours,
+    overrideActive: overrideRaw === "true",
+    isOpen: status.isOpen
   });
 }
-function handleSetHours(req, res) {
+async function handleSetHours(req, res) {
   const { hours } = req.body;
   if (!hours || typeof hours !== "object") {
     res.status(400).json({ error: "hours object required" });
@@ -23012,7 +23052,7 @@ function handleSetHours(req, res) {
       return;
     }
   }
-  setRuntimeHours(hours);
+  await kvSet(KV_HOURS, JSON.stringify(hours));
   console.log("[Admin] \xD6ffnungszeiten aktualisiert:", hours);
   res.json({ ok: true, hours });
 }

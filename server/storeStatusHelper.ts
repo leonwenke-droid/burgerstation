@@ -13,6 +13,7 @@ import fs   from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Request, Response } from "express";
+import { kvSet, kvGet } from "./kvStore";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -42,23 +43,22 @@ const DEFAULT_CONFIG: StoreConfig = {
   },
 };
 
-// ── Runtime state — pure in-memory, zero env-var writes ──────────────────────
-// Resets on cold start. For Vercel: the admin must re-toggle after a cold start
-// (very rare during service hours). No process.env is ever modified.
+// ── KV keys ───────────────────────────────────────────────────────────────────
+const KV_OVERRIDE = "bs:store_force_closed";
+const KV_HOURS    = "bs:runtime_hours";
 
-/** true = all online orders blocked ("Ausverkauf / zu viel los") */
-let isStoreForceClosed = false;
-let runtimeHours: Record<string, DayHours> | null = null;
+// ── Config loader (async, reads from KV) ─────────────────────────────────────
 
-export function setRuntimeOverride(value: boolean): void { isStoreForceClosed = value; }
-export function getRuntimeOverride(): boolean { return isStoreForceClosed; }
-export function setRuntimeHours(hours: Record<string, DayHours>): void { runtimeHours = hours; }
-
-// ── Config loader ─────────────────────────────────────────────────────────────
-
-function loadConfig(): StoreConfig {
-  const hours = runtimeHours ?? readFileHours() ?? DEFAULT_CONFIG.hours;
-  return { store_closed_override: isStoreForceClosed, hours };
+async function loadConfig(): Promise<StoreConfig> {
+  const [overrideRaw, hoursRaw] = await Promise.all([
+    kvGet(KV_OVERRIDE),
+    kvGet(KV_HOURS),
+  ]);
+  const forceClosed = overrideRaw === "true";
+  const hours = hoursRaw
+    ? (JSON.parse(hoursRaw) as Record<string, DayHours>)
+    : (readFileHours() ?? DEFAULT_CONFIG.hours);
+  return { store_closed_override: forceClosed, hours };
 }
 
 function readFileHours(): Record<string, DayHours> | null {
@@ -77,8 +77,9 @@ function readFileHours(): Record<string, DayHours> | null {
 }
 
 /** Returns the currently effective hours (for the admin editor). */
-export function getEffectiveHours(): Record<string, DayHours> {
-  return runtimeHours ?? readFileHours() ?? DEFAULT_CONFIG.hours;
+async function getEffectiveHours(): Promise<Record<string, DayHours>> {
+  const raw = await kvGet(KV_HOURS);
+  return raw ? (JSON.parse(raw) as Record<string, DayHours>) : (readFileHours() ?? DEFAULT_CONFIG.hours);
 }
 
 // ── Time helpers ──────────────────────────────────────────────────────────────
@@ -139,8 +140,8 @@ function nextOpeningLabel(config: StoreConfig, day: number): string {
 
 // ── Core logic ────────────────────────────────────────────────────────────────
 
-function computeStatus(): StoreStatus {
-  const config = loadConfig();
+async function computeStatus(): Promise<StoreStatus> {
+  const config = await loadConfig();
 
   if (config.store_closed_override) {
     return { isOpen: false, reason: "OVERLOAD", nextOpen: "bald" };
@@ -148,14 +149,11 @@ function computeStatus(): StoreStatus {
 
   const { day, totalMinutes } = getBerlinTime();
 
-  // 1. Check today's pre-midnight session
   const todayHours = config.hours[String(day)];
   if (todayHours && isInPreMidnightSession(todayHours, totalMinutes)) {
     return { isOpen: true, nextOpen: "" };
   }
 
-  // 2. Check yesterday's after-midnight session (cross-midnight days only)
-  //    e.g. it's 01:30 on Saturday → are we still in Friday's session (closes 02:00)?
   const yesterday      = (day + 6) % 7;
   const yesterdayHours = config.hours[String(yesterday)];
   if (yesterdayHours) {
@@ -175,33 +173,40 @@ function computeStatus(): StoreStatus {
 
 // ── Express handlers ──────────────────────────────────────────────────────────
 
-export function handleStoreStatus(_req: Request, res: Response): void {
-  res.json({ ...computeStatus(), overrideActive: isStoreForceClosed });
+export async function handleStoreStatus(_req: Request, res: Response): Promise<void> {
+  const status = await computeStatus();
+  const overrideRaw = await kvGet(KV_OVERRIDE);
+  res.json({ ...status, overrideActive: overrideRaw === "true" });
 }
 
 /** POST /api/admin/store-override  body: { closed: boolean } */
-export function handleSetStoreOverride(req: Request, res: Response): void {
+export async function handleSetStoreOverride(req: Request, res: Response): Promise<void> {
   const { closed } = req.body as { closed?: boolean };
   if (typeof closed !== "boolean") {
     res.status(400).json({ error: "closed must be boolean" });
     return;
   }
-  setRuntimeOverride(closed);
+  await kvSet(KV_OVERRIDE, String(closed));
   console.log(`[Admin] Store override set to: ${closed ? "CLOSED" : "OPEN"}`);
   res.json({ ok: true, closed });
 }
 
 /** GET /api/admin/store-config — returns current effective hours + override state. */
-export function handleGetStoreConfig(_req: Request, res: Response): void {
+export async function handleGetStoreConfig(_req: Request, res: Response): Promise<void> {
+  const [hours, overrideRaw, status] = await Promise.all([
+    getEffectiveHours(),
+    kvGet(KV_OVERRIDE),
+    computeStatus(),
+  ]);
   res.json({
-    hours:          getEffectiveHours(),
-    overrideActive: isStoreForceClosed,
-    isOpen:         computeStatus().isOpen,
+    hours,
+    overrideActive: overrideRaw === "true",
+    isOpen:         status.isOpen,
   });
 }
 
 /** POST /api/admin/set-hours  body: { hours: Record<string, {open,close}> } */
-export function handleSetHours(req: Request, res: Response): void {
+export async function handleSetHours(req: Request, res: Response): Promise<void> {
   const { hours } = req.body as { hours?: Record<string, DayHours> };
   if (!hours || typeof hours !== "object") {
     res.status(400).json({ error: "hours object required" });
@@ -215,7 +220,7 @@ export function handleSetHours(req: Request, res: Response): void {
       return;
     }
   }
-  setRuntimeHours(hours);
+  await kvSet(KV_HOURS, JSON.stringify(hours));
   console.log("[Admin] Öffnungszeiten aktualisiert:", hours);
   res.json({ ok: true, hours });
 }
