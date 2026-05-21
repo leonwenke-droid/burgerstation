@@ -8,11 +8,13 @@
 import express from "express";
 import { handleCreateCheckout, handleSumUpWebhook, handleVerifyCheckout } from "../server/sumupHelpers";
 import { handleCreatePosOrder } from "../server/posHelpers";
+import { handleStoreStatus } from "../server/storeStatusHelper";
 import { getGoogleReviewsNormalized } from "../server/googleReviews";
 
 const app = express();
 app.use(express.json());
 
+app.get("/api/store-status",              handleStoreStatus);
 app.post("/api/create-sandbox-checkout", handleCreateCheckout);
 app.post("/api/webhooks/sumup",           handleSumUpWebhook);
 app.get("/api/verify-checkout/:checkoutId", handleVerifyCheckout);

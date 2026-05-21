@@ -1,4 +1,4 @@
-import { type FormEvent, useMemo, useState } from "react";
+import { type FormEvent, useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
   Banknote,
@@ -45,6 +45,20 @@ export default function Checkout() {
   const [checkoutId, setCheckoutId] = useState<string | null>(() =>
     sessionStorage.getItem("bs_checkout_id"),
   );
+
+  // ── Store status ──────────────────────────────────────────────────────────
+  const [storeStatus, setStoreStatus] = useState<{
+    isOpen: boolean;
+    reason?: "OVERLOAD" | "CLOSED";
+    nextOpen?: string;
+  } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/store-status")
+      .then((r) => r.json())
+      .then((s) => setStoreStatus(s))
+      .catch(() => setStoreStatus({ isOpen: true })); // fail-open: don't block on network error
+  }, []);
 
   // ── Derived state ─────────────────────────────────────────────────────────
 
@@ -545,8 +559,24 @@ export default function Checkout() {
                   </span>
                 </label>
 
+                {/* ── Store closed / overload banner ── */}
+                {storeStatus && !storeStatus.isOpen && (
+                  <div className="border-[3px] border-bs-ink bg-bs-yellow shadow-[4px_4px_0_var(--bs-ink)] rounded-xl px-4 py-3 space-y-1">
+                    <p className="font-subhead font-bold text-bs-ink text-sm uppercase tracking-wide">
+                      {storeStatus.reason === "OVERLOAD"
+                        ? "⏸ Online-Kasse pausiert"
+                        : "🕐 Aktuell geschlossen"}
+                    </p>
+                    <p className="text-sm text-bs-ink font-body">
+                      {storeStatus.reason === "OVERLOAD"
+                        ? "Wegen sehr hohem Bestellaufkommen ist die Online-Kasse kurzzeitig pausiert. Bitte versuch es später nochmal."
+                        : `Der Lieferstore hat aktuell geschlossen. Wir sind ab ${storeStatus.nextOpen ?? "11:00 Uhr"} wieder für dich da!`}
+                    </p>
+                  </div>
+                )}
+
                 <button type="submit"
-                  disabled={!agb || submitting}
+                  disabled={!agb || submitting || (storeStatus !== null && !storeStatus.isOpen)}
                   className="btn-pink w-full text-base disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-x-0 disabled:translate-y-0 disabled:shadow-[4px_4px_0_var(--bs-ink)]">
                   {submitLabel()}
                 </button>

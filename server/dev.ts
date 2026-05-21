@@ -3,6 +3,7 @@ import { getGoogleReviewsNormalized } from "./googleReviews";
 import { loadEnvLocal } from "./loadEnvLocal";
 import { handleCreateCheckout, handleSumUpWebhook, handleVerifyCheckout } from "./sumupHelpers";
 import { handleCreatePosOrder } from "./posHelpers";
+import { handleStoreStatus } from "./storeStatusHelper";
 
 const port = Number(process.env.GOOGLE_REVIEWS_DEV_PORT || 8787);
 
@@ -12,6 +13,7 @@ async function main() {
   app.use(express.json());
 
   // ── SumUp routes ──────────────────────────────────────────────────────────
+  app.get("/api/store-status",              handleStoreStatus);
   app.post("/api/create-sandbox-checkout", handleCreateCheckout);
   app.post("/api/webhooks/sumup", handleSumUpWebhook);
   app.get("/api/verify-checkout/:checkoutId", handleVerifyCheckout);
