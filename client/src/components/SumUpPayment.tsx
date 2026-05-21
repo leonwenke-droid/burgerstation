@@ -14,7 +14,12 @@ interface SumUpMountConfig {
   email?: string;
   amount?: string;
   currency?: string;
-  paymentMethods?: Array<"card" | "apple-pay" | "google-pay">;
+  /**
+   * Google Pay — activate after completing Google Pay & Wallet Console registration.
+   * merchantId: issued by Google after domain registration (≠ SumUp merchantCode).
+   * merchantName: displayed to the customer in the Google Pay sheet.
+   */
+  googlePay?: { merchantId: string; merchantName: string };
   onPaymentMethodsLoad?: (methods: string[]) => void;
   onLoad?: () => void;
   onResponse?: (type: SumUpResponseType, body: unknown) => void;
@@ -85,7 +90,6 @@ export default function SumUpPayment({ checkoutId, amount, email }: SumUpPayment
         showFooter:    false,
         amount:        amount.toFixed(2),
         currency:      "EUR",
-        paymentMethods: ["card", "apple-pay", "google-pay"],
         ...(email ? { email } : {}),
         onPaymentMethodsLoad: (methods) => setAvailableMethods(methods),
         onLoad: () => setStatus("ready"),
