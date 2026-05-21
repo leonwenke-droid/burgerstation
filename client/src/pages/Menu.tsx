@@ -31,6 +31,8 @@ type MenuItem = {
   sumup_sku?: string;
   /** SumUp Variant-ID from the official product CSV export. */
   variant_id?: string;
+  /** VAT category for German delivery law: food → 7% | drink → 19%. */
+  category?: "food" | "drink";
   price: string;
   desc?: string;
   badge?: string;
@@ -41,15 +43,17 @@ const BEEF: MenuItem[] = [
   {
     name: "Single Smash",
     sumup_name: "Single Smash",
+    category: "food",
     price: "6,90",
     desc: "Brioche Bun, Single Beef Patty, Cheddar, Onion, Lettuce, Pickles, Burger Sauce",
     allergens: ["gluten", "lactose", "egg"],
   },
   {
     name: "Double Smash",
-    sumup_name: "Double Smash",                              // ← SumUp Artikelname
-    sumup_sku:  "DBL-SMSH-001",                              // ← Artikelnummer (SKU)
-    variant_id: "7569a6cd-268f-4d16-b86f-09676f4dcfaa",     // ← Variant-ID aus CSV-Export
+    sumup_name: "Double Smash",
+    sumup_sku:  "DBL-SMSH-001",
+    variant_id: "7569a6cd-268f-4d16-b86f-09676f4dcfaa",
+    category: "food",
     price: "9,40",
     desc: "Doppeltes Beef Patty, geschmolzener Cheddar, Pickles, Burger Sauce",
     badge: "Top Seller",
@@ -60,6 +64,7 @@ const BEEF: MenuItem[] = [
     sumup_name: "Long Chili Cheese",
     sumup_sku:  "LNG-CHI-002",
     variant_id: "42194cc3-fe98-4a6d-b5fa-04d333730d96",
+    category: "food",
     price: "11,90",
     desc: "Doppeltes Beef, Chili Cheese, Jalapeños, Burger Sauce",
     badge: "Spicy",
@@ -68,6 +73,7 @@ const BEEF: MenuItem[] = [
   {
     name: "BBQ Smash",
     sumup_name: "BBQ Smash",
+    category: "food",
     price: "9,90",
     desc: "Beef Patty, Bacon, Cheddar, Onion Rings, BBQ Sauce",
     badge: "Smoky",
@@ -76,6 +82,7 @@ const BEEF: MenuItem[] = [
   {
     name: "Croissant Smash",
     sumup_name: "Croissant Smash",
+    category: "food",
     price: "11,40",
     desc: "Croissant Bun, doppeltes Beef Patty, Cheddar, Burger Sauce",
     badge: "Signature",
@@ -84,6 +91,7 @@ const BEEF: MenuItem[] = [
   {
     name: "Sucuk Burger",
     sumup_name: "Sucuk Burger",
+    category: "food",
     price: "8,90",
     desc: "Sucuk, Cheddar, Onion, Lettuce, Pickles, Garlic Sauce",
     allergens: ["gluten", "lactose"],
@@ -94,6 +102,7 @@ const CHICKEN: MenuItem[] = [
   {
     name: "Classic Chicken",
     sumup_name: "Classic Chicken",
+    category: "food",
     price: "9,00",
     desc: "Knuspriges Chicken Patty, Buttermilk-Mariniert, Cheddar, Lettuce, Pickles, Burger Sauce",
     allergens: ["gluten", "egg"],
@@ -101,6 +110,7 @@ const CHICKEN: MenuItem[] = [
   {
     name: "Garlic Chicken",
     sumup_name: "Garlic Chicken",
+    category: "food",
     price: "9,00",
     desc: "Chicken Patty, Cheddar, Garlic Sauce",
     allergens: ["gluten", "egg"],
@@ -108,6 +118,7 @@ const CHICKEN: MenuItem[] = [
   {
     name: "Long Chicken",
     sumup_name: "Long Chicken",
+    category: "food",
     price: "11,50",
     desc: "Doppelt Chicken Patty, Cheddar, Lettuce, Onion, Pickles, Burger Sauce",
     allergens: ["gluten", "egg"],
@@ -118,6 +129,7 @@ const VEGAN: MenuItem[] = [
   {
     name: "Vegan Burger",
     sumup_name: "Vegan Burger",
+    category: "food",
     price: "8,70",
     desc: "Vegan Patty, Lettuce, Onion, Pickles, Vegan Sauce",
     allergens: ["gluten"],
@@ -125,6 +137,7 @@ const VEGAN: MenuItem[] = [
   {
     name: "Falafel Burger",
     sumup_name: "Falafel Burger",
+    category: "food",
     price: "8,70",
     desc: "Hausgemachte Falafel, Lettuce, Onion, Pickles, Vegan Sauce",
     allergens: ["gluten"],
@@ -132,24 +145,26 @@ const VEGAN: MenuItem[] = [
 ];
 
 const SIDES: MenuItem[] = [
-  { name: "Fries", sumup_name: "Fries", price: "3,50", allergens: ["gluten"] },
+  { name: "Fries", sumup_name: "Fries", category: "food", price: "3,50", allergens: ["gluten"] },
   {
     name: "Beef & Cheese Fries",
     sumup_name: "Beef & Cheese Fries",
+    category: "food",
     price: "7,90",
     desc: "Fries mit Smash Beef und Cheese Sauce",
     allergens: ["gluten", "lactose"],
   },
-  { name: "Sweet Potato Fries", sumup_name: "Sweet Potato Fries", price: "4,50" },
-  { name: "8 Chicken Nuggets", sumup_name: "8 Chicken Nuggets", price: "6,00", allergens: ["gluten", "egg"] },
-  { name: "Chicken Tenders", sumup_name: "Chicken Tenders", price: "6,60", allergens: ["gluten", "egg"] },
-  { name: "Onion Rings", sumup_name: "Onion Rings", price: "6,20", allergens: ["gluten", "egg"] },
+  { name: "Sweet Potato Fries", sumup_name: "Sweet Potato Fries", category: "food", price: "4,50" },
+  { name: "8 Chicken Nuggets", sumup_name: "8 Chicken Nuggets", category: "food", price: "6,00", allergens: ["gluten", "egg"] },
+  { name: "Chicken Tenders", sumup_name: "Chicken Tenders", category: "food", price: "6,60", allergens: ["gluten", "egg"] },
+  { name: "Onion Rings", sumup_name: "Onion Rings", category: "food", price: "6,20", allergens: ["gluten", "egg"] },
 ];
 
 const SHAKES: MenuItem[] = [
   {
     name: "Chocolate Shake",
     sumup_name: "Chocolate Shake",
+    category: "drink",
     price: "4,00",
     desc: "Cremig, kalt, klassisch",
     allergens: ["lactose", "egg"],
@@ -157,6 +172,7 @@ const SHAKES: MenuItem[] = [
   {
     name: "Vanilla Shake",
     sumup_name: "Vanilla Shake",
+    category: "drink",
     price: "4,00",
     desc: "Vanille, dick, eiskalt",
     allergens: ["lactose", "egg"],
@@ -164,8 +180,8 @@ const SHAKES: MenuItem[] = [
 ];
 
 const DRINKS: MenuItem[] = [
-  { name: "Water", sumup_name: "Water", price: "2,00", desc: "Wasser" },
-  { name: "Fritz Limo", sumup_name: "Fritz Limo", price: "3,30", desc: "Cola · Orange · Zitrone" },
+  { name: "Water", sumup_name: "Water", category: "drink", price: "2,00", desc: "Wasser" },
+  { name: "Fritz Limo", sumup_name: "Fritz Limo", category: "drink", price: "3,30", desc: "Cola · Orange · Zitrone" },
 ];
 
 const SAUCES: MenuItem[] = [
@@ -223,7 +239,7 @@ function BurgerCard({ item, img }: { item: MenuItem; img?: string }) {
   const [added, setAdded] = useState(false);
 
   function handleAdd() {
-    addItem({ id: item.name, name: item.name, sumup_name: item.sumup_name ?? item.name, sumup_sku: item.sumup_sku, variant_id: item.variant_id, price: parsePrice(item.price) });
+    addItem({ id: item.name, name: item.name, sumup_name: item.sumup_name ?? item.name, sumup_sku: item.sumup_sku, variant_id: item.variant_id, category: item.category, price: parsePrice(item.price) });
     setAdded(true);
     setTimeout(() => setAdded(false), 1200);
   }
@@ -301,7 +317,7 @@ function HorizontalCard({ item }: { item: MenuItem }) {
   const [added, setAdded] = useState(false);
 
   function handleAdd() {
-    addItem({ id: item.name, name: item.name, sumup_name: item.sumup_name ?? item.name, sumup_sku: item.sumup_sku, variant_id: item.variant_id, price: parsePrice(item.price) });
+    addItem({ id: item.name, name: item.name, sumup_name: item.sumup_name ?? item.name, sumup_sku: item.sumup_sku, variant_id: item.variant_id, category: item.category, price: parsePrice(item.price) });
     setAdded(true);
     setTimeout(() => setAdded(false), 1200);
   }
@@ -368,7 +384,7 @@ function ShakeCard({ item }: { item: MenuItem }) {
   const [added, setAdded] = useState(false);
 
   function handleAdd() {
-    addItem({ id: item.name, name: item.name, sumup_name: item.sumup_name ?? item.name, sumup_sku: item.sumup_sku, variant_id: item.variant_id, price: parsePrice(item.price) });
+    addItem({ id: item.name, name: item.name, sumup_name: item.sumup_name ?? item.name, sumup_sku: item.sumup_sku, variant_id: item.variant_id, category: item.category, price: parsePrice(item.price) });
     setAdded(true);
     setTimeout(() => setAdded(false), 1200);
   }

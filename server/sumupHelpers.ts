@@ -6,12 +6,16 @@ import type { Request, Response } from "express";
 // Einzige verlässliche Quelle für Preise und Steuersätze.
 // Basiert auf dem offiziellen SumUp CSV-Export.
 // Neue Artikel einfach als weiteres Objekt hinzufügen.
+// Steuersätze (Lieferung, Deutschland):
+//   food  → 7%  (§ 12 Abs. 2 Nr. 1 UStG — Speisen)
+//   drink → 19% (§ 12 Abs. 1 UStG    — Getränke)
 export const SUMUP_CATALOG = [
   {
-    sumup_catalog_id: "c0b10e52-2f19-4614-9633-76e4da4228c3",  // Item ID aus dem SumUp CSV-Export
-    variant_id:       "7569a6cd-268f-4d16-b86f-09676f4dcfaa",  // Variant ID aus dem SumUp CSV-Export
+    sumup_catalog_id: "c0b10e52-2f19-4614-9633-76e4da4228c3",
+    variant_id:       "7569a6cd-268f-4d16-b86f-09676f4dcfaa",
     sku:              "DBL-SMSH-001",
     name:             "Double Smash",
+    category:         "food" as const,
     price:            9.40,
     tax_rate:         7.00,
   },
@@ -20,24 +24,28 @@ export const SUMUP_CATALOG = [
     variant_id:       "42194cc3-fe98-4a6d-b5fa-04d333730d96",
     sku:              "LNG-CHI-002",
     name:             "Long Chili Cheese",
+    category:         "food" as const,
     price:            11.90,
     tax_rate:         7.00,
   },
-  // Vorlage für neue Artikel (aus SumUp CSV-Export einfügen):
-  // { sumup_catalog_id: "HIER_ID_EINTRAGEN", variant_id: "HIER_VARIANT_ID", sku: "...", name: "Single Smash", price: 0.00, tax_rate: 7.00 },
+  // Vorlage für Speisen  (7%):  { sumup_catalog_id: "...", variant_id: "...", sku: "...", name: "...", category: "food"  as const, price: 0.00, tax_rate: 7.00  },
+  // Vorlage für Getränke (19%): { sumup_catalog_id: "...", variant_id: "...", sku: "...", name: "...", category: "drink" as const, price: 0.00, tax_rate: 19.00 },
 ] as const;
 
 // ─── Interfaces ───────────────────────────────────────────────────────────────
 
 /** Item sent from the frontend: either a catalog variant (variant_id + quantity)
- *  or a non-catalog fallback (name + price + quantity). */
+ *  or a non-catalog fallback (name + price + quantity + category). */
 export interface OrderedItem {
   variant_id?: string;
   name?:       string;
   sku?:        string;
   quantity:    number;
-  price?:      number;   // used only when no variant_id
-  tax_rate?:   number;   // defaults to 7 when no variant_id
+  price?:      number;
+  /** "food" → 7% MwSt. | "drink" → 19% MwSt. (Lieferung, Deutschland) */
+  category?:   "food" | "drink";
+  /** Explicit override — only used when no variant_id; derived from category otherwise. */
+  tax_rate?:   number;
 }
 
 /** Resolved item after catalog lookup — all fields guaranteed. */
@@ -47,6 +55,7 @@ interface ResolvedItem {
   name:        string;
   quantity:    number;
   price:       number;
+  category:    "food" | "drink";
   tax_rate:    number;
 }
 
@@ -93,6 +102,7 @@ function resolveItems(ordered: OrderedItem[]): { items: ResolvedItem[]; error?: 
         name:       entry.name,
         quantity:   o.quantity,
         price:      entry.price,
+        category:   entry.category,
         tax_rate:   entry.tax_rate,
       });
     } else {
@@ -100,12 +110,17 @@ function resolveItems(ordered: OrderedItem[]): { items: ResolvedItem[]; error?: 
       if (!o.name || typeof o.price !== "number" || o.price <= 0) {
         return { items: [], error: "Fallback-Item muss name und price > 0 haben." };
       }
+      const category: "food" | "drink" = o.category ?? "food";
+      // Derive tax_rate from category (legal default for delivery in Germany).
+      // An explicit o.tax_rate override still takes precedence.
+      const tax_rate = o.tax_rate ?? (category === "drink" ? 19 : 7);
       resolved.push({
         sku:      o.sku,
         name:     o.name,
         quantity: o.quantity,
         price:    o.price,
-        tax_rate: o.tax_rate ?? 7,
+        category,
+        tax_rate,
       });
     }
   }

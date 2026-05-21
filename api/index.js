@@ -22476,11 +22476,10 @@ import path from "node:path";
 var SUMUP_CATALOG = [
   {
     sumup_catalog_id: "c0b10e52-2f19-4614-9633-76e4da4228c3",
-    // Item ID aus dem SumUp CSV-Export
     variant_id: "7569a6cd-268f-4d16-b86f-09676f4dcfaa",
-    // Variant ID aus dem SumUp CSV-Export
     sku: "DBL-SMSH-001",
     name: "Double Smash",
+    category: "food",
     price: 9.4,
     tax_rate: 7
   },
@@ -22489,11 +22488,12 @@ var SUMUP_CATALOG = [
     variant_id: "42194cc3-fe98-4a6d-b5fa-04d333730d96",
     sku: "LNG-CHI-002",
     name: "Long Chili Cheese",
+    category: "food",
     price: 11.9,
     tax_rate: 7
   }
-  // Vorlage für neue Artikel (aus SumUp CSV-Export einfügen):
-  // { sumup_catalog_id: "HIER_ID_EINTRAGEN", variant_id: "HIER_VARIANT_ID", sku: "...", name: "Single Smash", price: 0.00, tax_rate: 7.00 },
+  // Vorlage für Speisen  (7%):  { sumup_catalog_id: "...", variant_id: "...", sku: "...", name: "...", category: "food"  as const, price: 0.00, tax_rate: 7.00  },
+  // Vorlage für Getränke (19%): { sumup_catalog_id: "...", variant_id: "...", sku: "...", name: "...", category: "drink" as const, price: 0.00, tax_rate: 19.00 },
 ];
 var pendingOrders = /* @__PURE__ */ new Map();
 function lookupVariant(variant_id) {
@@ -22519,18 +22519,22 @@ function resolveItems(ordered) {
         name: entry.name,
         quantity: o.quantity,
         price: entry.price,
+        category: entry.category,
         tax_rate: entry.tax_rate
       });
     } else {
       if (!o.name || typeof o.price !== "number" || o.price <= 0) {
         return { items: [], error: "Fallback-Item muss name und price > 0 haben." };
       }
+      const category = o.category ?? "food";
+      const tax_rate = o.tax_rate ?? (category === "drink" ? 19 : 7);
       resolved.push({
         sku: o.sku,
         name: o.name,
         quantity: o.quantity,
         price: o.price,
-        tax_rate: o.tax_rate ?? 7
+        category,
+        tax_rate
       });
     }
   }

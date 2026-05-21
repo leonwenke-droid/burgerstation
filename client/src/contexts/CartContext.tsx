@@ -9,6 +9,8 @@ export interface CartItem {
   sumup_sku?: string;
   /** SumUp Variant-ID from the official product CSV export. When present, price is resolved server-side from SUMUP_CATALOG. */
   variant_id?: string;
+  /** Tax category for VAT calculation (delivery, Germany): food → 7% | drink → 19%. */
+  category?: "food" | "drink";
   price: number;
   quantity: number;
 }

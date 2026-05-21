@@ -130,7 +130,7 @@ export default function Checkout() {
             sku:      i.sumup_sku,
             quantity: i.quantity,
             price:    i.price,
-            tax_rate: 7,
+            category: i.category, // "food" → 7% MwSt. | "drink" → 19% MwSt.
           },
     );
   }
