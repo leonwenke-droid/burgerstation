@@ -42,10 +42,26 @@ const DEFAULT_CONFIG: StoreConfig = {
   },
 };
 
+// ── Runtime override (set via admin dashboard without restart) ────────────────
+
+let runtimeOverride: boolean | null = null;
+
+/** Called by POST /api/admin/store-override from the admin dashboard. */
+export function setRuntimeOverride(value: boolean | null): void {
+  runtimeOverride = value;
+}
+export function getRuntimeOverride(): boolean | null {
+  return runtimeOverride;
+}
+
 // ── Config loader ─────────────────────────────────────────────────────────────
 
 function loadConfig(): StoreConfig {
-  // Env-var override (recommended for Vercel: set STORE_CLOSED_OVERRIDE=true)
+  // 1. Runtime override (set via admin dashboard — survives without redeploy)
+  if (runtimeOverride !== null) {
+    return { ...DEFAULT_CONFIG, store_closed_override: runtimeOverride };
+  }
+  // 2. Env-var override (recommended for Vercel: set STORE_CLOSED_OVERRIDE=true)
   if (process.env.STORE_CLOSED_OVERRIDE === "true") {
     return { ...DEFAULT_CONFIG, store_closed_override: true };
   }
@@ -160,8 +176,20 @@ function computeStatus(): StoreStatus {
   };
 }
 
-// ── Express handler ───────────────────────────────────────────────────────────
+// ── Express handlers ──────────────────────────────────────────────────────────
 
 export function handleStoreStatus(_req: Request, res: Response): void {
-  res.json(computeStatus());
+  res.json({ ...computeStatus(), overrideActive: runtimeOverride });
+}
+
+/** POST /api/admin/store-override  body: { closed: boolean } */
+export function handleSetStoreOverride(req: Request, res: Response): void {
+  const { closed } = req.body as { closed?: boolean };
+  if (typeof closed !== "boolean") {
+    res.status(400).json({ error: "closed must be boolean" });
+    return;
+  }
+  setRuntimeOverride(closed);
+  console.log(`[Admin] Store override set to: ${closed ? "CLOSED" : "OPEN"}`);
+  res.json({ ok: true, closed });
 }

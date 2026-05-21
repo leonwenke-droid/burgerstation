@@ -1,4 +1,12 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+
+// Stable session ID for analytics (not tied to auth — just identifies this browser tab)
+function getSessionId(): string {
+  const key = "bs_session_id";
+  let id = sessionStorage.getItem(key);
+  if (!id) { id = Math.random().toString(36).slice(2, 10); sessionStorage.setItem(key, id); }
+  return id;
+}
 
 export interface CartItem {
   id: string;
@@ -33,6 +41,7 @@ const CartContext = createContext<CartContextType | null>(null);
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const sessionId = useRef(getSessionId());
 
   function addItem(item: Omit<CartItem, "quantity">) {
     setItems((prev) => {
@@ -63,6 +72,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
   function clearCart() {
     setItems([]);
   }
+
+  // Sync cart item count to analytics backend (fire-and-forget)
+  useEffect(() => {
+    const count = items.reduce((s, i) => s + i.quantity, 0);
+    fetch("/api/analytics/cart-sync", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ sessionId: sessionId.current, count }),
+    }).catch(() => {});
+  }, [items]);
 
   const subtotal = useMemo(
     () => items.reduce((sum, i) => sum + i.price * i.quantity, 0),

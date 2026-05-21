@@ -8,14 +8,19 @@
 import express from "express";
 import { handleCreateCheckout, handleSumUpWebhook, handleVerifyCheckout } from "../server/sumupHelpers";
 import { handleCreatePosOrder } from "../server/posHelpers";
-import { handleStoreStatus } from "../server/storeStatusHelper";
+import { handleStoreStatus, handleSetStoreOverride } from "../server/storeStatusHelper";
+import { handleSnapshot, handleCartSync, trackActiveUser } from "../server/analyticsHelper";
 import { getGoogleReviewsNormalized } from "../server/googleReviews";
 
 const app = express();
 app.use(express.json());
+app.use(trackActiveUser);
 
-app.get("/api/store-status",              handleStoreStatus);
-app.post("/api/create-sandbox-checkout", handleCreateCheckout);
+app.get("/api/store-status",                handleStoreStatus);
+app.post("/api/admin/store-override",       handleSetStoreOverride);
+app.get("/api/analytics/snapshot",          handleSnapshot);
+app.post("/api/analytics/cart-sync",        handleCartSync);
+app.post("/api/create-sandbox-checkout",    handleCreateCheckout);
 app.post("/api/webhooks/sumup",           handleSumUpWebhook);
 app.get("/api/verify-checkout/:checkoutId", handleVerifyCheckout);
 app.post("/api/create-pos-order",         handleCreatePosOrder);

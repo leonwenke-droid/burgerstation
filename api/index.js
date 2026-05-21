@@ -22659,6 +22659,61 @@ function handleSumUpWebhook(req, res) {
   appendOrderLog(logEntry);
 }
 
+// server/analyticsHelper.ts
+var activeIPs = /* @__PURE__ */ new Map();
+var cartSessions = /* @__PURE__ */ new Map();
+var orderHistory = [];
+var SESSION_TTL_MS = 5 * 60 * 1e3;
+function pruneStale() {
+  const cutoff = Date.now() - SESSION_TTL_MS;
+  for (const [ip, ts] of activeIPs) {
+    if (ts < cutoff) activeIPs.delete(ip);
+  }
+}
+function totalCartItems() {
+  let total = 0;
+  for (const count of cartSessions.values()) total += count;
+  return total;
+}
+function todayPrefix() {
+  return (/* @__PURE__ */ new Date()).toISOString().slice(0, 10);
+}
+function buildSnapshot() {
+  pruneStale();
+  const today = todayPrefix();
+  const todayOrders = orderHistory.filter((o) => o.timestamp.startsWith(today));
+  return {
+    activeUsers: activeIPs.size,
+    totalCartItems: totalCartItems(),
+    orders: orderHistory,
+    ordersToday: todayOrders.length,
+    revenueToday: todayOrders.reduce((s, o) => s + o.total, 0)
+  };
+}
+function trackActiveUser(req, _res, next) {
+  const ip = req.headers["x-forwarded-for"]?.split(",")[0]?.trim() ?? req.socket?.remoteAddress ?? "unknown";
+  activeIPs.set(ip, Date.now());
+  next();
+}
+function recordOrder(order) {
+  orderHistory.unshift(order);
+  if (orderHistory.length > 500) orderHistory.pop();
+}
+function handleSnapshot(_req, res) {
+  res.json(buildSnapshot());
+}
+function handleCartSync(req, res) {
+  const { sessionId, count } = req.body;
+  if (sessionId && typeof count === "number" && count >= 0) {
+    if (count === 0) {
+      cartSessions.delete(sessionId);
+    } else {
+      cartSessions.set(sessionId, count);
+    }
+  }
+  res.json({ ok: true, totalCartItems: totalCartItems() });
+}
+
 // server/posHelpers.ts
 var GOODTILL_PRODUCTS = {
   "7569a6cd-268f-4d16-b86f-09676f4dcfaa": {
@@ -22722,6 +22777,15 @@ async function handleCreatePosOrder(req, res) {
       items: items.map((i) => `${i.quantity}\xD7 ${i.name} @ ${i.price} \u20AC`),
       customer
     });
+    recordOrder({
+      id: orderRef ?? `BS-LOCAL-${Date.now()}`,
+      timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+      total: items.reduce((s, i) => s + i.price * i.quantity, 0),
+      status: paymentStatus,
+      items: items.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price })),
+      customer: customer ? `${customer.vorname} ${customer.nachname}` : void 0,
+      phone: customer?.telefon
+    });
     res.json({ ok: true, mode: "local-only", ref: orderRef });
     return;
   }
@@ -22774,6 +22838,15 @@ async function handleCreatePosOrder(req, res) {
     console.log(
       `[POS] \u2705 Bestellung erstellt | ref: ${orderRef} | status: ${paymentStatus} | POS-ID: ${posData.id}`
     );
+    recordOrder({
+      id: orderRef ?? `BS-POS-${posData.id ?? Date.now()}`,
+      timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+      total: items.reduce((s, i) => s + i.price * i.quantity, 0),
+      status: paymentStatus,
+      items: items.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price })),
+      customer: customer ? `${customer.vorname} ${customer.nachname}` : void 0,
+      phone: customer?.telefon
+    });
     res.json({ ok: true, posOrderId: posData.id, ref: orderRef });
   } catch (err) {
     console.error("[POS] Unexpected error:", err);
@@ -22797,7 +22870,14 @@ var DEFAULT_CONFIG = {
     "0": { open: "11:00", close: "23:00" }
   }
 };
+var runtimeOverride = null;
+function setRuntimeOverride(value) {
+  runtimeOverride = value;
+}
 function loadConfig() {
+  if (runtimeOverride !== null) {
+    return { ...DEFAULT_CONFIG, store_closed_override: runtimeOverride };
+  }
   if (process.env.STORE_CLOSED_OVERRIDE === "true") {
     return { ...DEFAULT_CONFIG, store_closed_override: true };
   }
@@ -22883,7 +22963,17 @@ function computeStatus() {
   };
 }
 function handleStoreStatus(_req, res) {
-  res.json(computeStatus());
+  res.json({ ...computeStatus(), overrideActive: runtimeOverride });
+}
+function handleSetStoreOverride(req, res) {
+  const { closed } = req.body;
+  if (typeof closed !== "boolean") {
+    res.status(400).json({ error: "closed must be boolean" });
+    return;
+  }
+  setRuntimeOverride(closed);
+  console.log(`[Admin] Store override set to: ${closed ? "CLOSED" : "OPEN"}`);
+  res.json({ ok: true, closed });
 }
 
 // server/googleReviews.ts
@@ -22973,7 +23063,11 @@ async function getGoogleReviewsNormalized() {
 // api/_source.ts
 var app = (0, import_express.default)();
 app.use(import_express.default.json());
+app.use(trackActiveUser);
 app.get("/api/store-status", handleStoreStatus);
+app.post("/api/admin/store-override", handleSetStoreOverride);
+app.get("/api/analytics/snapshot", handleSnapshot);
+app.post("/api/analytics/cart-sync", handleCartSync);
 app.post("/api/create-sandbox-checkout", handleCreateCheckout);
 app.post("/api/webhooks/sumup", handleSumUpWebhook);
 app.get("/api/verify-checkout/:checkoutId", handleVerifyCheckout);

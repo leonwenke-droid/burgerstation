@@ -20,6 +20,7 @@
  */
 
 import type { Request, Response } from "express";
+import { recordOrder } from "./analyticsHelper";
 
 // ── Product ID mapping ────────────────────────────────────────────────────────
 // Keyed by SumUp variant_id → The Good Till product_id
@@ -139,6 +140,15 @@ export async function handleCreatePosOrder(req: Request, res: Response) {
       items:   items.map((i) => `${i.quantity}× ${i.name} @ ${i.price} €`),
       customer,
     });
+    recordOrder({
+      id:        orderRef ?? `BS-LOCAL-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      total:     items.reduce((s, i) => s + i.price * i.quantity, 0),
+      status:    paymentStatus,
+      items:     items.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price })),
+      customer:  customer ? `${customer.vorname} ${customer.nachname}` : undefined,
+      phone:     customer?.telefon,
+    });
     res.json({ ok: true, mode: "local-only", ref: orderRef });
     return;
   }
@@ -204,6 +214,15 @@ export async function handleCreatePosOrder(req: Request, res: Response) {
     console.log(
       `[POS] ✅ Bestellung erstellt | ref: ${orderRef} | status: ${paymentStatus} | POS-ID: ${posData.id}`,
     );
+    recordOrder({
+      id:        orderRef ?? `BS-POS-${posData.id ?? Date.now()}`,
+      timestamp: new Date().toISOString(),
+      total:     items.reduce((s, i) => s + i.price * i.quantity, 0),
+      status:    paymentStatus,
+      items:     items.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price })),
+      customer:  customer ? `${customer.vorname} ${customer.nachname}` : undefined,
+      phone:     customer?.telefon,
+    });
     res.json({ ok: true, posOrderId: posData.id, ref: orderRef });
   } catch (err) {
     console.error("[POS] Unexpected error:", err);
