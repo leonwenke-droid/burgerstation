@@ -3,9 +3,8 @@ import { useLocation } from "wouter";
 import { AlertCircle, CheckCircle, Loader2 } from "lucide-react";
 
 // ── SumUp Payment Widget type declarations ────────────────────────────────────
-// Source: https://developer.sumup.com/online-payments/checkouts/card-widget
+// Docs: https://developer.sumup.com/online-payments/checkouts/card-widget
 interface SumUpMountConfig {
-  /** DOM element id to render the widget in. */
   id?: string;
   checkoutId: string;
   locale?: string;
@@ -15,16 +14,7 @@ interface SumUpMountConfig {
   email?: string;
   amount?: string;
   currency?: string;
-  /**
-   * Required for Google Pay. `merchantId` is issued by Google after domain
-   * registration; `merchantName` is shown to the customer in the G-Pay sheet.
-   * Leave undefined until Google merchant onboarding is complete.
-   */
-  googlePay?: { merchantId: string; merchantName: string };
-  /**
-   * Called when the widget has determined which payment methods are available
-   * for this checkout. Useful to hide/show the host page payment section.
-   */
+  paymentMethods?: Array<"card" | "apple-pay" | "google-pay">;
   onPaymentMethodsLoad?: (methods: string[]) => void;
   onLoad?: () => void;
   onResponse?: (type: SumUpResponseType, body: unknown) => void;
@@ -97,10 +87,7 @@ export default function SumUpPayment({ checkoutId, amount, email }: SumUpPayment
         currency:      "EUR",
         paymentMethods: ["card", "apple-pay", "google-pay"],
         ...(email ? { email } : {}),
-        onPaymentMethodsLoad: (methods) => {
-          setAvailableMethods(methods);
-          console.log("[SumUp] Verfügbare Zahlungsarten:", methods);
-        },
+        onPaymentMethodsLoad: (methods) => setAvailableMethods(methods),
         onLoad: () => setStatus("ready"),
         onResponse: (type, body) => {
           console.log("[SumUp] Response:", type, body);
@@ -111,12 +98,11 @@ export default function SumUpPayment({ checkoutId, amount, email }: SumUpPayment
             case "success":
               setStatus("success");
               sessionStorage.removeItem("bs_checkout_id");
-              // Verify checkout details on the server (logs items + amount).
               fetch(`/api/verify-checkout/${checkoutId}`)
                 .then((r) => r.json())
-                .then((d) => console.log("[SumUp Verify] Frontend response:", d))
-                .catch((err) => console.warn("[SumUp Verify] Fehler:", err));
-              // Push PAID order to SumUp KassenPOS Pro (The Good Till).
+                .then((d) => console.log("[SumUp Verify]", d))
+                .catch(() => {});
+              // Push PAID order to SumUp KassenPOS Pro.
               try {
                 const raw = sessionStorage.getItem("bs_pos_order");
                 if (raw) {
