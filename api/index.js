@@ -22660,39 +22660,41 @@ function handleSumUpWebhook(req, res) {
 }
 
 // server/analyticsHelper.ts
-var activeIPs = /* @__PURE__ */ new Map();
+var activeSessions = /* @__PURE__ */ new Map();
 var cartSessions = /* @__PURE__ */ new Map();
 var orderHistory = [];
-var SESSION_TTL_MS = 5 * 60 * 1e3;
+var SESSION_TTL_MS = 45e3;
 function pruneStale() {
   const cutoff = Date.now() - SESSION_TTL_MS;
-  for (const [ip, ts] of activeIPs) {
-    if (ts < cutoff) activeIPs.delete(ip);
+  for (const [id, ts] of activeSessions) {
+    if (ts < cutoff) {
+      activeSessions.delete(id);
+      cartSessions.delete(id);
+    }
   }
 }
 function totalCartItems() {
-  let total = 0;
-  for (const count of cartSessions.values()) total += count;
-  return total;
-}
-function todayPrefix() {
-  return (/* @__PURE__ */ new Date()).toISOString().slice(0, 10);
+  let n = 0;
+  for (const c of cartSessions.values()) n += c;
+  return n;
 }
 function buildSnapshot() {
   pruneStale();
-  const today = todayPrefix();
+  const today = (/* @__PURE__ */ new Date()).toISOString().slice(0, 10);
   const todayOrders = orderHistory.filter((o) => o.timestamp.startsWith(today));
   return {
-    activeUsers: activeIPs.size,
+    activeUsers: activeSessions.size,
     totalCartItems: totalCartItems(),
     orders: orderHistory,
     ordersToday: todayOrders.length,
     revenueToday: todayOrders.reduce((s, o) => s + o.total, 0)
   };
 }
+function extractSession(req) {
+  return req.headers["x-session-id"] ?? req.body?.sessionId ?? req.headers["x-forwarded-for"]?.split(",")[0]?.trim() ?? req.socket?.remoteAddress ?? "unknown";
+}
 function trackActiveUser(req, _res, next) {
-  const ip = req.headers["x-forwarded-for"]?.split(",")[0]?.trim() ?? req.socket?.remoteAddress ?? "unknown";
-  activeIPs.set(ip, Date.now());
+  activeSessions.set(extractSession(req), Date.now());
   next();
 }
 function recordOrder(order) {
@@ -22702,14 +22704,23 @@ function recordOrder(order) {
 function handleSnapshot(_req, res) {
   res.json(buildSnapshot());
 }
+function handleHeartbeat(req, res) {
+  const sessionId = extractSession(req);
+  activeSessions.set(sessionId, Date.now());
+  res.json({ ok: true, activeUsers: activeSessions.size });
+}
+function handleDisconnect(req, res) {
+  const sessionId = extractSession(req);
+  activeSessions.delete(sessionId);
+  cartSessions.delete(sessionId);
+  res.json({ ok: true });
+}
 function handleCartSync(req, res) {
   const { sessionId, count } = req.body;
   if (sessionId && typeof count === "number" && count >= 0) {
-    if (count === 0) {
-      cartSessions.delete(sessionId);
-    } else {
-      cartSessions.set(sessionId, count);
-    }
+    activeSessions.set(sessionId, Date.now());
+    if (count === 0) cartSessions.delete(sessionId);
+    else cartSessions.set(sessionId, count);
   }
   res.json({ ok: true, totalCartItems: totalCartItems() });
 }
@@ -22870,28 +22881,17 @@ var DEFAULT_CONFIG = {
     "0": { open: "11:00", close: "23:00" }
   }
 };
-var runtimeOverride = null;
+var isStoreForceClosed = false;
 var runtimeHours = null;
 function setRuntimeOverride(value) {
-  runtimeOverride = value;
+  isStoreForceClosed = value;
 }
 function setRuntimeHours(hours) {
   runtimeHours = hours;
 }
 function loadConfig() {
-  if (runtimeOverride !== null) {
-    const hours = runtimeHours ?? readFileHours() ?? DEFAULT_CONFIG.hours;
-    return { store_closed_override: runtimeOverride, hours };
-  }
-  if (process.env.STORE_CLOSED_OVERRIDE === "true") {
-    return { ...DEFAULT_CONFIG, store_closed_override: true };
-  }
-  if (runtimeHours) {
-    return { store_closed_override: false, hours: runtimeHours };
-  }
-  const fileConfig = readFileHours();
-  if (fileConfig) return { store_closed_override: false, hours: fileConfig };
-  return DEFAULT_CONFIG;
+  const hours = runtimeHours ?? readFileHours() ?? DEFAULT_CONFIG.hours;
+  return { store_closed_override: isStoreForceClosed, hours };
 }
 function readFileHours() {
   try {
@@ -23110,6 +23110,8 @@ app.post("/api/admin/store-override", handleSetStoreOverride);
 app.get("/api/admin/store-config", handleGetStoreConfig);
 app.post("/api/admin/set-hours", handleSetHours);
 app.get("/api/analytics/snapshot", handleSnapshot);
+app.post("/api/analytics/heartbeat", handleHeartbeat);
+app.post("/api/analytics/disconnect", handleDisconnect);
 app.post("/api/analytics/cart-sync", handleCartSync);
 app.post("/api/create-sandbox-checkout", handleCreateCheckout);
 app.post("/api/webhooks/sumup", handleSumUpWebhook);

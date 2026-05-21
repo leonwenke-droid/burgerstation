@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Route, Switch, useLocation } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -27,6 +27,57 @@ function ScrollToTop() {
   return null;
 }
 
+/** Returns the stable session ID for this browser tab (created once, stored in sessionStorage). */
+function getSessionId(): string {
+  const KEY = "bs_session_id";
+  let id = sessionStorage.getItem(KEY);
+  if (!id) { id = Math.random().toString(36).slice(2, 12); sessionStorage.setItem(KEY, id); }
+  return id;
+}
+
+/**
+ * Sends a heartbeat to the analytics API every 30 s so the active-visitor counter
+ * stays accurate. On tab/window close, fires a synchronous disconnect via sendBeacon
+ * so the counter drops to 0 immediately without waiting for the 45 s TTL.
+ */
+function useAnalyticsSession() {
+  const sessionId = useRef(getSessionId());
+
+  useEffect(() => {
+    const sid = sessionId.current;
+
+    // Initial ping
+    fetch("/api/analytics/heartbeat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-session-id": sid },
+      body: JSON.stringify({ sessionId: sid }),
+    }).catch(() => {});
+
+    // Heartbeat every 30 s (TTL is 45 s so this keeps the session alive)
+    const timer = setInterval(() => {
+      fetch("/api/analytics/heartbeat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-session-id": sid },
+        body: JSON.stringify({ sessionId: sid }),
+      }).catch(() => {});
+    }, 30_000);
+
+    // Instant disconnect on tab/window close
+    function onUnload() {
+      navigator.sendBeacon(
+        "/api/analytics/disconnect",
+        new Blob([JSON.stringify({ sessionId: sid })], { type: "application/json" }),
+      );
+    }
+    window.addEventListener("beforeunload", onUnload);
+
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener("beforeunload", onUnload);
+    };
+  }, []);
+}
+
 function Router() {
   return (
     <>
@@ -50,6 +101,7 @@ function Router() {
 }
 
 function App() {
+  useAnalyticsSession();
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="light">

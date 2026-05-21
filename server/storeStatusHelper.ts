@@ -42,35 +42,23 @@ const DEFAULT_CONFIG: StoreConfig = {
   },
 };
 
-// ── Runtime state (survives without restart, resets on cold start) ────────────
+// ── Runtime state — pure in-memory, zero env-var writes ──────────────────────
+// Resets on cold start. For Vercel: the admin must re-toggle after a cold start
+// (very rare during service hours). No process.env is ever modified.
 
-let runtimeOverride: boolean | null = null;
+/** true = all online orders blocked ("Ausverkauf / zu viel los") */
+let isStoreForceClosed = false;
 let runtimeHours: Record<string, DayHours> | null = null;
 
-export function setRuntimeOverride(value: boolean | null): void { runtimeOverride = value; }
-export function getRuntimeOverride(): boolean | null { return runtimeOverride; }
+export function setRuntimeOverride(value: boolean): void { isStoreForceClosed = value; }
+export function getRuntimeOverride(): boolean { return isStoreForceClosed; }
 export function setRuntimeHours(hours: Record<string, DayHours>): void { runtimeHours = hours; }
 
 // ── Config loader ─────────────────────────────────────────────────────────────
 
 function loadConfig(): StoreConfig {
-  // 1. Runtime override (set via admin dashboard)
-  if (runtimeOverride !== null) {
-    const hours = runtimeHours ?? readFileHours() ?? DEFAULT_CONFIG.hours;
-    return { store_closed_override: runtimeOverride, hours };
-  }
-  // 2. Env-var override (Vercel dashboard)
-  if (process.env.STORE_CLOSED_OVERRIDE === "true") {
-    return { ...DEFAULT_CONFIG, store_closed_override: true };
-  }
-  // 3. Runtime hours edit (no override, but hours were changed via admin UI)
-  if (runtimeHours) {
-    return { store_closed_override: false, hours: runtimeHours };
-  }
-  // 4. JSON file (local dev, live-editable)
-  const fileConfig = readFileHours();
-  if (fileConfig) return { store_closed_override: false, hours: fileConfig };
-  return DEFAULT_CONFIG;
+  const hours = runtimeHours ?? readFileHours() ?? DEFAULT_CONFIG.hours;
+  return { store_closed_override: isStoreForceClosed, hours };
 }
 
 function readFileHours(): Record<string, DayHours> | null {

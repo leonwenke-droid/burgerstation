@@ -1,9 +1,10 @@
 /**
- * In-memory analytics for the Burger Station admin dashboard.
+ * In-memory analytics — session-based user tracking.
  *
- * State lives for the lifetime of the server process.
- * On Vercel (serverless), each warm instance tracks its own window;
- * for a single-store operation this is accurate enough.
+ * Each browser tab carries a `bs_session_id` (sessionStorage).
+ * On beforeunload the frontend fires sendBeacon → /api/analytics/disconnect.
+ * Sessions also expire automatically after SESSION_TTL_MS (45 s) of inactivity,
+ * so a crash/hard-close never leaves a ghost visitor in the count.
  */
 import type { Request, Response, NextFunction } from "express";
 
@@ -11,11 +12,11 @@ import type { Request, Response, NextFunction } from "express";
 
 export interface OrderRecord {
   id:        string;
-  timestamp: string; // ISO 8601
+  timestamp: string;
   total:     number;
   status:    "PAID" | "OPEN";
   items:     Array<{ name: string; quantity: number; price: number }>;
-  customer?: string; // "Vorname Nachname"
+  customer?: string;
   phone?:    string;
 }
 
@@ -29,42 +30,41 @@ export interface AnalyticsSnapshot {
 
 // ── In-memory state ───────────────────────────────────────────────────────────
 
-/** IP → lastSeen timestamp (ms). Pruned after SESSION_TTL_MS. */
-const activeIPs = new Map<string, number>();
+/** sessionId → lastSeen (ms). Max 45 s stale before pruned. */
+const activeSessions = new Map<string, number>();
 
-/** sessionId → cart item count. One entry per browser session. */
+/** sessionId → cart item count. */
 const cartSessions = new Map<string, number>();
 
-/** Up to 500 most recent orders (newest first). */
+/** Up to 500 most recent orders, newest first. */
 const orderHistory: OrderRecord[] = [];
 
-const SESSION_TTL_MS = 5 * 60 * 1000; // 5 min
+const SESSION_TTL_MS = 45_000; // 45 seconds — matches frontend 30 s heartbeat
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function pruneStale() {
+function pruneStale(): void {
   const cutoff = Date.now() - SESSION_TTL_MS;
-  for (const [ip, ts] of activeIPs) {
-    if (ts < cutoff) activeIPs.delete(ip);
+  for (const [id, ts] of activeSessions) {
+    if (ts < cutoff) {
+      activeSessions.delete(id);
+      cartSessions.delete(id); // ghost cart gone too
+    }
   }
 }
 
 function totalCartItems(): number {
-  let total = 0;
-  for (const count of cartSessions.values()) total += count;
-  return total;
-}
-
-function todayPrefix(): string {
-  return new Date().toISOString().slice(0, 10);
+  let n = 0;
+  for (const c of cartSessions.values()) n += c;
+  return n;
 }
 
 function buildSnapshot(): AnalyticsSnapshot {
   pruneStale();
-  const today = todayPrefix();
+  const today = new Date().toISOString().slice(0, 10);
   const todayOrders = orderHistory.filter(o => o.timestamp.startsWith(today));
   return {
-    activeUsers:    activeIPs.size,
+    activeUsers:    activeSessions.size,
     totalCartItems: totalCartItems(),
     orders:         orderHistory,
     ordersToday:    todayOrders.length,
@@ -72,24 +72,29 @@ function buildSnapshot(): AnalyticsSnapshot {
   };
 }
 
+/** Extract sessionId from header, body, or fall back to IP. */
+function extractSession(req: Request): string {
+  return (
+    (req.headers["x-session-id"] as string | undefined) ??
+    (req.body as Record<string, unknown>)?.sessionId as string | undefined ??
+    (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim() ??
+    req.socket?.remoteAddress ??
+    "unknown"
+  );
+}
+
 // ── Public API ────────────────────────────────────────────────────────────────
 
 /**
- * Express middleware — register each API caller's IP as an active user.
- * Apply this to /api/* routes so every checkout/order ping keeps the counter live.
+ * Middleware — bump session lastSeen on every API call.
+ * Works even without a heartbeat as long as the user does anything (cart sync, etc.)
  */
 export function trackActiveUser(req: Request, _res: Response, next: NextFunction): void {
-  const ip =
-    (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim() ??
-    req.socket?.remoteAddress ??
-    "unknown";
-  activeIPs.set(ip, Date.now());
+  activeSessions.set(extractSession(req), Date.now());
   next();
 }
 
-/**
- * Record a completed order. Called by posHelpers after order creation.
- */
+/** Called by posHelpers after order creation. */
 export function recordOrder(order: OrderRecord): void {
   orderHistory.unshift(order);
   if (orderHistory.length > 500) orderHistory.pop();
@@ -97,24 +102,45 @@ export function recordOrder(order: OrderRecord): void {
 
 // ── Route handlers ────────────────────────────────────────────────────────────
 
-/** GET /api/analytics/snapshot — polled by admin dashboard every 5 s. */
+/** GET /api/analytics/snapshot */
 export function handleSnapshot(_req: Request, res: Response): void {
   res.json(buildSnapshot());
 }
 
 /**
+ * POST /api/analytics/heartbeat
+ * Body: { sessionId }
+ * Frontend calls this every 30 s to stay "alive" in the counter.
+ */
+export function handleHeartbeat(req: Request, res: Response): void {
+  const sessionId = extractSession(req);
+  activeSessions.set(sessionId, Date.now());
+  res.json({ ok: true, activeUsers: activeSessions.size });
+}
+
+/**
+ * POST /api/analytics/disconnect
+ * Body: { sessionId }
+ * Frontend fires this via navigator.sendBeacon on beforeunload.
+ * Immediately removes the session so the counter drops to 0 when the last tab closes.
+ */
+export function handleDisconnect(req: Request, res: Response): void {
+  const sessionId = extractSession(req);
+  activeSessions.delete(sessionId);
+  cartSessions.delete(sessionId);
+  res.json({ ok: true });
+}
+
+/**
  * POST /api/analytics/cart-sync
- * Body: { sessionId: string, count: number }
- * Frontend calls this on every cart state change.
+ * Body: { sessionId, count }
  */
 export function handleCartSync(req: Request, res: Response): void {
   const { sessionId, count } = req.body as { sessionId?: string; count?: number };
   if (sessionId && typeof count === "number" && count >= 0) {
-    if (count === 0) {
-      cartSessions.delete(sessionId);
-    } else {
-      cartSessions.set(sessionId, count);
-    }
+    activeSessions.set(sessionId, Date.now()); // cart activity = alive
+    if (count === 0) cartSessions.delete(sessionId);
+    else             cartSessions.set(sessionId, count);
   }
   res.json({ ok: true, totalCartItems: totalCartItems() });
 }
