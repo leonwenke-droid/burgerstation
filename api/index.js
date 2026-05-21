@@ -22871,16 +22871,29 @@ var DEFAULT_CONFIG = {
   }
 };
 var runtimeOverride = null;
+var runtimeHours = null;
 function setRuntimeOverride(value) {
   runtimeOverride = value;
 }
+function setRuntimeHours(hours) {
+  runtimeHours = hours;
+}
 function loadConfig() {
   if (runtimeOverride !== null) {
-    return { ...DEFAULT_CONFIG, store_closed_override: runtimeOverride };
+    const hours = runtimeHours ?? readFileHours() ?? DEFAULT_CONFIG.hours;
+    return { store_closed_override: runtimeOverride, hours };
   }
   if (process.env.STORE_CLOSED_OVERRIDE === "true") {
     return { ...DEFAULT_CONFIG, store_closed_override: true };
   }
+  if (runtimeHours) {
+    return { store_closed_override: false, hours: runtimeHours };
+  }
+  const fileConfig = readFileHours();
+  if (fileConfig) return { store_closed_override: false, hours: fileConfig };
+  return DEFAULT_CONFIG;
+}
+function readFileHours() {
   try {
     let configPath;
     try {
@@ -22888,10 +22901,14 @@ function loadConfig() {
     } catch {
       configPath = path2.join(__dirname, "storeConfig.json");
     }
-    return JSON.parse(fs2.readFileSync(configPath, "utf-8"));
+    const raw = JSON.parse(fs2.readFileSync(configPath, "utf-8"));
+    return raw.hours ?? null;
   } catch {
-    return DEFAULT_CONFIG;
+    return null;
   }
+}
+function getEffectiveHours() {
+  return runtimeHours ?? readFileHours() ?? DEFAULT_CONFIG.hours;
 }
 function toMinutes(time) {
   const [h, m] = time.split(":").map(Number);
@@ -22974,6 +22991,30 @@ function handleSetStoreOverride(req, res) {
   setRuntimeOverride(closed);
   console.log(`[Admin] Store override set to: ${closed ? "CLOSED" : "OPEN"}`);
   res.json({ ok: true, closed });
+}
+function handleGetStoreConfig(_req, res) {
+  res.json({
+    hours: getEffectiveHours(),
+    overrideActive: runtimeOverride,
+    isOpen: computeStatus().isOpen
+  });
+}
+function handleSetHours(req, res) {
+  const { hours } = req.body;
+  if (!hours || typeof hours !== "object") {
+    res.status(400).json({ error: "hours object required" });
+    return;
+  }
+  const HH_MM = /^\d{2}:\d{2}$/;
+  for (const [day, h] of Object.entries(hours)) {
+    if (!["0", "1", "2", "3", "4", "5", "6"].includes(day) || !HH_MM.test(h.open) || !HH_MM.test(h.close)) {
+      res.status(400).json({ error: `Ung\xFCltiger Eintrag f\xFCr Tag ${day}` });
+      return;
+    }
+  }
+  setRuntimeHours(hours);
+  console.log("[Admin] \xD6ffnungszeiten aktualisiert:", hours);
+  res.json({ ok: true, hours });
 }
 
 // server/googleReviews.ts
@@ -23066,6 +23107,8 @@ app.use(import_express.default.json());
 app.use(trackActiveUser);
 app.get("/api/store-status", handleStoreStatus);
 app.post("/api/admin/store-override", handleSetStoreOverride);
+app.get("/api/admin/store-config", handleGetStoreConfig);
+app.post("/api/admin/set-hours", handleSetHours);
 app.get("/api/analytics/snapshot", handleSnapshot);
 app.post("/api/analytics/cart-sync", handleCartSync);
 app.post("/api/create-sandbox-checkout", handleCreateCheckout);

@@ -42,46 +42,55 @@ const DEFAULT_CONFIG: StoreConfig = {
   },
 };
 
-// ── Runtime override (set via admin dashboard without restart) ────────────────
+// ── Runtime state (survives without restart, resets on cold start) ────────────
 
 let runtimeOverride: boolean | null = null;
+let runtimeHours: Record<string, DayHours> | null = null;
 
-/** Called by POST /api/admin/store-override from the admin dashboard. */
-export function setRuntimeOverride(value: boolean | null): void {
-  runtimeOverride = value;
-}
-export function getRuntimeOverride(): boolean | null {
-  return runtimeOverride;
-}
+export function setRuntimeOverride(value: boolean | null): void { runtimeOverride = value; }
+export function getRuntimeOverride(): boolean | null { return runtimeOverride; }
+export function setRuntimeHours(hours: Record<string, DayHours>): void { runtimeHours = hours; }
 
 // ── Config loader ─────────────────────────────────────────────────────────────
 
 function loadConfig(): StoreConfig {
-  // 1. Runtime override (set via admin dashboard — survives without redeploy)
+  // 1. Runtime override (set via admin dashboard)
   if (runtimeOverride !== null) {
-    return { ...DEFAULT_CONFIG, store_closed_override: runtimeOverride };
+    const hours = runtimeHours ?? readFileHours() ?? DEFAULT_CONFIG.hours;
+    return { store_closed_override: runtimeOverride, hours };
   }
-  // 2. Env-var override (recommended for Vercel: set STORE_CLOSED_OVERRIDE=true)
+  // 2. Env-var override (Vercel dashboard)
   if (process.env.STORE_CLOSED_OVERRIDE === "true") {
     return { ...DEFAULT_CONFIG, store_closed_override: true };
   }
+  // 3. Runtime hours edit (no override, but hours were changed via admin UI)
+  if (runtimeHours) {
+    return { store_closed_override: false, hours: runtimeHours };
+  }
+  // 4. JSON file (local dev, live-editable)
+  const fileConfig = readFileHours();
+  if (fileConfig) return { store_closed_override: false, hours: fileConfig };
+  return DEFAULT_CONFIG;
+}
 
-  // Try reading the JSON file fresh from disk (works in local dev, allows
-  // live-editing without server restart). Falls back to DEFAULT_CONFIG on
-  // Vercel where the source tree isn't next to the bundled function.
+function readFileHours(): Record<string, DayHours> | null {
   try {
     let configPath: string;
     try {
-      // ESM: resolve relative to this source file
       configPath = fileURLToPath(new URL("./storeConfig.json", import.meta.url));
     } catch {
-      // CommonJS fallback
       configPath = path.join(__dirname, "storeConfig.json");
     }
-    return JSON.parse(fs.readFileSync(configPath, "utf-8")) as StoreConfig;
+    const raw = JSON.parse(fs.readFileSync(configPath, "utf-8")) as StoreConfig;
+    return raw.hours ?? null;
   } catch {
-    return DEFAULT_CONFIG;
+    return null;
   }
+}
+
+/** Returns the currently effective hours (for the admin editor). */
+export function getEffectiveHours(): Record<string, DayHours> {
+  return runtimeHours ?? readFileHours() ?? DEFAULT_CONFIG.hours;
 }
 
 // ── Time helpers ──────────────────────────────────────────────────────────────
@@ -192,4 +201,33 @@ export function handleSetStoreOverride(req: Request, res: Response): void {
   setRuntimeOverride(closed);
   console.log(`[Admin] Store override set to: ${closed ? "CLOSED" : "OPEN"}`);
   res.json({ ok: true, closed });
+}
+
+/** GET /api/admin/store-config — returns current effective hours + override state. */
+export function handleGetStoreConfig(_req: Request, res: Response): void {
+  res.json({
+    hours:          getEffectiveHours(),
+    overrideActive: runtimeOverride,
+    isOpen:         computeStatus().isOpen,
+  });
+}
+
+/** POST /api/admin/set-hours  body: { hours: Record<string, {open,close}> } */
+export function handleSetHours(req: Request, res: Response): void {
+  const { hours } = req.body as { hours?: Record<string, DayHours> };
+  if (!hours || typeof hours !== "object") {
+    res.status(400).json({ error: "hours object required" });
+    return;
+  }
+  // Basic validation: each entry needs HH:MM strings
+  const HH_MM = /^\d{2}:\d{2}$/;
+  for (const [day, h] of Object.entries(hours)) {
+    if (!["0","1","2","3","4","5","6"].includes(day) || !HH_MM.test(h.open) || !HH_MM.test(h.close)) {
+      res.status(400).json({ error: `Ungültiger Eintrag für Tag ${day}` });
+      return;
+    }
+  }
+  setRuntimeHours(hours);
+  console.log("[Admin] Öffnungszeiten aktualisiert:", hours);
+  res.json({ ok: true, hours });
 }
