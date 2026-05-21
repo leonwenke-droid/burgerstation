@@ -68,7 +68,11 @@ function EmergencyStop() {
 
   async function load() {
     const r = await fetch("/api/admin/store-config");
-    setCfg(await r.json());
+    const data = await r.json();
+    // #region agent log
+    fetch('http://127.0.0.1:7795/ingest/66c2885f-1421-4d80-ad50-1c0a8d3bdcd6',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a7a0af'},body:JSON.stringify({sessionId:'a7a0af',location:'AdminSettings.tsx:load',message:'store-config loaded',data:{status:r.status,cfg:data},hypothesisId:'A-D',timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
+    setCfg(data);
   }
 
   useEffect(() => { load(); }, []);
@@ -78,10 +82,18 @@ function EmergencyStop() {
     if (cfg.isOpen && !confirm) { setConfirm(true); return; }
     setConfirm(false);
     setLoading(true);
-    await fetch("/api/admin/store-override", {
+    const payload = { closed: cfg.isOpen };
+    // #region agent log
+    fetch('http://127.0.0.1:7795/ingest/66c2885f-1421-4d80-ad50-1c0a8d3bdcd6',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a7a0af'},body:JSON.stringify({sessionId:'a7a0af',location:'AdminSettings.tsx:toggle-before',message:'sending override',data:{payload,cfgIsOpen:cfg.isOpen,cfgOverrideActive:cfg.overrideActive},hypothesisId:'B-C',timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
+    const overrideRes = await fetch("/api/admin/store-override", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ closed: cfg.isOpen }),
+      body: JSON.stringify(payload),
     });
+    const overrideData = await overrideRes.json();
+    // #region agent log
+    fetch('http://127.0.0.1:7795/ingest/66c2885f-1421-4d80-ad50-1c0a8d3bdcd6',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a7a0af'},body:JSON.stringify({sessionId:'a7a0af',location:'AdminSettings.tsx:toggle-after',message:'override response',data:{status:overrideRes.status,body:overrideData},hypothesisId:'B',timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
     await load();
     setLoading(false);
   }
