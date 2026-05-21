@@ -90,15 +90,13 @@ export default function SumUpPayment({ checkoutId, amount, email }: SumUpPayment
       instanceRef.current = window.SumUpCard.mount({
         id: "sumup-card",
         checkoutId,
-        locale:      "de-DE",
-        country:     "DE",
-        showFooter:  false,
-        amount:      amount.toFixed(2),
-        currency:    "EUR",
-        // Pre-fill email if known (reduces friction; also required for SCA)
+        locale:        "de-DE",
+        country:       "DE",
+        showFooter:    false,
+        amount:        amount.toFixed(2),
+        currency:      "EUR",
+        paymentMethods: ["card", "apple-pay", "google-pay"],
         ...(email ? { email } : {}),
-        // Google Pay — uncomment and fill in after Google merchant onboarding:
-        // googlePay: { merchantId: "YOUR_GOOGLE_MERCHANT_ID", merchantName: "Burger Station Leer" },
         onPaymentMethodsLoad: (methods) => {
           setAvailableMethods(methods);
           console.log("[SumUp] Verfügbare Zahlungsarten:", methods);
