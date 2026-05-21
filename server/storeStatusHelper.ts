@@ -176,7 +176,7 @@ function computeStatus(): StoreStatus {
 // ── Express handlers ──────────────────────────────────────────────────────────
 
 export function handleStoreStatus(_req: Request, res: Response): void {
-  res.json({ ...computeStatus(), overrideActive: runtimeOverride });
+  res.json({ ...computeStatus(), overrideActive: isStoreForceClosed });
 }
 
 /** POST /api/admin/store-override  body: { closed: boolean } */
@@ -195,7 +195,7 @@ export function handleSetStoreOverride(req: Request, res: Response): void {
 export function handleGetStoreConfig(_req: Request, res: Response): void {
   res.json({
     hours:          getEffectiveHours(),
-    overrideActive: runtimeOverride,
+    overrideActive: isStoreForceClosed,
     isOpen:         computeStatus().isOpen,
   });
 }

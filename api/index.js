@@ -22980,7 +22980,7 @@ function computeStatus() {
   };
 }
 function handleStoreStatus(_req, res) {
-  res.json({ ...computeStatus(), overrideActive: runtimeOverride });
+  res.json({ ...computeStatus(), overrideActive: isStoreForceClosed });
 }
 function handleSetStoreOverride(req, res) {
   const { closed } = req.body;
@@ -22995,7 +22995,7 @@ function handleSetStoreOverride(req, res) {
 function handleGetStoreConfig(_req, res) {
   res.json({
     hours: getEffectiveHours(),
-    overrideActive: runtimeOverride,
+    overrideActive: isStoreForceClosed,
     isOpen: computeStatus().isOpen
   });
 }
