@@ -4,6 +4,7 @@
   "outputDirectory": "dist/public",
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api" },
+    { "source": "/.well-known/:file", "destination": "/.well-known/:file" },
     { "source": "/(.*)",     "destination": "/index.html" }
   ]
 }
