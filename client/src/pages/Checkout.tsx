@@ -497,7 +497,7 @@ export default function Checkout() {
                           icon: <Smartphone size={16} />,
                           hint: onlinePaymentBlocked
                             ? `Nicht verfügbar für: ${uncataloguedItems.map((i) => i.name).join(", ")}`
-                            : "Kartenzahlung über SumUp",
+                            : "Karte, PayPal, Apple Pay & Google Pay",
                           disabled: onlinePaymentBlocked,
                         },
                       ] as { v: string; label: string; icon: React.ReactNode; disabled?: boolean; hint?: string }[]
@@ -636,8 +636,11 @@ export default function Checkout() {
 
               {/* ── Payment state panel ── */}
               {showSumUpWidget ? (
-                <div id="sumup-payment-section" className="mt-6 pt-5 border-t-[3px] border-bs-ink">
+                <div id="sumup-payment-section" className="mt-6 pt-5 border-t-[3px] border-bs-ink w-full">
                   <h3 className="text-subhead text-lg text-bs-ink mb-3">Bezahlung</h3>
+                  <p className="text-xs text-bs-ink-v mb-4 leading-relaxed">
+                    Wähle deine Zahlungsart — PayPal, Apple Pay, Google Pay oder Karte.
+                  </p>
                   <SumUpPayment checkoutId={checkoutId!} amount={subtotal} email={form.email || undefined} />
                 </div>
               ) : (

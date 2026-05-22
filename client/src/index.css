@@ -567,3 +567,8 @@
   .stagger-3  { animation-delay: 0.15s; }
   .stagger-4  { animation-delay: 0.20s; }
 }
+
+/* SumUp Payment Widget — transparent background inside neubrutalist card */
+.sumup-payment-container [data-sumup-id="widget__container"] {
+  background-color: transparent !important;
+}

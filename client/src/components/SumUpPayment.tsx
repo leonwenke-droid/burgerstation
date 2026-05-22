@@ -1,9 +1,39 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { AlertCircle, CheckCircle, Loader2 } from "lucide-react";
 
-// ── SumUp Payment Widget type declarations ────────────────────────────────────
-// Docs: https://developer.sumup.com/online-payments/checkouts/card-widget
+// ── SumUp Payment Widget (universal element — card + APMs) ─────────────────────
+// Docs: https://developer.sumup.com/online-payments/checkouts/card-widget/
+const SUMUP_WIDGET_ID = "sumup-payment-widget";
+
+/** Express channels we want when the merchant has them enabled in the dashboard. */
+const REQUESTED_PAYMENT_METHODS = [
+  "card",
+  "paypal",
+  "apple-pay",
+  "google-pay",
+] as const;
+
+const METHOD_ALIASES: Record<(typeof REQUESTED_PAYMENT_METHODS)[number], string[]> = {
+  card:       ["card"],
+  paypal:     ["paypal"],
+  "apple-pay": ["apple-pay", "apple_pay"],
+  "google-pay": ["google-pay", "google_pay"],
+};
+
+function filterEligibleMethods(eligible: string[]): string[] {
+  const picked: string[] = [];
+  for (const preferred of REQUESTED_PAYMENT_METHODS) {
+    const match = eligible.find((id) => METHOD_ALIASES[preferred].includes(id));
+    if (match && !picked.includes(match)) picked.push(match);
+  }
+  return picked.length > 0 ? picked : eligible;
+}
+
+interface PaymentMethodsLoadEvent {
+  eligible: string[];
+}
+
 interface SumUpMountConfig {
   id?: string;
   checkoutId: string;
@@ -14,13 +44,9 @@ interface SumUpMountConfig {
   email?: string;
   amount?: string;
   currency?: string;
-  /**
-   * Google Pay — activate after completing Google Pay & Wallet Console registration.
-   * merchantId: issued by Google after domain registration (≠ SumUp merchantCode).
-   * merchantName: displayed to the customer in the Google Pay sheet.
-   */
   googlePay?: { merchantId: string; merchantName: string };
-  onPaymentMethodsLoad?: (methods: string[]) => void;
+  /** Filter which dashboard-enabled methods the widget renders. */
+  onPaymentMethodsLoad?: (event: PaymentMethodsLoadEvent) => string[];
   onLoad?: () => void;
   onResponse?: (type: SumUpResponseType, body: unknown) => void;
 }
@@ -41,11 +67,13 @@ type SumUpResponseType =
 
 declare global {
   interface Window {
-    /** SumUp Payment Widget — loaded from gateway.sumup.com/gateway/ecom/card/v2/sdk.js */
-    SumUpCard: { mount: (config: SumUpMountConfig) => SumUpCardInstance };
+    SumUpCard:    { mount: (config: SumUpMountConfig) => SumUpCardInstance };
+    SumUpPayment: { mount: (config: SumUpMountConfig) => SumUpCardInstance };
   }
 }
-// ─────────────────────────────────────────────────────────────────────────────
+
+const GOOGLE_PAY_MERCHANT_ID = import.meta.env.VITE_GOOGLE_PAY_MERCHANT_ID as string | undefined;
+const GOOGLE_PAY_MERCHANT_NAME = "Burger Station Leer";
 
 type PaymentStatus =
   | "loading"
@@ -58,7 +86,6 @@ type PaymentStatus =
 interface SumUpPaymentProps {
   checkoutId: string;
   amount: number;
-  /** Customer email — passed to the widget so the email field is pre-filled. */
   email?: string;
 }
 
@@ -67,32 +94,89 @@ export default function SumUpPayment({ checkoutId, amount, email }: SumUpPayment
   const [status, setStatus] = useState<PaymentStatus>("loading");
   const [errorMsg, setErrorMsg] = useState("");
   const [availableMethods, setAvailableMethods] = useState<string[]>([]);
+  const containerRef = useRef<HTMLDivElement>(null);
   const instanceRef = useRef<SumUpCardInstance | null>(null);
-  const didMount = useRef(false);
+
+  const handleSuccess = useCallback(() => {
+    setStatus("success");
+    sessionStorage.removeItem("bs_checkout_id");
+    fetch(`/api/verify-checkout/${checkoutId}`)
+      .then((r) => r.json())
+      .then((d) => console.log("[SumUp Verify]", d))
+      .catch(() => {});
+
+    try {
+      const raw = sessionStorage.getItem("bs_pos_order");
+      if (raw) {
+        const posOrder = JSON.parse(raw) as {
+          checkoutRef: string;
+          items: { variant_id?: string; name: string; quantity: number; price: number; tax_rate: number }[];
+          customer: { vorname: string; nachname: string; telefon: string; strasse: string; ort: string };
+        };
+        sessionStorage.setItem("bs_order_ref", posOrder.checkoutRef);
+        sessionStorage.removeItem("bs_pos_order");
+        fetch("/api/create-pos-order", {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            items:         posOrder.items,
+            paymentStatus: "PAID",
+            paymentType:   "ECOM",
+            orderRef:      posOrder.checkoutRef,
+            customer:      posOrder.customer,
+          }),
+        })
+          .then((r) => r.json())
+          .then((d) => console.log("[POS] ✅ PAID-Bestellung übermittelt:", d))
+          .catch((err) => console.warn("[POS] Nicht erreichbar:", err));
+      }
+    } catch {
+      /* non-fatal */
+    }
+
+    setTimeout(() => navigate("/order-success"), 1800);
+  }, [checkoutId, navigate]);
 
   useEffect(() => {
-    // Guard against double-mount in React StrictMode
-    if (didMount.current) return;
-    didMount.current = true;
+    let cancelled = false;
 
-    // Poll until the SDK script has finished loading
-    function initWidget() {
-      if (!window.SumUpCard) {
-        setTimeout(initWidget, 150);
+    function mountWidget() {
+      const SumUp = window.SumUpPayment ?? window.SumUpCard;
+      if (cancelled || !SumUp || !containerRef.current) {
+        if (!cancelled) setTimeout(mountWidget, 150);
         return;
       }
 
-      instanceRef.current = window.SumUpCard.mount({
-        id: "sumup-card",
+      instanceRef.current?.unmount();
+      setStatus("loading");
+
+      instanceRef.current = SumUp.mount({
+        id: SUMUP_WIDGET_ID,
         checkoutId,
-        locale:        "de-DE",
-        country:       "DE",
-        showFooter:    false,
-        amount:        amount.toFixed(2),
-        currency:      "EUR",
+        locale:     "de-DE",
+        country:    "DE",
+        showFooter: false,
+        amount:     amount.toFixed(2),
+        currency:   "EUR",
         ...(email ? { email } : {}),
-        onPaymentMethodsLoad: (methods) => setAvailableMethods(methods),
-        onLoad: () => setStatus("ready"),
+        ...(GOOGLE_PAY_MERCHANT_ID
+          ? {
+              googlePay: {
+                merchantId:   GOOGLE_PAY_MERCHANT_ID,
+                merchantName: GOOGLE_PAY_MERCHANT_NAME,
+              },
+            }
+          : {}),
+        // Force express channels (PayPal, Apple Pay, Google Pay) when dashboard-enabled
+        onPaymentMethodsLoad: ({ eligible }) => {
+          const shown = filterEligibleMethods(eligible);
+          setAvailableMethods(shown);
+          console.log("[SumUp] Eligible:", eligible, "→ shown:", shown);
+          return shown;
+        },
+        onLoad: () => {
+          if (!cancelled) setStatus("ready");
+        },
         onResponse: (type, body) => {
           console.log("[SumUp] Response:", type, body);
           switch (type) {
@@ -100,48 +184,12 @@ export default function SumUpPayment({ checkoutId, amount, email }: SumUpPayment
               setStatus("processing");
               break;
             case "success":
-              setStatus("success");
-              sessionStorage.removeItem("bs_checkout_id");
-              fetch(`/api/verify-checkout/${checkoutId}`)
-                .then((r) => r.json())
-                .then((d) => console.log("[SumUp Verify]", d))
-                .catch(() => {});
-              // Push PAID order to SumUp KassenPOS Pro.
-              try {
-                const raw = sessionStorage.getItem("bs_pos_order");
-                if (raw) {
-                  const posOrder = JSON.parse(raw) as {
-                    checkoutRef: string;
-                    items: { variant_id?: string; name: string; quantity: number; price: number; tax_rate: number }[];
-                    customer: { vorname: string; nachname: string; telefon: string; strasse: string; ort: string };
-                  };
-                  // Persist the reference so OrderSuccess can display it
-                  sessionStorage.setItem("bs_order_ref", posOrder.checkoutRef);
-                  sessionStorage.removeItem("bs_pos_order");
-                  fetch("/api/create-pos-order", {
-                    method:  "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      items:         posOrder.items,
-                      paymentStatus: "PAID",
-                      paymentType:   "ECOM",
-                      orderRef:      posOrder.checkoutRef,
-                      customer:      posOrder.customer,
-                    }),
-                  })
-                    .then((r) => r.json())
-                    .then((d) => console.log("[POS] ✅ PAID-Bestellung übermittelt:", d))
-                    .catch((err) => console.warn("[POS] Nicht erreichbar:", err));
-                }
-              } catch {
-                /* non-fatal — customer navigation continues regardless */
-              }
-              setTimeout(() => navigate("/order-success"), 1800);
+              handleSuccess();
               break;
             case "error":
               setStatus("error");
               setErrorMsg(
-                "Zahlung fehlgeschlagen. Bitte prüfe deine Kartendaten und versuche es erneut.",
+                "Zahlung fehlgeschlagen. Bitte prüfe deine Zahlungsdaten und versuche es erneut.",
               );
               break;
             case "fail":
@@ -155,17 +203,17 @@ export default function SumUpPayment({ checkoutId, amount, email }: SumUpPayment
       });
     }
 
-    initWidget();
+    mountWidget();
 
     return () => {
+      cancelled = true;
       instanceRef.current?.unmount();
+      instanceRef.current = null;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [checkoutId]);
+  }, [checkoutId, amount, email, handleSuccess]);
 
   return (
     <div className="space-y-3">
-      {/* ── Status banners ── */}
       {status === "loading" && (
         <div className="flex items-center justify-center gap-3 py-6 text-bs-ink-v">
           <Loader2 size={20} className="animate-spin text-bs-teal shrink-0" />
@@ -198,23 +246,21 @@ export default function SumUpPayment({ checkoutId, amount, email }: SumUpPayment
         </div>
       )}
 
-      {/* ── SumUp widget mount point ── */}
+      {/* Universal SumUp element — grows with PayPal / Apple Pay / Google Pay buttons */}
       <div
-        id="sumup-card"
-        className="rounded-2xl overflow-hidden bg-white border-[3px] border-bs-ink shadow-[4px_4px_0_var(--bs-ink)]"
-        style={{ minHeight: status === "loading" ? 0 : undefined }}
+        ref={containerRef}
+        id={SUMUP_WIDGET_ID}
+        className="w-full min-h-[400px] rounded-2xl overflow-visible bg-transparent border-[3px] border-bs-ink shadow-[4px_4px_0_var(--bs-ink)] sumup-payment-container"
       />
 
-      {/* ── Available methods badge (shown once widget reports back) ── */}
       {availableMethods.length > 0 && (
         <p className="text-[11px] text-bs-ink-v text-center">
-          Aktive Zahlungsarten:{" "}
+          Verfügbare Zahlungsarten:{" "}
           <span className="font-semibold text-bs-ink">
             {availableMethods.join(", ")}
           </span>
         </p>
       )}
-
     </div>
   );
 }
