@@ -2,37 +2,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { AlertCircle, CheckCircle, Loader2 } from "lucide-react";
 
-// ── SumUp Payment Widget (universal element — card + APMs) ─────────────────────
+// ── SumUp Payment Widget — card + dashboard-enabled APMs (PayPal, Apple Pay, …) ─
 // Docs: https://developer.sumup.com/online-payments/checkouts/card-widget/
-const SUMUP_WIDGET_ID = "sumup-payment-widget";
-
-/** Express channels we want when the merchant has them enabled in the dashboard. */
-const REQUESTED_PAYMENT_METHODS = [
-  "card",
-  "paypal",
-  "apple-pay",
-  "google-pay",
-] as const;
-
-const METHOD_ALIASES: Record<(typeof REQUESTED_PAYMENT_METHODS)[number], string[]> = {
-  card:       ["card"],
-  paypal:     ["paypal"],
-  "apple-pay": ["apple-pay", "apple_pay"],
-  "google-pay": ["google-pay", "google_pay"],
-};
-
-function filterEligibleMethods(eligible: string[]): string[] {
-  const picked: string[] = [];
-  for (const preferred of REQUESTED_PAYMENT_METHODS) {
-    const match = eligible.find((id) => METHOD_ALIASES[preferred].includes(id));
-    if (match && !picked.includes(match)) picked.push(match);
-  }
-  return picked.length > 0 ? picked : eligible;
-}
-
-interface PaymentMethodsLoadEvent {
-  eligible: string[];
-}
+const SUMUP_WIDGET_ID = "sumup-card";
 
 interface SumUpMountConfig {
   id?: string;
@@ -45,8 +17,6 @@ interface SumUpMountConfig {
   amount?: string;
   currency?: string;
   googlePay?: { merchantId: string; merchantName: string };
-  /** Filter which dashboard-enabled methods the widget renders. */
-  onPaymentMethodsLoad?: (event: PaymentMethodsLoadEvent) => string[];
   onLoad?: () => void;
   onResponse?: (type: SumUpResponseType, body: unknown) => void;
 }
@@ -67,8 +37,7 @@ type SumUpResponseType =
 
 declare global {
   interface Window {
-    SumUpCard:    { mount: (config: SumUpMountConfig) => SumUpCardInstance };
-    SumUpPayment: { mount: (config: SumUpMountConfig) => SumUpCardInstance };
+    SumUpCard: { mount: (config: SumUpMountConfig) => SumUpCardInstance };
   }
 }
 
@@ -93,7 +62,6 @@ export default function SumUpPayment({ checkoutId, amount, email }: SumUpPayment
   const [, navigate] = useLocation();
   const [status, setStatus] = useState<PaymentStatus>("loading");
   const [errorMsg, setErrorMsg] = useState("");
-  const [availableMethods, setAvailableMethods] = useState<string[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const instanceRef = useRef<SumUpCardInstance | null>(null);
 
@@ -141,8 +109,7 @@ export default function SumUpPayment({ checkoutId, amount, email }: SumUpPayment
     let cancelled = false;
 
     function mountWidget() {
-      const SumUp = window.SumUpPayment ?? window.SumUpCard;
-      if (cancelled || !SumUp || !containerRef.current) {
+      if (cancelled || !window.SumUpCard || !containerRef.current) {
         if (!cancelled) setTimeout(mountWidget, 150);
         return;
       }
@@ -150,7 +117,8 @@ export default function SumUpPayment({ checkoutId, amount, email }: SumUpPayment
       instanceRef.current?.unmount();
       setStatus("loading");
 
-      instanceRef.current = SumUp.mount({
+      // No onPaymentMethodsLoad filter — widget renders all dashboard-active methods.
+      instanceRef.current = window.SumUpCard.mount({
         id: SUMUP_WIDGET_ID,
         checkoutId,
         locale:     "de-DE",
@@ -167,13 +135,6 @@ export default function SumUpPayment({ checkoutId, amount, email }: SumUpPayment
               },
             }
           : {}),
-        // Force express channels (PayPal, Apple Pay, Google Pay) when dashboard-enabled
-        onPaymentMethodsLoad: ({ eligible }) => {
-          const shown = filterEligibleMethods(eligible);
-          setAvailableMethods(shown);
-          console.log("[SumUp] Eligible:", eligible, "→ shown:", shown);
-          return shown;
-        },
         onLoad: () => {
           if (!cancelled) setStatus("ready");
         },
@@ -246,21 +207,11 @@ export default function SumUpPayment({ checkoutId, amount, email }: SumUpPayment
         </div>
       )}
 
-      {/* Universal SumUp element — grows with PayPal / Apple Pay / Google Pay buttons */}
       <div
         ref={containerRef}
         id={SUMUP_WIDGET_ID}
-        className="w-full min-h-[400px] rounded-2xl overflow-visible bg-transparent border-[3px] border-bs-ink shadow-[4px_4px_0_var(--bs-ink)] sumup-payment-container"
+        className="w-full min-h-[450px] rounded-2xl bg-transparent border-[3px] border-bs-ink shadow-[4px_4px_0_var(--bs-ink)] sumup-payment-container"
       />
-
-      {availableMethods.length > 0 && (
-        <p className="text-[11px] text-bs-ink-v text-center">
-          Verfügbare Zahlungsarten:{" "}
-          <span className="font-semibold text-bs-ink">
-            {availableMethods.join(", ")}
-          </span>
-        </p>
-      )}
     </div>
   );
 }
