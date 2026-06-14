@@ -124,7 +124,7 @@ export default function SumUpPayment({ checkoutId, amount, email }: SumUpPayment
         locale:     "de-DE",
         country:    "DE",
         showFooter: false,
-        amount:     amount.toFixed(2),
+        showAmount: true,
         currency:   "EUR",
         ...(email ? { email } : {}),
         ...(GOOGLE_PAY_MERCHANT_ID
