@@ -16,6 +16,8 @@ import storeConfigFile from "./storeConfig.json";
 
 interface DayHours { open: string; close: string }
 interface StoreConfig {
+  /** false = Store ist zeitlich immer offen; hours bleiben für späteres Reaktivieren erhalten. */
+  enforce_opening_hours: boolean;
   store_closed_override: boolean;
   hours: Record<string, DayHours>;
 }
@@ -36,6 +38,7 @@ async function loadConfig(): Promise<StoreConfig> {
   const overrideRaw = await kvGet(KV_OVERRIDE);
   const forceClosed = overrideRaw === "true";
   return {
+    enforce_opening_hours: BUNDLED_CONFIG.enforce_opening_hours ?? true,
     store_closed_override: forceClosed,
     hours: BUNDLED_CONFIG.hours,
   };
@@ -93,6 +96,10 @@ async function computeStatus(): Promise<StoreStatus> {
 
   if (config.store_closed_override) {
     return { isOpen: false, reason: "OVERLOAD", nextOpen: "bald" };
+  }
+
+  if (!config.enforce_opening_hours) {
+    return { isOpen: true, nextOpen: "" };
   }
 
   const { day, totalMinutes } = getBerlinTime();

@@ -22898,7 +22898,8 @@ async function kvGet(key) {
 
 // server/storeConfig.json
 var storeConfig_default = {
-  _comment: "\xD6ffnungszeiten nur hier im Code \xE4ndern, dann deployen. Schl\xFCssel: 0=So, 1=Mo \u2026 6=Sa. Fr+Sa: close 02:00 = Folgetag.",
+  _comment: "\xD6ffnungszeiten nur hier im Code \xE4ndern, dann deployen. Schl\xFCssel: 0=So, 1=Mo \u2026 6=Sa. Fr+Sa: close 02:00 = Folgetag. enforce_opening_hours: false = dauerhaft ge\xF6ffnet (Notaus greift weiterhin).",
+  enforce_opening_hours: false,
   store_closed_override: false,
   hours: {
     "1": { open: "11:00", close: "23:00" },
@@ -22906,8 +22907,8 @@ var storeConfig_default = {
     "3": { open: "11:00", close: "23:00" },
     "4": { open: "11:00", close: "23:00" },
     "5": { open: "11:00", close: "02:00" },
-    "6": { open: "11:00", close: "02:00" },
-    "0": { open: "11:00", close: "23:00" }
+    "6": { open: "00:00", close: "00:00" },
+    "0": { open: "00:00", close: "23:00" }
   }
 };
 
@@ -22918,6 +22919,7 @@ async function loadConfig() {
   const overrideRaw = await kvGet(KV_OVERRIDE);
   const forceClosed = overrideRaw === "true";
   return {
+    enforce_opening_hours: BUNDLED_CONFIG.enforce_opening_hours ?? true,
     store_closed_override: forceClosed,
     hours: BUNDLED_CONFIG.hours
   };
@@ -22970,6 +22972,9 @@ async function computeStatus() {
   const config = await loadConfig();
   if (config.store_closed_override) {
     return { isOpen: false, reason: "OVERLOAD", nextOpen: "bald" };
+  }
+  if (!config.enforce_opening_hours) {
+    return { isOpen: true, nextOpen: "" };
   }
   const { day, totalMinutes } = getBerlinTime();
   const todayHours = config.hours[String(day)];

@@ -1,5 +1,6 @@
 {
-  "_comment": "Öffnungszeiten nur hier im Code ändern, dann deployen. Schlüssel: 0=So, 1=Mo … 6=Sa. Fr+Sa: close 02:00 = Folgetag.",
+  "_comment": "Öffnungszeiten nur hier im Code ändern, dann deployen. Schlüssel: 0=So, 1=Mo … 6=Sa. Fr+Sa: close 02:00 = Folgetag. enforce_opening_hours: false = dauerhaft geöffnet (Notaus greift weiterhin).",
+  "enforce_opening_hours": false,
   "store_closed_override": false,
   "hours": {
     "1": { "open": "11:00", "close": "23:00" },
@@ -7,7 +8,7 @@
     "3": { "open": "11:00", "close": "23:00" },
     "4": { "open": "11:00", "close": "23:00" },
     "5": { "open": "11:00", "close": "02:00" },
-    "6": { "open": "11:00", "close": "02:00" },
-    "0": { "open": "11:00", "close": "23:00" }
+    "6": { "open": "00:00", "close": "00:00" },
+    "0": { "open": "00:00", "close": "23:00" }
   }
 }
