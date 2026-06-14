@@ -23,23 +23,31 @@ const INPUT =
 const LABEL =
   "block font-body font-bold text-xs text-bs-ink/60 mb-1 uppercase tracking-wider";
 
-export default function Checkout() {
+const EMPTY_FORM = {
+  vorname:    "",
+  nachname:   "",
+  email:      "",
+  telefon:    "",
+  strasse:    "",
+  hausnummer: "",
+  plz:        "",
+  ort:        "",
+  anmerkungen: "",
+};
+
+export type CheckoutPreviewConfig = {
+  form?: Partial<typeof EMPTY_FORM>;
+  payment?: "bar" | "karte" | "online";
+  agb?: boolean;
+};
+
+export default function Checkout({ preview }: { preview?: CheckoutPreviewConfig }) {
   const { items, subtotal, itemCount } = useCart();
 
-  const [form, setForm] = useState({
-    vorname:    "",
-    nachname:   "",
-    email:      "",
-    telefon:    "",
-    strasse:    "",
-    hausnummer: "",
-    plz:        "",
-    ort:        "",
-    anmerkungen: "",
-  });
+  const [form, setForm] = useState({ ...EMPTY_FORM, ...preview?.form });
   const [zeitpunkt, setZeitpunkt] = useState<"sofort" | "geplant">("sofort");
-  const [payment, setPayment] = useState<"bar" | "karte" | "online">("bar");
-  const [agb, setAgb] = useState(false);
+  const [payment, setPayment] = useState<"bar" | "karte" | "online">(preview?.payment ?? "bar");
+  const [agb, setAgb] = useState(preview?.agb ?? false);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [checkoutId, setCheckoutId] = useState<string | null>(() =>
@@ -54,11 +62,15 @@ export default function Checkout() {
   } | null>(null);
 
   useEffect(() => {
+    if (preview) {
+      setStoreStatus({ isOpen: true });
+      return;
+    }
     fetch("/api/store-status")
       .then((r) => r.json())
       .then((s) => setStoreStatus(s))
       .catch(() => setStoreStatus({ isOpen: true })); // fail-open: don't block on network error
-  }, []);
+  }, [preview]);
 
   // ── Derived state ─────────────────────────────────────────────────────────
 

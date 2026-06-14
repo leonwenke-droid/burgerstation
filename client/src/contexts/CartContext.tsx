@@ -38,8 +38,14 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | null>(null);
 
-export function CartProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([]);
+export function CartProvider({
+  children,
+  initialItems = [],
+}: {
+  children: ReactNode;
+  initialItems?: CartItem[];
+}) {
+  const [items, setItems] = useState<CartItem[]>(initialItems);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const sessionId = useRef(getSessionId());
 

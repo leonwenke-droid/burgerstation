@@ -20,6 +20,7 @@ import Checkout from "./pages/Checkout";
 import ThankYou from "./pages/ThankYou";
 import OrderSuccess from "./pages/OrderSuccess";
 import AdminSettings from "./pages/AdminSettings";
+import BurgerStationPortfolioMockups from "./portfolio/BurgerStationPortfolioMockups";
 
 function ScrollToTop() {
   const [location] = useLocation();
@@ -97,6 +98,7 @@ function Router() {
         <Route path="/bestellen/danke" component={ThankYou} />
         <Route path="/order-success" component={OrderSuccess} />
         <Route path="/admin" component={AdminSettings} />
+        <Route path="/portfolio" component={BurgerStationPortfolioMockups} />
         <Route path="/404" component={NotFound} />
         <Route component={NotFound} />
       </Switch>
