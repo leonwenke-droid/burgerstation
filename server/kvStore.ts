@@ -47,6 +47,16 @@ export async function kvSet(key: string, value: string): Promise<void> {
   }
 }
 
+/** Like kvSet but with an expiry (seconds). In-memory fallback ignores the TTL —
+ *  callers that need expiry in dev should also carry an expiresAt in the value. */
+export async function kvSetEx(key: string, value: string, ttlSeconds: number): Promise<void> {
+  if (upstashEnabled()) {
+    await upstashReq(["SET", key, value, "EX", String(ttlSeconds)]);
+  } else {
+    mem.set(key, value);
+  }
+}
+
 export async function kvGet(key: string): Promise<string | null> {
   if (upstashEnabled()) {
     const result = await upstashReq(["GET", key]);
