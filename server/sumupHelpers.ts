@@ -135,6 +135,33 @@ function buildDescription(items: ResolvedItem[]): string {
     .slice(0, 999);
 }
 
+/**
+ * Absolute base URL of the live site (e.g. "https://burgerstation.de").
+ *
+ * SumUp requires an absolute `redirect_url` on checkout creation to offer
+ * Alternative Payment Methods (PayPal, Apple Pay, Google Pay); redirect-based
+ * methods send the payer to this URL after they finish paying.
+ *
+ * Priority: explicit PUBLIC_BASE_URL env → Origin header → forwarded host →
+ * Host header. Derived from the request so it works both locally and on Vercel
+ * without hard-coding the domain.
+ */
+function resolveBaseUrl(req: Request): string {
+  const envUrl = process.env.PUBLIC_BASE_URL;
+  if (envUrl) return envUrl.replace(/\/+$/, "");
+
+  const origin = req.headers.origin;
+  if (typeof origin === "string" && origin) return origin.replace(/\/+$/, "");
+
+  const forwardedProto =
+    (req.headers["x-forwarded-proto"] as string | undefined)?.split(",")[0] ?? "https";
+  const host =
+    (req.headers["x-forwarded-host"] as string | undefined) ??
+    (req.headers.host as string | undefined);
+
+  return host ? `${forwardedProto}://${host}` : "";
+}
+
 const ORDERS_LOG = path.resolve(process.cwd(), "orders.txt");
 
 function appendOrderLog(entry: object) {
@@ -187,6 +214,20 @@ export async function handleCreateCheckout(req: Request, res: Response) {
 
   pendingOrders.set(checkoutReference, items);
 
+  // ── Alternative Payment Methods (PayPal, Apple Pay, Google Pay) ──────────────
+  // SumUp only renders APMs in the widget when the checkout is created with an
+  // absolute `redirect_url`. Without it, the widget shows the card field only.
+  // Redirect-based methods return the payer here (with ?checkout_id=…) after pay.
+  const baseUrl = resolveBaseUrl(req);
+  const redirectUrl = baseUrl ? `${baseUrl}/order-success` : undefined;
+
+  if (!redirectUrl) {
+    console.warn(
+      "[SumUp] Kein redirect_url ermittelbar (weder PUBLIC_BASE_URL noch Origin/Host-Header). " +
+        "APMs wie PayPal/Apple Pay/Google Pay werden ohne redirect_url nicht angezeigt.",
+    );
+  }
+
   try {
     const sumupRes = await fetch("https://api.sumup.com/v0.1/checkouts", {
       method: "POST",
@@ -200,6 +241,8 @@ export async function handleCreateCheckout(req: Request, res: Response) {
         currency,
         merchant_code: merchantCode,
         description:   buildDescription(items),
+        // Required for APMs; also enables clean 3DS return for cards.
+        ...(redirectUrl ? { redirect_url: redirectUrl } : {}),
       }),
     });
 

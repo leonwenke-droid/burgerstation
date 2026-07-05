@@ -1,30 +1,98 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { CheckCircle } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useCart } from "@/contexts/CartContext";
 
+interface StoredPosOrder {
+  checkoutRef: string;
+  items: { variant_id?: string; name: string; quantity: number; price: number; tax_rate: number }[];
+  customer: { vorname: string; nachname: string; telefon: string; strasse: string; ort: string };
+}
+
 export default function OrderSuccess() {
   const [, navigate] = useLocation();
   const { clearCart } = useCart();
 
-  // Read order reference before clearing — falls back to a random number
-  const orderRef = useMemo(
+  // Order reference shown on the page. Starts from any stored value, then gets
+  // upgraded to the real checkout reference once an APM return is finalized.
+  const [orderRef, setOrderRef] = useState<string>(
     () =>
       sessionStorage.getItem("bs_order_ref") ??
       sessionStorage.getItem("bs_order_num") ??
       `BS-${Math.floor(Math.random() * 9000) + 1000}`,
-    [],
   );
 
-  // Clear the cart and all session keys once page mounts — payment is confirmed.
+  // Guard against double execution (React StrictMode / re-renders) so we never
+  // push the POS order twice.
+  const finalizedRef = useRef(false);
+
   useEffect(() => {
-    clearCart();
-    sessionStorage.removeItem("bs_checkout_id");
-    sessionStorage.removeItem("bs_pos_order");
-    sessionStorage.removeItem("bs_order_ref");
-    sessionStorage.removeItem("bs_order_num");
+    if (finalizedRef.current) return;
+    finalizedRef.current = true;
+
+    // Capture session state BEFORE anything is cleared.
+    const rawOrder = sessionStorage.getItem("bs_pos_order");
+    const params = new URLSearchParams(window.location.search);
+    const checkoutId =
+      params.get("checkout_id") ??
+      params.get("checkoutId") ??
+      params.get("id") ??
+      sessionStorage.getItem("bs_checkout_id");
+
+    async function finalize() {
+      // ── APM redirect return ────────────────────────────────────────────────
+      // Card payments finish inside the widget (SumUpPayment.handleSuccess) which
+      // already pushed the PAID POS order and removed bs_pos_order. Redirect-based
+      // APMs (PayPal, Apple Pay, Google Pay) come back here via a full page load,
+      // so that handler never ran and bs_pos_order is still present. Verify the
+      // checkout is actually PAID server-side, then push the POS order.
+      if (rawOrder && checkoutId) {
+        try {
+          const res = await fetch(`/api/verify-checkout/${checkoutId}`);
+          if (res.ok) {
+            const data = (await res.json()) as { status?: string };
+            const status = String(data.status ?? "").toUpperCase();
+
+            if (status === "PAID") {
+              const posOrder = JSON.parse(rawOrder) as StoredPosOrder;
+              setOrderRef(posOrder.checkoutRef);
+              sessionStorage.setItem("bs_order_ref", posOrder.checkoutRef);
+              // Consume immediately so a refresh can't push a second time.
+              sessionStorage.removeItem("bs_pos_order");
+
+              await fetch("/api/create-pos-order", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  items: posOrder.items,
+                  paymentStatus: "PAID",
+                  paymentType: "ECOM",
+                  orderRef: posOrder.checkoutRef,
+                  customer: posOrder.customer,
+                }),
+              })
+                .then((r) => r.json())
+                .then((d) => console.log("[POS] ✅ PAID-Bestellung (APM-Redirect) übermittelt:", d))
+                .catch((err) => console.warn("[POS] Nicht erreichbar:", err));
+            } else {
+              console.warn(`[SumUp] Checkout ${checkoutId} nicht PAID (status: ${status}) — kein POS-Push.`);
+            }
+          }
+        } catch (err) {
+          console.warn("[OrderSuccess] APM-Finalisierung fehlgeschlagen:", err);
+        }
+      }
+
+      // Payment confirmed (or already handled by the widget) — clear cart + session.
+      clearCart();
+      sessionStorage.removeItem("bs_checkout_id");
+      sessionStorage.removeItem("bs_pos_order");
+      sessionStorage.removeItem("bs_order_num");
+    }
+
+    void finalize();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (

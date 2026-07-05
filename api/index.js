@@ -22543,6 +22543,15 @@ function resolveItems(ordered) {
 function buildDescription(items) {
   return items.map((i) => `${i.name} \xD7 ${i.quantity}`).join(", ").slice(0, 999);
 }
+function resolveBaseUrl(req) {
+  const envUrl = process.env.PUBLIC_BASE_URL;
+  if (envUrl) return envUrl.replace(/\/+$/, "");
+  const origin = req.headers.origin;
+  if (typeof origin === "string" && origin) return origin.replace(/\/+$/, "");
+  const forwardedProto = req.headers["x-forwarded-proto"]?.split(",")[0] ?? "https";
+  const host = req.headers["x-forwarded-host"] ?? req.headers.host;
+  return host ? `${forwardedProto}://${host}` : "";
+}
 var ORDERS_LOG = path.resolve(process.cwd(), "orders.txt");
 function appendOrderLog(entry) {
   const line = `[${(/* @__PURE__ */ new Date()).toISOString()}] ${JSON.stringify(entry)}
@@ -22575,6 +22584,13 @@ async function handleCreateCheckout(req, res) {
   const datePart = (/* @__PURE__ */ new Date()).toISOString().slice(2, 10).replace(/-/g, "");
   const checkoutReference = `BS-${datePart}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
   pendingOrders.set(checkoutReference, items);
+  const baseUrl = resolveBaseUrl(req);
+  const redirectUrl = baseUrl ? `${baseUrl}/order-success` : void 0;
+  if (!redirectUrl) {
+    console.warn(
+      "[SumUp] Kein redirect_url ermittelbar (weder PUBLIC_BASE_URL noch Origin/Host-Header). APMs wie PayPal/Apple Pay/Google Pay werden ohne redirect_url nicht angezeigt."
+    );
+  }
   try {
     const sumupRes = await fetch("https://api.sumup.com/v0.1/checkouts", {
       method: "POST",
@@ -22587,7 +22603,9 @@ async function handleCreateCheckout(req, res) {
         amount,
         currency,
         merchant_code: merchantCode,
-        description: buildDescription(items)
+        description: buildDescription(items),
+        // Required for APMs; also enables clean 3DS return for cards.
+        ...redirectUrl ? { redirect_url: redirectUrl } : {}
       })
     });
     if (!sumupRes.ok) {
