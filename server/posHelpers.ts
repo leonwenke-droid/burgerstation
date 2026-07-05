@@ -174,35 +174,41 @@ function sanitizePosItems(raw: unknown): { items?: PosOrderItem[]; error?: strin
  * - paymentStatus "OPEN"  → bar/karte order, appears on iPad as unpaid → kitchen prints on accept
  * - paymentStatus "PAID"  → online order, appears on iPad as already paid → kitchen prints on accept
  */
-export async function handleCreatePosOrder(req: Request, res: Response) {
-  // ── Anti-abuse guards ───────────────────────────────────────────────────────
-  // 1) Rate limit per IP — blocks scripted order floods to the kitchen.
-  if (!(await rateLimitByIp(req, res, "pos", 10, 60_000))) return;
-  // 2) Reject cross-site / off-origin browser requests.
-  if (!checkSameOrigin(req, res)) return;
+export interface PosResult {
+  ok:          boolean;
+  mode?:       "local-only";
+  posOrderId?: string;
+  ref?:        string;
+  error?:      string;
+  detail?:     string;
+  /** Set only for hard rejects the caller should surface as an HTTP status (400/403). */
+  httpStatus?: number;
+}
 
-  const body = req.body as CreatePosOrderBody;
+/**
+ * Creates a POS order (validate → store-open check → Good Till push). Reused by
+ * the public /api/create-pos-order route (PAID/online) and by the verified
+ * /api/order/confirm route (OPEN cash/card after email code). No HTTP concerns.
+ */
+export async function createPosOrder(body: CreatePosOrderBody): Promise<PosResult> {
   const { paymentStatus, paymentType, customer, orderRef } = body;
 
-  // 3) Validate + normalise items (server-side prices for catalog items).
+  // Validate + normalise items (server-side prices for catalog items).
   const { items, error: itemError } = sanitizePosItems(body.items);
   if (itemError || !items) {
-    res.status(400).json({ error: itemError ?? "Ungültige Bestellung." });
-    return;
+    return { ok: false, error: itemError ?? "Ungültige Bestellung.", httpStatus: 400 };
   }
 
-  // 4) Enforce store-open server-side for unpaid (bar/karte) orders. PAID orders
-  //    are already paid online, so they are always accepted even if the store just
-  //    closed — we must never drop a captured payment.
+  // Enforce store-open server-side for unpaid (bar/karte) orders. PAID orders are
+  // already paid online, so they are always accepted even if the store just
+  // closed — we must never drop a captured payment.
   if (paymentStatus === "OPEN" && !(await isStoreOpen())) {
-    res.status(403).json({ error: "Der Store ist aktuell geschlossen — keine Bestellung möglich." });
-    return;
+    return { ok: false, error: "Der Store ist aktuell geschlossen — keine Bestellung möglich.", httpStatus: 403 };
   }
 
   const subdomain = process.env.GOODTILL_SUBDOMAIN;
   const outletId  = process.env.GOODTILL_OUTLET_ID;
 
-  // ── Config check: log clearly what's missing ────────────────────────────────
   const missingVars = [
     !subdomain && "GOODTILL_SUBDOMAIN",
     !outletId  && "GOODTILL_OUTLET_ID",
@@ -211,7 +217,7 @@ export async function handleCreatePosOrder(req: Request, res: Response) {
   ].filter(Boolean);
 
   if (missingVars.length > 0) {
-    // In demo mode: log the order locally and return success so the UI flow works
+    // In demo mode: log the order locally and return success so the UI flow works.
     console.warn(
       `[POS] Good Till nicht konfiguriert (fehlend: ${missingVars.join(", ")}). ` +
       `Bestellung wird nur lokal protokolliert.`,
@@ -232,8 +238,7 @@ export async function handleCreatePosOrder(req: Request, res: Response) {
       customer:  customer ? `${customer.vorname} ${customer.nachname}` : undefined,
       phone:     customer?.telefon,
     });
-    res.json({ ok: true, mode: "local-only", ref: orderRef });
-    return;
+    return { ok: true, mode: "local-only", ref: orderRef };
   }
 
   const baseUrl = `https://${subdomain}.goodtill.com/api`;
@@ -241,21 +246,19 @@ export async function handleCreatePosOrder(req: Request, res: Response) {
   try {
     const token = await getToken(baseUrl);
 
-    // ── Map items to Good Till line items ──────────────────────────────────────
     const lineItems = items.map((item) => {
       const catalogEntry = item.variant_id ? GOODTILL_PRODUCTS[item.variant_id] : null;
       return {
-        product_id:  catalogEntry?.product_id ?? null,  // null = free-text item
-        name:        item.name,
-        quantity:    item.quantity,
-        price:       item.price,
-        tax_rate:    item.tax_rate,
+        product_id: catalogEntry?.product_id ?? null,  // null = free-text item
+        name:       item.name,
+        quantity:   item.quantity,
+        price:      item.price,
+        tax_rate:   item.tax_rate,
       };
     });
 
     const totalAmount = items.reduce((s, i) => s + i.price * i.quantity, 0);
 
-    // ── Build The Good Till ExternalSale payload ───────────────────────────────
     const salePayload = {
       sale_items: lineItems,
       payments: [
@@ -265,13 +268,9 @@ export async function handleCreatePosOrder(req: Request, res: Response) {
           payment_status: paymentStatus,  // "OPEN" or "PAID"
         },
       ],
-      customer_name: customer
-        ? `${customer.vorname} ${customer.nachname}`
-        : undefined,
+      customer_name:  customer ? `${customer.vorname} ${customer.nachname}` : undefined,
       customer_phone: customer?.telefon,
-      notes: customer
-        ? `Lieferung: ${customer.strasse}, ${customer.ort}`
-        : undefined,
+      notes:          customer ? `Lieferung: ${customer.strasse}, ${customer.ort}` : undefined,
       external_reference: orderRef,
     };
 
@@ -288,9 +287,8 @@ export async function handleCreatePosOrder(req: Request, res: Response) {
     if (!posRes.ok) {
       const detail = await posRes.text();
       console.error("[POS] ExternalSale failed:", posRes.status, detail);
-      // Non-fatal: we don't want to block the customer flow if POS is down
-      res.json({ ok: false, error: `POS Fehler ${posRes.status}`, detail });
-      return;
+      // Non-fatal: we don't want to block the customer flow if POS is down.
+      return { ok: false, error: `POS Fehler ${posRes.status}`, detail };
     }
 
     const posData = (await posRes.json()) as { id?: string };
@@ -300,16 +298,46 @@ export async function handleCreatePosOrder(req: Request, res: Response) {
     recordOrder({
       id:        orderRef ?? `BS-POS-${posData.id ?? Date.now()}`,
       timestamp: new Date().toISOString(),
-      total:     items.reduce((s, i) => s + i.price * i.quantity, 0),
+      total:     totalAmount,
       status:    paymentStatus,
       items:     items.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price })),
       customer:  customer ? `${customer.vorname} ${customer.nachname}` : undefined,
       phone:     customer?.telefon,
     });
-    res.json({ ok: true, posOrderId: posData.id, ref: orderRef });
+    return { ok: true, posOrderId: posData.id, ref: orderRef };
   } catch (err) {
     console.error("[POS] Unexpected error:", err);
-    // Also non-fatal — customer flow must not break if POS is unreachable
-    res.json({ ok: false, error: String(err) });
+    // Also non-fatal — customer flow must not break if POS is unreachable.
+    return { ok: false, error: String(err) };
   }
+}
+
+/**
+ * POST /api/create-pos-order — PAID/online orders only.
+ * OPEN (unpaid bar/karte) orders MUST go through /api/order/confirm (email code),
+ * so they are rejected here to prevent bypassing verification.
+ */
+export async function handleCreatePosOrder(req: Request, res: Response) {
+  // 1) Rate limit per IP — blocks scripted order floods to the kitchen.
+  if (!(await rateLimitByIp(req, res, "pos", 10, 60_000))) return;
+  // 2) Reject cross-site / off-origin browser requests.
+  if (!checkSameOrigin(req, res)) return;
+
+  const body = req.body as CreatePosOrderBody;
+
+  // 3) Unpaid orders must be email-verified via /api/order/confirm.
+  if (body.paymentStatus === "OPEN") {
+    res.status(403).json({
+      error: "Unbezahlte Bestellungen müssen per E-Mail-Code bestätigt werden.",
+    });
+    return;
+  }
+
+  const result = await createPosOrder(body);
+  if (result.httpStatus) {
+    res.status(result.httpStatus).json({ error: result.error, detail: result.detail });
+    return;
+  }
+  const { httpStatus: _omit, ...clean } = result;
+  res.json(clean);
 }
