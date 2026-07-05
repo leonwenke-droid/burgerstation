@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { Request, Response } from "express";
+import { rateLimitByIp, checkSameOrigin } from "./security";
 
 // ─── Master-Katalog ────────────────────────────────────────────────────────────
 // Einzige verlässliche Quelle für Preise und Steuersätze.
@@ -183,6 +184,11 @@ function appendOrderLog(entry: object) {
  * Non-catalog items fall back to the provided name/price.
  */
 export async function handleCreateCheckout(req: Request, res: Response) {
+  // Anti-abuse: each call creates a real SumUp checkout (API cost). Throttle per
+  // IP and reject off-origin requests before touching SumUp.
+  if (!rateLimitByIp(req, res, "checkout", 15, 60_000)) return;
+  if (!checkSameOrigin(req, res)) return;
+
   const { orderedItems, items: legacyItems, currency = "EUR" } = req.body as CreateCheckoutBody;
 
   const raw = orderedItems ?? legacyItems;
@@ -322,6 +328,28 @@ export async function handleVerifyCheckout(req: Request, res: Response) {
  * secret before processing. Replace the TODO block with your POS/printer call.
  */
 export function handleSumUpWebhook(req: Request, res: Response) {
+  // ── Authenticity check ──────────────────────────────────────────────────────
+  // SumUp lets you set the webhook URL in the dashboard; append a secret token
+  // (?token=… or an X-Webhook-Token header) and verify it here so forged events
+  // can't poison the order log. Fail-closed only when a secret is configured, so
+  // an unconfigured deployment keeps working (the webhook currently only logs).
+  const expected = process.env.SUMUP_WEBHOOK_TOKEN;
+  if (expected) {
+    const provided =
+      (req.query.token as string | undefined) ??
+      (req.headers["x-webhook-token"] as string | undefined);
+    if (provided !== expected) {
+      console.warn("[SumUp Webhook] Abgelehnt: fehlendes/falsches Token.");
+      res.status(401).json({ error: "unauthorized" });
+      return;
+    }
+  } else {
+    console.warn(
+      "[SumUp Webhook] SUMUP_WEBHOOK_TOKEN nicht gesetzt — Event wird ungeprüft angenommen. " +
+        "Vor Kopplung an die Kasse: Token setzen und das Event zusätzlich per API gegen-verifizieren.",
+    );
+  }
+
   res.status(200).json({ received: true });
 
   const event     = req.body as Record<string, unknown>;

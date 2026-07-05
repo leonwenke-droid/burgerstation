@@ -7,6 +7,7 @@
  * so a crash/hard-close never leaves a ghost visitor in the count.
  */
 import type { Request, Response, NextFunction } from "express";
+import { requireAdmin } from "./security";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -102,8 +103,9 @@ export function recordOrder(order: OrderRecord): void {
 
 // ── Route handlers ────────────────────────────────────────────────────────────
 
-/** GET /api/analytics/snapshot */
-export function handleSnapshot(_req: Request, res: Response): void {
+/** GET /api/analytics/snapshot — admin only (exposes customer names + phones). */
+export function handleSnapshot(req: Request, res: Response): void {
+  if (!requireAdmin(req, res)) return;
   res.json(buildSnapshot());
 }
 

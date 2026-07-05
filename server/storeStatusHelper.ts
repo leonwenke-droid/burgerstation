@@ -11,6 +11,7 @@
 import type { Request, Response } from "express";
 import { kvSet, kvGet } from "./kvStore";
 import storeConfigFile from "./storeConfig.json";
+import { requireAdmin } from "./security";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -136,8 +137,15 @@ export async function handleStoreStatus(_req: Request, res: Response): Promise<v
   res.json({ ...status, overrideActive: overrideRaw === "true" });
 }
 
-/** POST /api/admin/store-override  body: { closed: boolean } */
+/** Server-side store-open check for enforcing order acceptance. */
+export async function isStoreOpen(): Promise<boolean> {
+  return (await computeStatus()).isOpen;
+}
+
+/** POST /api/admin/store-override  body: { closed: boolean } — admin only. */
 export async function handleSetStoreOverride(req: Request, res: Response): Promise<void> {
+  if (!requireAdmin(req, res)) return;
+
   const { closed } = req.body as { closed?: boolean };
   if (typeof closed !== "boolean") {
     res.status(400).json({ error: "closed must be boolean" });

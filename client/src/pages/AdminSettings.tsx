@@ -1,7 +1,23 @@
 import { useEffect, useRef, useState } from "react";
 import { Search, RefreshCw, TrendingUp, ShoppingCart, Users } from "lucide-react";
 
-const ADMIN_PIN = import.meta.env.VITE_ADMIN_PIN ?? "burgerstation";
+// The admin secret is entered at login and verified server-side. It is never
+// baked into the bundle — it only lives in sessionStorage after a successful login.
+const SECRET_KEY = "bs_admin_secret";
+
+function getSecret(): string | null {
+  return sessionStorage.getItem(SECRET_KEY);
+}
+
+/** Auth header for admin-only endpoints (snapshot, store-override). */
+function authHeaders(): Record<string, string> {
+  const s = getSecret();
+  return s ? { Authorization: `Bearer ${s}` } : {};
+}
+
+function clearSecret(): void {
+  sessionStorage.removeItem(SECRET_KEY);
+}
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -33,21 +49,52 @@ const fmtDate = (iso: string) => new Date(iso).toLocaleDateString("de-DE", { day
 function PinGate({ onAuth }: { onAuth: () => void }) {
   const [input, setInput] = useState("");
   const [shake, setShake] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
 
-  function submit(e: React.FormEvent) {
-    e.preventDefault();
-    if (input === ADMIN_PIN) { sessionStorage.setItem("bs_admin_auth", "1"); onAuth(); }
-    else { setShake(true); setInput(""); setTimeout(() => setShake(false), 500); }
+  function fail(msg: string) {
+    setErr(msg);
+    setShake(true);
+    setInput("");
+    setTimeout(() => setShake(false), 500);
   }
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!input || busy) return;
+    setBusy(true);
+    setErr("");
+    try {
+      // Verify the secret against a protected endpoint before granting access.
+      const r = await fetch("/api/analytics/snapshot", {
+        headers: { Authorization: `Bearer ${input}` },
+      });
+      if (r.ok) {
+        sessionStorage.setItem(SECRET_KEY, input);
+        onAuth();
+        return;
+      }
+      if (r.status === 503) fail("Server: ADMIN_SECRET ist nicht gesetzt.");
+      else fail("Falscher Zugangscode.");
+    } catch {
+      fail("Netzwerkfehler — bitte erneut versuchen.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-bs-sand flex items-center justify-center p-4">
       <form onSubmit={submit}
         className={`retro-card p-8 w-full max-w-xs space-y-5 ${shake ? "translate-x-1" : ""} transition-transform`}>
         <h1 className="font-subhead text-2xl text-bs-ink text-center uppercase tracking-wider">🔒 Admin</h1>
-        <input type="password" placeholder="PIN eingeben" value={input}
-          onChange={e => setInput(e.target.value)} autoFocus
+        <input type="password" placeholder="Zugangscode eingeben" value={input}
+          onChange={e => { setInput(e.target.value); setErr(""); }} autoFocus
           className="w-full border-[3px] border-bs-ink rounded-xl px-4 py-3 font-body text-lg bg-white focus:outline-none text-center tracking-widest" />
-        <button type="submit" className="btn-pink w-full">EINLOGGEN →</button>
+        {err && <p className="text-sm text-red-600 font-body text-center">{err}</p>}
+        <button type="submit" disabled={busy} className="btn-pink w-full disabled:opacity-50">
+          {busy ? "PRÜFE…" : "EINLOGGEN →"}
+        </button>
       </form>
     </div>
   );
@@ -79,7 +126,7 @@ function EmergencyStop() {
     setLoading(true);
     await fetch("/api/admin/store-override", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...authHeaders() },
       body: JSON.stringify({ closed: wantsClose }),
     });
     await load();
@@ -251,7 +298,7 @@ function OrderRow({ order }: { order: OrderRecord }) {
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 export default function AdminSettings() {
-  const [authed, setAuthed] = useState(() => sessionStorage.getItem("bs_admin_auth") === "1");
+  const [authed, setAuthed] = useState(() => getSecret() !== null);
   const [data,   setData]   = useState<Snapshot | null>(null);
   const [filter, setFilter] = useState<"ALL" | "PAID" | "OPEN">("ALL");
   const [search, setSearch] = useState("");
@@ -260,7 +307,13 @@ export default function AdminSettings() {
 
   async function poll() {
     try {
-      const r = await fetch("/api/analytics/snapshot");
+      const r = await fetch("/api/analytics/snapshot", { headers: authHeaders() });
+      if (r.status === 401 || r.status === 503) {
+        // Secret revoked/invalid — drop back to the login gate.
+        clearSecret();
+        setAuthed(false);
+        return;
+      }
       setData(await r.json());
       setLastPoll(new Date());
     } catch { /* silent */ }
@@ -298,7 +351,7 @@ export default function AdminSettings() {
           <button onClick={poll} className="p-1.5 rounded-lg border border-zinc-600 hover:border-white transition-colors" title="Refresh">
             <RefreshCw size={14} />
           </button>
-          <button onClick={() => { sessionStorage.removeItem("bs_admin_auth"); setAuthed(false); }}
+          <button onClick={() => { clearSecret(); setAuthed(false); }}
             className="text-xs text-zinc-400 hover:text-white transition-colors font-body">
             Abmelden
           </button>

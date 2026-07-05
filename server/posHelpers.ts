@@ -21,6 +21,8 @@
 
 import type { Request, Response } from "express";
 import { recordOrder } from "./analyticsHelper";
+import { rateLimitByIp, checkSameOrigin } from "./security";
+import { isStoreOpen } from "./storeStatusHelper";
 
 // ── Product ID mapping ────────────────────────────────────────────────────────
 // Keyed by SumUp variant_id → The Good Till product_id
@@ -98,6 +100,71 @@ async function getToken(baseUrl: string): Promise<string> {
   return data.token;
 }
 
+// ── Input validation / price hardening ────────────────────────────────────────
+
+const MAX_ITEMS      = 40;   // per order
+const MAX_QUANTITY   = 50;   // per line
+const MAX_UNIT_PRICE = 200;  // € — sanity ceiling for a single item
+const MAX_ORDER_TOTAL = 1000; // € — sanity ceiling for the whole order
+
+/**
+ * Validates and normalises client-supplied order items. Prices and tax rates for
+ * catalog items (known variant_id) are ALWAYS taken from the server-side catalog,
+ * so a manipulated client price is ignored. Non-catalog items are bounds-checked.
+ */
+function sanitizePosItems(raw: unknown): { items?: PosOrderItem[]; error?: string } {
+  if (!Array.isArray(raw) || raw.length === 0) {
+    return { error: "items must be a non-empty array" };
+  }
+  if (raw.length > MAX_ITEMS) {
+    return { error: `Zu viele Positionen (max. ${MAX_ITEMS}).` };
+  }
+
+  const clean: PosOrderItem[] = [];
+  for (const entry of raw as PosOrderItem[]) {
+    if (!entry || typeof entry !== "object") return { error: "Ungültige Position." };
+
+    const quantity = Number(entry.quantity);
+    if (!Number.isInteger(quantity) || quantity < 1 || quantity > MAX_QUANTITY) {
+      return { error: `Ungültige Menge für "${entry.name ?? entry.variant_id}".` };
+    }
+
+    const catalog = entry.variant_id ? GOODTILL_PRODUCTS[entry.variant_id] : undefined;
+    if (catalog) {
+      // Trusted path — price/tax/name come from the server catalog, never the client.
+      clean.push({
+        variant_id: entry.variant_id,
+        name:       catalog.name,
+        quantity,
+        price:      catalog.price,
+        tax_rate:   catalog.tax_rate,
+      });
+    } else {
+      // Non-catalog item (free-text) — bounds-check the client values.
+      const name = typeof entry.name === "string" ? entry.name.trim().slice(0, 120) : "";
+      const price = Number(entry.price);
+      if (!name) return { error: "Position ohne Namen." };
+      if (!Number.isFinite(price) || price <= 0 || price > MAX_UNIT_PRICE) {
+        return { error: `Ungültiger Preis für "${name}".` };
+      }
+      const taxRate = Number(entry.tax_rate);
+      clean.push({
+        name,
+        quantity,
+        price,
+        tax_rate: Number.isFinite(taxRate) && taxRate >= 0 && taxRate <= 25 ? taxRate : 7,
+      });
+    }
+  }
+
+  const total = clean.reduce((s, i) => s + i.price * i.quantity, 0);
+  if (total > MAX_ORDER_TOTAL) {
+    return { error: `Bestellsumme unplausibel hoch (max. ${MAX_ORDER_TOTAL} €).` };
+  }
+
+  return { items: clean };
+}
+
 // ── Main handler ──────────────────────────────────────────────────────────────
 
 /**
@@ -108,11 +175,27 @@ async function getToken(baseUrl: string): Promise<string> {
  * - paymentStatus "PAID"  → online order, appears on iPad as already paid → kitchen prints on accept
  */
 export async function handleCreatePosOrder(req: Request, res: Response) {
-  const body = req.body as CreatePosOrderBody;
-  const { items, paymentStatus, paymentType, customer, orderRef } = body;
+  // ── Anti-abuse guards ───────────────────────────────────────────────────────
+  // 1) Rate limit per IP — blocks scripted order floods to the kitchen.
+  if (!rateLimitByIp(req, res, "pos", 10, 60_000)) return;
+  // 2) Reject cross-site / off-origin browser requests.
+  if (!checkSameOrigin(req, res)) return;
 
-  if (!Array.isArray(items) || items.length === 0) {
-    res.status(400).json({ error: "items must be a non-empty array" });
+  const body = req.body as CreatePosOrderBody;
+  const { paymentStatus, paymentType, customer, orderRef } = body;
+
+  // 3) Validate + normalise items (server-side prices for catalog items).
+  const { items, error: itemError } = sanitizePosItems(body.items);
+  if (itemError || !items) {
+    res.status(400).json({ error: itemError ?? "Ungültige Bestellung." });
+    return;
+  }
+
+  // 4) Enforce store-open server-side for unpaid (bar/karte) orders. PAID orders
+  //    are already paid online, so they are always accepted even if the store just
+  //    closed — we must never drop a captured payment.
+  if (paymentStatus === "OPEN" && !(await isStoreOpen())) {
+    res.status(403).json({ error: "Der Store ist aktuell geschlossen — keine Bestellung möglich." });
     return;
   }
 

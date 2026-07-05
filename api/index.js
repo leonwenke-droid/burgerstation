@@ -18588,14 +18588,14 @@ var require_etag = __commonJS({
   "node_modules/.pnpm/etag@1.8.1/node_modules/etag/index.js"(exports, module) {
     "use strict";
     module.exports = etag;
-    var crypto = __require("crypto");
+    var crypto2 = __require("crypto");
     var Stats = __require("fs").Stats;
     var toString = Object.prototype.toString;
     function entitytag(entity) {
       if (entity.length === 0) {
         return '"0-2jmj7l5rSw0yVb/vlWAYkK/YBwk"';
       }
-      var hash = crypto.createHash("sha1").update(entity, "utf8").digest("base64").substring(0, 27);
+      var hash = crypto2.createHash("sha1").update(entity, "utf8").digest("base64").substring(0, 27);
       var len = typeof entity === "string" ? Buffer.byteLength(entity, "utf8") : entity.length;
       return '"' + len.toString(16) + "-" + hash + '"';
     }
@@ -21487,11 +21487,11 @@ var require_request = __commonJS({
 // node_modules/.pnpm/cookie-signature@1.0.6/node_modules/cookie-signature/index.js
 var require_cookie_signature = __commonJS({
   "node_modules/.pnpm/cookie-signature@1.0.6/node_modules/cookie-signature/index.js"(exports) {
-    var crypto = __require("crypto");
+    var crypto2 = __require("crypto");
     exports.sign = function(val, secret) {
       if ("string" != typeof val) throw new TypeError("Cookie value must be provided as a string.");
       if ("string" != typeof secret) throw new TypeError("Secret string must be provided.");
-      return val + "." + crypto.createHmac("sha256", secret).update(val).digest("base64").replace(/\=+$/, "");
+      return val + "." + crypto2.createHmac("sha256", secret).update(val).digest("base64").replace(/\=+$/, "");
     };
     exports.unsign = function(val, secret) {
       if ("string" != typeof val) throw new TypeError("Signed cookie string must be provided.");
@@ -21500,7 +21500,7 @@ var require_cookie_signature = __commonJS({
       return sha1(mac) == sha1(val) ? str : false;
     };
     function sha1(str) {
-      return crypto.createHash("sha1").update(str).digest("hex");
+      return crypto2.createHash("sha1").update(str).digest("hex");
     }
   }
 });
@@ -22473,6 +22473,88 @@ var import_express = __toESM(require_express2(), 1);
 // server/sumupHelpers.ts
 import fs from "node:fs";
 import path from "node:path";
+
+// server/security.ts
+import crypto from "node:crypto";
+function timingSafeEqualStr(a, b) {
+  const ab = Buffer.from(a);
+  const bb = Buffer.from(b);
+  if (ab.length !== bb.length) return false;
+  return crypto.timingSafeEqual(ab, bb);
+}
+function requireAdmin(req, res) {
+  const secret = process.env.ADMIN_SECRET;
+  if (!secret) {
+    console.warn("[Security] ADMIN_SECRET nicht gesetzt \u2014 Admin-Endpunkte gesperrt (fail-closed).");
+    res.status(503).json({ error: "Admin nicht konfiguriert (ADMIN_SECRET fehlt)." });
+    return false;
+  }
+  const header = req.headers.authorization ?? "";
+  const token = header.startsWith("Bearer ") ? header.slice(7) : "";
+  if (!token || !timingSafeEqualStr(token, secret)) {
+    res.status(401).json({ error: "Nicht autorisiert." });
+    return false;
+  }
+  return true;
+}
+function getClientIp(req) {
+  const fwd = req.headers["x-forwarded-for"];
+  const ip = (Array.isArray(fwd) ? fwd[0] : fwd)?.split(",")[0]?.trim();
+  return ip || req.socket?.remoteAddress || "unknown";
+}
+function getRequestHost(req) {
+  const envUrl = process.env.PUBLIC_BASE_URL;
+  if (envUrl) {
+    try {
+      return new URL(envUrl).host;
+    } catch {
+    }
+  }
+  const xfHost = req.headers["x-forwarded-host"];
+  const host = (Array.isArray(xfHost) ? xfHost[0] : xfHost) ?? req.headers.host;
+  return host?.split(",")[0]?.trim() ?? "";
+}
+function checkSameOrigin(req, res) {
+  const ourHost = getRequestHost(req);
+  if (!ourHost) return true;
+  const source = req.headers.origin ?? req.headers.referer;
+  if (!source) return true;
+  try {
+    if (new URL(source).host === ourHost) return true;
+  } catch {
+  }
+  res.status(403).json({ error: "Ung\xFCltige Anfrage-Herkunft." });
+  return false;
+}
+var buckets = /* @__PURE__ */ new Map();
+function allowRequest(key, max, windowMs) {
+  const now = Date.now();
+  if (buckets.size > 5e3) {
+    buckets.forEach((b, k) => {
+      if (now >= b.resetAt) buckets.delete(k);
+    });
+  }
+  const bucket = buckets.get(key);
+  if (!bucket || now >= bucket.resetAt) {
+    buckets.set(key, { count: 1, resetAt: now + windowMs });
+    return { ok: true, retryAfter: 0 };
+  }
+  if (bucket.count >= max) {
+    return { ok: false, retryAfter: Math.ceil((bucket.resetAt - now) / 1e3) };
+  }
+  bucket.count++;
+  return { ok: true, retryAfter: 0 };
+}
+function rateLimitByIp(req, res, prefix, max, windowMs) {
+  const { ok, retryAfter } = allowRequest(`${prefix}:${getClientIp(req)}`, max, windowMs);
+  if (!ok) {
+    res.setHeader("Retry-After", String(retryAfter));
+    res.status(429).json({ error: "Zu viele Anfragen. Bitte kurz warten und erneut versuchen." });
+  }
+  return ok;
+}
+
+// server/sumupHelpers.ts
 var SUMUP_CATALOG = [
   {
     sumup_catalog_id: "c0b10e52-2f19-4614-9633-76e4da4228c3",
@@ -22563,6 +22645,8 @@ function appendOrderLog(entry) {
   }
 }
 async function handleCreateCheckout(req, res) {
+  if (!rateLimitByIp(req, res, "checkout", 15, 6e4)) return;
+  if (!checkSameOrigin(req, res)) return;
   const { orderedItems, items: legacyItems, currency = "EUR" } = req.body;
   const raw = orderedItems ?? legacyItems;
   if (!Array.isArray(raw) || raw.length === 0) {
@@ -22658,6 +22742,19 @@ async function handleVerifyCheckout(req, res) {
   }
 }
 function handleSumUpWebhook(req, res) {
+  const expected = process.env.SUMUP_WEBHOOK_TOKEN;
+  if (expected) {
+    const provided = req.query.token ?? req.headers["x-webhook-token"];
+    if (provided !== expected) {
+      console.warn("[SumUp Webhook] Abgelehnt: fehlendes/falsches Token.");
+      res.status(401).json({ error: "unauthorized" });
+      return;
+    }
+  } else {
+    console.warn(
+      "[SumUp Webhook] SUMUP_WEBHOOK_TOKEN nicht gesetzt \u2014 Event wird ungepr\xFCft angenommen. Vor Kopplung an die Kasse: Token setzen und das Event zus\xE4tzlich per API gegen-verifizieren."
+    );
+  }
   res.status(200).json({ received: true });
   const event = req.body;
   const eventType = event.type ?? event.event_type;
@@ -22719,7 +22816,8 @@ function recordOrder(order) {
   orderHistory.unshift(order);
   if (orderHistory.length > 500) orderHistory.pop();
 }
-function handleSnapshot(_req, res) {
+function handleSnapshot(req, res) {
+  if (!requireAdmin(req, res)) return;
   res.json(buildSnapshot());
 }
 function handleHeartbeat(req, res) {
@@ -22741,146 +22839,6 @@ function handleCartSync(req, res) {
     else cartSessions.set(sessionId, count);
   }
   res.json({ ok: true, totalCartItems: totalCartItems() });
-}
-
-// server/posHelpers.ts
-var GOODTILL_PRODUCTS = {
-  "7569a6cd-268f-4d16-b86f-09676f4dcfaa": {
-    product_id: "GOODTILL_ID_DOUBLE_SMASH",
-    // ← replace with real ID from POS dashboard
-    name: "Double Smash",
-    price: 9.4,
-    tax_rate: 7
-  },
-  "42194cc3-fe98-4a6d-b5fa-04d333730d96": {
-    product_id: "GOODTILL_ID_LONG_CHILI",
-    // ← replace with real ID from POS dashboard
-    name: "Long Chili Cheese",
-    price: 11.9,
-    tax_rate: 7
-  }
-};
-var cachedToken = null;
-async function getToken(baseUrl) {
-  if (cachedToken && Date.now() < cachedToken.expiresAt) return cachedToken.token;
-  const username = process.env.GOODTILL_USERNAME;
-  const password = process.env.GOODTILL_PASSWORD;
-  if (!username || !password) throw new Error("GOODTILL_USERNAME / GOODTILL_PASSWORD not set");
-  const res = await fetch(`${baseUrl}/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password })
-  });
-  if (!res.ok) {
-    const detail = await res.text();
-    throw new Error(`Good Till auth failed ${res.status}: ${detail}`);
-  }
-  const data = await res.json();
-  if (!data.token) throw new Error("Good Till auth: no token in response");
-  cachedToken = { token: data.token, expiresAt: Date.now() + 50 * 60 * 1e3 };
-  return data.token;
-}
-async function handleCreatePosOrder(req, res) {
-  const body = req.body;
-  const { items, paymentStatus, paymentType, customer, orderRef } = body;
-  if (!Array.isArray(items) || items.length === 0) {
-    res.status(400).json({ error: "items must be a non-empty array" });
-    return;
-  }
-  const subdomain = process.env.GOODTILL_SUBDOMAIN;
-  const outletId = process.env.GOODTILL_OUTLET_ID;
-  const missingVars = [
-    !subdomain && "GOODTILL_SUBDOMAIN",
-    !outletId && "GOODTILL_OUTLET_ID",
-    !process.env.GOODTILL_USERNAME && "GOODTILL_USERNAME",
-    !process.env.GOODTILL_PASSWORD && "GOODTILL_PASSWORD"
-  ].filter(Boolean);
-  if (missingVars.length > 0) {
-    console.warn(
-      `[POS] Good Till nicht konfiguriert (fehlend: ${missingVars.join(", ")}). Bestellung wird nur lokal protokolliert.`
-    );
-    console.log("[POS] \u{1F4CB} Bestellung (lokal):", {
-      ref: orderRef,
-      status: paymentStatus,
-      payment: paymentType,
-      items: items.map((i) => `${i.quantity}\xD7 ${i.name} @ ${i.price} \u20AC`),
-      customer
-    });
-    recordOrder({
-      id: orderRef ?? `BS-LOCAL-${Date.now()}`,
-      timestamp: (/* @__PURE__ */ new Date()).toISOString(),
-      total: items.reduce((s, i) => s + i.price * i.quantity, 0),
-      status: paymentStatus,
-      items: items.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price })),
-      customer: customer ? `${customer.vorname} ${customer.nachname}` : void 0,
-      phone: customer?.telefon
-    });
-    res.json({ ok: true, mode: "local-only", ref: orderRef });
-    return;
-  }
-  const baseUrl = `https://${subdomain}.goodtill.com/api`;
-  try {
-    const token = await getToken(baseUrl);
-    const lineItems = items.map((item) => {
-      const catalogEntry = item.variant_id ? GOODTILL_PRODUCTS[item.variant_id] : null;
-      return {
-        product_id: catalogEntry?.product_id ?? null,
-        // null = free-text item
-        name: item.name,
-        quantity: item.quantity,
-        price: item.price,
-        tax_rate: item.tax_rate
-      };
-    });
-    const totalAmount = items.reduce((s, i) => s + i.price * i.quantity, 0);
-    const salePayload = {
-      sale_items: lineItems,
-      payments: [
-        {
-          payment_type: paymentType ?? (paymentStatus === "PAID" ? "ECOM" : "CASH"),
-          payment_amount: totalAmount,
-          payment_status: paymentStatus
-          // "OPEN" or "PAID"
-        }
-      ],
-      customer_name: customer ? `${customer.vorname} ${customer.nachname}` : void 0,
-      customer_phone: customer?.telefon,
-      notes: customer ? `Lieferung: ${customer.strasse}, ${customer.ort}` : void 0,
-      external_reference: orderRef
-    };
-    const posRes = await fetch(`${baseUrl}/externalsale`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-        "Outlet-Id": outletId
-      },
-      body: JSON.stringify(salePayload)
-    });
-    if (!posRes.ok) {
-      const detail = await posRes.text();
-      console.error("[POS] ExternalSale failed:", posRes.status, detail);
-      res.json({ ok: false, error: `POS Fehler ${posRes.status}`, detail });
-      return;
-    }
-    const posData = await posRes.json();
-    console.log(
-      `[POS] \u2705 Bestellung erstellt | ref: ${orderRef} | status: ${paymentStatus} | POS-ID: ${posData.id}`
-    );
-    recordOrder({
-      id: orderRef ?? `BS-POS-${posData.id ?? Date.now()}`,
-      timestamp: (/* @__PURE__ */ new Date()).toISOString(),
-      total: items.reduce((s, i) => s + i.price * i.quantity, 0),
-      status: paymentStatus,
-      items: items.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price })),
-      customer: customer ? `${customer.vorname} ${customer.nachname}` : void 0,
-      phone: customer?.telefon
-    });
-    res.json({ ok: true, posOrderId: posData.id, ref: orderRef });
-  } catch (err) {
-    console.error("[POS] Unexpected error:", err);
-    res.json({ ok: false, error: String(err) });
-  }
 }
 
 // server/kvStore.ts
@@ -23021,7 +22979,11 @@ async function handleStoreStatus(_req, res) {
   ]);
   res.json({ ...status, overrideActive: overrideRaw === "true" });
 }
+async function isStoreOpen() {
+  return (await computeStatus()).isOpen;
+}
 async function handleSetStoreOverride(req, res) {
+  if (!requireAdmin(req, res)) return;
   const { closed } = req.body;
   if (typeof closed !== "boolean") {
     res.status(400).json({ error: "closed must be boolean" });
@@ -23030,6 +22992,202 @@ async function handleSetStoreOverride(req, res) {
   await kvSet(KV_OVERRIDE, String(closed));
   console.log(`[Admin] Store override set to: ${closed ? "CLOSED" : "OPEN"}`);
   res.json({ ok: true, closed });
+}
+
+// server/posHelpers.ts
+var GOODTILL_PRODUCTS = {
+  "7569a6cd-268f-4d16-b86f-09676f4dcfaa": {
+    product_id: "GOODTILL_ID_DOUBLE_SMASH",
+    // ← replace with real ID from POS dashboard
+    name: "Double Smash",
+    price: 9.4,
+    tax_rate: 7
+  },
+  "42194cc3-fe98-4a6d-b5fa-04d333730d96": {
+    product_id: "GOODTILL_ID_LONG_CHILI",
+    // ← replace with real ID from POS dashboard
+    name: "Long Chili Cheese",
+    price: 11.9,
+    tax_rate: 7
+  }
+};
+var cachedToken = null;
+async function getToken(baseUrl) {
+  if (cachedToken && Date.now() < cachedToken.expiresAt) return cachedToken.token;
+  const username = process.env.GOODTILL_USERNAME;
+  const password = process.env.GOODTILL_PASSWORD;
+  if (!username || !password) throw new Error("GOODTILL_USERNAME / GOODTILL_PASSWORD not set");
+  const res = await fetch(`${baseUrl}/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password })
+  });
+  if (!res.ok) {
+    const detail = await res.text();
+    throw new Error(`Good Till auth failed ${res.status}: ${detail}`);
+  }
+  const data = await res.json();
+  if (!data.token) throw new Error("Good Till auth: no token in response");
+  cachedToken = { token: data.token, expiresAt: Date.now() + 50 * 60 * 1e3 };
+  return data.token;
+}
+var MAX_ITEMS = 40;
+var MAX_QUANTITY = 50;
+var MAX_UNIT_PRICE = 200;
+var MAX_ORDER_TOTAL = 1e3;
+function sanitizePosItems(raw) {
+  if (!Array.isArray(raw) || raw.length === 0) {
+    return { error: "items must be a non-empty array" };
+  }
+  if (raw.length > MAX_ITEMS) {
+    return { error: `Zu viele Positionen (max. ${MAX_ITEMS}).` };
+  }
+  const clean = [];
+  for (const entry of raw) {
+    if (!entry || typeof entry !== "object") return { error: "Ung\xFCltige Position." };
+    const quantity = Number(entry.quantity);
+    if (!Number.isInteger(quantity) || quantity < 1 || quantity > MAX_QUANTITY) {
+      return { error: `Ung\xFCltige Menge f\xFCr "${entry.name ?? entry.variant_id}".` };
+    }
+    const catalog = entry.variant_id ? GOODTILL_PRODUCTS[entry.variant_id] : void 0;
+    if (catalog) {
+      clean.push({
+        variant_id: entry.variant_id,
+        name: catalog.name,
+        quantity,
+        price: catalog.price,
+        tax_rate: catalog.tax_rate
+      });
+    } else {
+      const name = typeof entry.name === "string" ? entry.name.trim().slice(0, 120) : "";
+      const price = Number(entry.price);
+      if (!name) return { error: "Position ohne Namen." };
+      if (!Number.isFinite(price) || price <= 0 || price > MAX_UNIT_PRICE) {
+        return { error: `Ung\xFCltiger Preis f\xFCr "${name}".` };
+      }
+      const taxRate = Number(entry.tax_rate);
+      clean.push({
+        name,
+        quantity,
+        price,
+        tax_rate: Number.isFinite(taxRate) && taxRate >= 0 && taxRate <= 25 ? taxRate : 7
+      });
+    }
+  }
+  const total = clean.reduce((s, i) => s + i.price * i.quantity, 0);
+  if (total > MAX_ORDER_TOTAL) {
+    return { error: `Bestellsumme unplausibel hoch (max. ${MAX_ORDER_TOTAL} \u20AC).` };
+  }
+  return { items: clean };
+}
+async function handleCreatePosOrder(req, res) {
+  if (!rateLimitByIp(req, res, "pos", 10, 6e4)) return;
+  if (!checkSameOrigin(req, res)) return;
+  const body = req.body;
+  const { paymentStatus, paymentType, customer, orderRef } = body;
+  const { items, error: itemError } = sanitizePosItems(body.items);
+  if (itemError || !items) {
+    res.status(400).json({ error: itemError ?? "Ung\xFCltige Bestellung." });
+    return;
+  }
+  if (paymentStatus === "OPEN" && !await isStoreOpen()) {
+    res.status(403).json({ error: "Der Store ist aktuell geschlossen \u2014 keine Bestellung m\xF6glich." });
+    return;
+  }
+  const subdomain = process.env.GOODTILL_SUBDOMAIN;
+  const outletId = process.env.GOODTILL_OUTLET_ID;
+  const missingVars = [
+    !subdomain && "GOODTILL_SUBDOMAIN",
+    !outletId && "GOODTILL_OUTLET_ID",
+    !process.env.GOODTILL_USERNAME && "GOODTILL_USERNAME",
+    !process.env.GOODTILL_PASSWORD && "GOODTILL_PASSWORD"
+  ].filter(Boolean);
+  if (missingVars.length > 0) {
+    console.warn(
+      `[POS] Good Till nicht konfiguriert (fehlend: ${missingVars.join(", ")}). Bestellung wird nur lokal protokolliert.`
+    );
+    console.log("[POS] \u{1F4CB} Bestellung (lokal):", {
+      ref: orderRef,
+      status: paymentStatus,
+      payment: paymentType,
+      items: items.map((i) => `${i.quantity}\xD7 ${i.name} @ ${i.price} \u20AC`),
+      customer
+    });
+    recordOrder({
+      id: orderRef ?? `BS-LOCAL-${Date.now()}`,
+      timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+      total: items.reduce((s, i) => s + i.price * i.quantity, 0),
+      status: paymentStatus,
+      items: items.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price })),
+      customer: customer ? `${customer.vorname} ${customer.nachname}` : void 0,
+      phone: customer?.telefon
+    });
+    res.json({ ok: true, mode: "local-only", ref: orderRef });
+    return;
+  }
+  const baseUrl = `https://${subdomain}.goodtill.com/api`;
+  try {
+    const token = await getToken(baseUrl);
+    const lineItems = items.map((item) => {
+      const catalogEntry = item.variant_id ? GOODTILL_PRODUCTS[item.variant_id] : null;
+      return {
+        product_id: catalogEntry?.product_id ?? null,
+        // null = free-text item
+        name: item.name,
+        quantity: item.quantity,
+        price: item.price,
+        tax_rate: item.tax_rate
+      };
+    });
+    const totalAmount = items.reduce((s, i) => s + i.price * i.quantity, 0);
+    const salePayload = {
+      sale_items: lineItems,
+      payments: [
+        {
+          payment_type: paymentType ?? (paymentStatus === "PAID" ? "ECOM" : "CASH"),
+          payment_amount: totalAmount,
+          payment_status: paymentStatus
+          // "OPEN" or "PAID"
+        }
+      ],
+      customer_name: customer ? `${customer.vorname} ${customer.nachname}` : void 0,
+      customer_phone: customer?.telefon,
+      notes: customer ? `Lieferung: ${customer.strasse}, ${customer.ort}` : void 0,
+      external_reference: orderRef
+    };
+    const posRes = await fetch(`${baseUrl}/externalsale`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        "Outlet-Id": outletId
+      },
+      body: JSON.stringify(salePayload)
+    });
+    if (!posRes.ok) {
+      const detail = await posRes.text();
+      console.error("[POS] ExternalSale failed:", posRes.status, detail);
+      res.json({ ok: false, error: `POS Fehler ${posRes.status}`, detail });
+      return;
+    }
+    const posData = await posRes.json();
+    console.log(
+      `[POS] \u2705 Bestellung erstellt | ref: ${orderRef} | status: ${paymentStatus} | POS-ID: ${posData.id}`
+    );
+    recordOrder({
+      id: orderRef ?? `BS-POS-${posData.id ?? Date.now()}`,
+      timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+      total: items.reduce((s, i) => s + i.price * i.quantity, 0),
+      status: paymentStatus,
+      items: items.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price })),
+      customer: customer ? `${customer.vorname} ${customer.nachname}` : void 0,
+      phone: customer?.telefon
+    });
+    res.json({ ok: true, posOrderId: posData.id, ref: orderRef });
+  } catch (err) {
+    console.error("[POS] Unexpected error:", err);
+    res.json({ ok: false, error: String(err) });
+  }
 }
 
 // server/googleReviews.ts
