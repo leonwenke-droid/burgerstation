@@ -86,8 +86,25 @@ Wegwerf-Domains hebt die Hürde zusätzlich.
 ## Umgebungsvariablen (neu)
 
 - `RESEND_API_KEY` — API-Key aus dem Resend-Dashboard.
-- `ORDER_FROM_EMAIL` — z.B. `Burger Station <noreply@deine-domain.de>`
-  (Domain muss in Resend verifiziert sein).
+- `ORDER_FROM_EMAIL` — Absenderadresse. Default `onboarding@resend.dev`, sobald
+  eine eigene Domain in Resend verifiziert ist auf
+  `Burger Station <noreply@deine-domain.de>` umstellen.
+
+## Rollout-Stufen (Domain noch nicht vorhanden)
+
+Die Logik wird domain-unabhängig gebaut und in Stufen aktivierbar:
+
+1. **Jetzt (keine Domain, kein Key):** ohne `RESEND_API_KEY` loggt der Server
+   den Code in die Konsole. Der komplette Flow ist damit lokal testbar, ohne
+   dass eine Mail rausgeht.
+2. **Resend-Konto, noch keine Domain:** mit Key + Default-Absender
+   `onboarding@resend.dev` versendet Resend im Test-Modus nur an die eigene
+   Konto-Adresse — reicht für einen echten End-to-End-Test, aber noch nicht für
+   Kunden.
+3. **Eigene Domain registriert + in Resend verifiziert:** `ORDER_FROM_EMAIL` auf
+   die eigene Adresse setzen — ab dann Versand an beliebige Kunden. **Kein
+   Code-Change nötig.** Eine `*.vercel.app`-Adresse ist hierfür nicht
+   verifizierbar; es braucht eine eigene registrierte Domain.
 
 ## Bewusst nicht im Scope (Folge-Punkte)
 
