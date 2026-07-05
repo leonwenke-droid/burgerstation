@@ -18588,14 +18588,14 @@ var require_etag = __commonJS({
   "node_modules/.pnpm/etag@1.8.1/node_modules/etag/index.js"(exports, module) {
     "use strict";
     module.exports = etag;
-    var crypto2 = __require("crypto");
+    var crypto4 = __require("crypto");
     var Stats = __require("fs").Stats;
     var toString = Object.prototype.toString;
     function entitytag(entity) {
       if (entity.length === 0) {
         return '"0-2jmj7l5rSw0yVb/vlWAYkK/YBwk"';
       }
-      var hash = crypto2.createHash("sha1").update(entity, "utf8").digest("base64").substring(0, 27);
+      var hash = crypto4.createHash("sha1").update(entity, "utf8").digest("base64").substring(0, 27);
       var len = typeof entity === "string" ? Buffer.byteLength(entity, "utf8") : entity.length;
       return '"' + len.toString(16) + "-" + hash + '"';
     }
@@ -21487,11 +21487,11 @@ var require_request = __commonJS({
 // node_modules/.pnpm/cookie-signature@1.0.6/node_modules/cookie-signature/index.js
 var require_cookie_signature = __commonJS({
   "node_modules/.pnpm/cookie-signature@1.0.6/node_modules/cookie-signature/index.js"(exports) {
-    var crypto2 = __require("crypto");
+    var crypto4 = __require("crypto");
     exports.sign = function(val, secret) {
       if ("string" != typeof val) throw new TypeError("Cookie value must be provided as a string.");
       if ("string" != typeof secret) throw new TypeError("Secret string must be provided.");
-      return val + "." + crypto2.createHmac("sha256", secret).update(val).digest("base64").replace(/\=+$/, "");
+      return val + "." + crypto4.createHmac("sha256", secret).update(val).digest("base64").replace(/\=+$/, "");
     };
     exports.unsign = function(val, secret) {
       if ("string" != typeof val) throw new TypeError("Signed cookie string must be provided.");
@@ -21500,7 +21500,7 @@ var require_cookie_signature = __commonJS({
       return sha1(mac) == sha1(val) ? str : false;
     };
     function sha1(str) {
-      return crypto2.createHash("sha1").update(str).digest("hex");
+      return crypto4.createHash("sha1").update(str).digest("hex");
     }
   }
 });
@@ -22511,12 +22511,26 @@ async function kvSet(key, value) {
     mem.set(key, value);
   }
 }
+async function kvSetEx(key, value, ttlSeconds) {
+  if (upstashEnabled()) {
+    await upstashReq(["SET", key, value, "EX", String(ttlSeconds)]);
+  } else {
+    mem.set(key, value);
+  }
+}
 async function kvGet(key) {
   if (upstashEnabled()) {
     const result = await upstashReq(["GET", key]);
     return typeof result === "string" ? result : null;
   }
   return mem.get(key) ?? null;
+}
+async function kvDel(key) {
+  if (upstashEnabled()) {
+    await upstashReq(["DEL", key]);
+  } else {
+    mem.delete(key);
+  }
 }
 async function kvIncrFixedWindow(key, ttlSeconds) {
   if (!upstashEnabled()) return null;
@@ -23118,19 +23132,14 @@ function sanitizePosItems(raw) {
   }
   return { items: clean };
 }
-async function handleCreatePosOrder(req, res) {
-  if (!await rateLimitByIp(req, res, "pos", 10, 6e4)) return;
-  if (!checkSameOrigin(req, res)) return;
-  const body = req.body;
+async function createPosOrder(body) {
   const { paymentStatus, paymentType, customer, orderRef } = body;
   const { items, error: itemError } = sanitizePosItems(body.items);
   if (itemError || !items) {
-    res.status(400).json({ error: itemError ?? "Ung\xFCltige Bestellung." });
-    return;
+    return { ok: false, error: itemError ?? "Ung\xFCltige Bestellung.", httpStatus: 400 };
   }
   if (paymentStatus === "OPEN" && !await isStoreOpen()) {
-    res.status(403).json({ error: "Der Store ist aktuell geschlossen \u2014 keine Bestellung m\xF6glich." });
-    return;
+    return { ok: false, error: "Der Store ist aktuell geschlossen \u2014 keine Bestellung m\xF6glich.", httpStatus: 403 };
   }
   const subdomain = process.env.GOODTILL_SUBDOMAIN;
   const outletId = process.env.GOODTILL_OUTLET_ID;
@@ -23160,8 +23169,7 @@ async function handleCreatePosOrder(req, res) {
       customer: customer ? `${customer.vorname} ${customer.nachname}` : void 0,
       phone: customer?.telefon
     });
-    res.json({ ok: true, mode: "local-only", ref: orderRef });
-    return;
+    return { ok: true, mode: "local-only", ref: orderRef };
   }
   const baseUrl = `https://${subdomain}.goodtill.com/api`;
   try {
@@ -23205,8 +23213,7 @@ async function handleCreatePosOrder(req, res) {
     if (!posRes.ok) {
       const detail = await posRes.text();
       console.error("[POS] ExternalSale failed:", posRes.status, detail);
-      res.json({ ok: false, error: `POS Fehler ${posRes.status}`, detail });
-      return;
+      return { ok: false, error: `POS Fehler ${posRes.status}`, detail };
     }
     const posData = await posRes.json();
     console.log(
@@ -23215,17 +23222,205 @@ async function handleCreatePosOrder(req, res) {
     recordOrder({
       id: orderRef ?? `BS-POS-${posData.id ?? Date.now()}`,
       timestamp: (/* @__PURE__ */ new Date()).toISOString(),
-      total: items.reduce((s, i) => s + i.price * i.quantity, 0),
+      total: totalAmount,
       status: paymentStatus,
       items: items.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price })),
       customer: customer ? `${customer.vorname} ${customer.nachname}` : void 0,
       phone: customer?.telefon
     });
-    res.json({ ok: true, posOrderId: posData.id, ref: orderRef });
+    return { ok: true, posOrderId: posData.id, ref: orderRef };
   } catch (err) {
     console.error("[POS] Unexpected error:", err);
-    res.json({ ok: false, error: String(err) });
+    return { ok: false, error: String(err) };
   }
+}
+async function handleCreatePosOrder(req, res) {
+  if (!await rateLimitByIp(req, res, "pos", 10, 6e4)) return;
+  if (!checkSameOrigin(req, res)) return;
+  const body = req.body;
+  if (body.paymentStatus === "OPEN") {
+    res.status(403).json({
+      error: "Unbezahlte Bestellungen m\xFCssen per E-Mail-Code best\xE4tigt werden."
+    });
+    return;
+  }
+  const result = await createPosOrder(body);
+  if (result.httpStatus) {
+    res.status(result.httpStatus).json({ error: result.error, detail: result.detail });
+    return;
+  }
+  const { httpStatus: _omit, ...clean } = result;
+  res.json(clean);
+}
+
+// server/orderVerification.ts
+import crypto3 from "node:crypto";
+
+// server/emailHelpers.ts
+import crypto2 from "node:crypto";
+var CODE_TTL_SEC = 600;
+var MAX_ATTEMPTS = 5;
+var DISPOSABLE_DOMAINS = /* @__PURE__ */ new Set([
+  "mailinator.com",
+  "10minutemail.com",
+  "guerrillamail.com",
+  "guerrillamail.info",
+  "sharklasers.com",
+  "trashmail.com",
+  "yopmail.com",
+  "temp-mail.org",
+  "tempmail.com",
+  "getnada.com",
+  "dispostable.com",
+  "maildrop.cc",
+  "fakeinbox.com",
+  "mohmal.com",
+  "throwawaymail.com",
+  "mytemp.email",
+  "tmpmail.org",
+  "emailondeck.com",
+  "mailnesia.com"
+]);
+function otpKey(email) {
+  const norm = email.trim().toLowerCase();
+  return `otp:${crypto2.createHash("sha256").update(norm).digest("hex")}`;
+}
+function isValidEmail(email) {
+  if (typeof email !== "string") return false;
+  const e = email.trim();
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e);
+}
+function isDisposableDomain(email) {
+  const domain = email.trim().toLowerCase().split("@")[1] ?? "";
+  return DISPOSABLE_DOMAINS.has(domain);
+}
+function generateCode() {
+  return String(crypto2.randomInt(0, 1e6)).padStart(6, "0");
+}
+async function storeCode(email, code) {
+  const payload = { code, attempts: 0, expiresAt: Date.now() + CODE_TTL_SEC * 1e3 };
+  await kvSetEx(otpKey(email), JSON.stringify(payload), CODE_TTL_SEC);
+}
+async function verifyOrderCode(email, code) {
+  const key = otpKey(email);
+  const raw = await kvGet(key);
+  if (!raw) {
+    return { ok: false, error: "Code abgelaufen oder ung\xFCltig. Bitte einen neuen Code anfordern." };
+  }
+  let data;
+  try {
+    data = JSON.parse(raw);
+  } catch {
+    await kvDel(key);
+    return { ok: false, error: "Code ung\xFCltig. Bitte einen neuen Code anfordern." };
+  }
+  if (Date.now() > data.expiresAt) {
+    await kvDel(key);
+    return { ok: false, error: "Code abgelaufen. Bitte einen neuen Code anfordern." };
+  }
+  if (data.attempts >= MAX_ATTEMPTS) {
+    await kvDel(key);
+    return { ok: false, error: "Zu viele Fehlversuche. Bitte einen neuen Code anfordern." };
+  }
+  if (String(code).trim() !== data.code) {
+    data.attempts += 1;
+    const remainingSec = Math.max(1, Math.ceil((data.expiresAt - Date.now()) / 1e3));
+    await kvSetEx(key, JSON.stringify(data), remainingSec);
+    return { ok: false, error: "Code falsch. Bitte erneut versuchen." };
+  }
+  await kvDel(key);
+  return { ok: true };
+}
+async function sendCodeEmail(email, code) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.log(`[Email] (DEV \u2014 kein RESEND_API_KEY) Best\xE4tigungscode f\xFCr ${email}: ${code}`);
+    return { ok: true };
+  }
+  const from = process.env.ORDER_FROM_EMAIL || "onboarding@resend.dev";
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from,
+        to: [email],
+        subject: "Dein Best\xE4tigungscode \u2013 Burger Station Leer",
+        html: `<div style="font-family:sans-serif;font-size:16px;color:#1d1d03"><p>Dein Best\xE4tigungscode f\xFCr deine Bestellung bei der Burger Station Leer:</p><p style="font-size:32px;font-weight:bold;letter-spacing:4px">${code}</p><p>Der Code ist 10 Minuten g\xFCltig. Wenn du keine Bestellung aufgegeben hast, ignoriere diese E-Mail.</p></div>`
+      })
+    });
+    if (!res.ok) {
+      console.error("[Email] Resend-Fehler:", res.status, await res.text());
+      return { ok: false };
+    }
+    return { ok: true };
+  } catch (err) {
+    console.error("[Email] Resend nicht erreichbar:", err);
+    return { ok: false };
+  }
+}
+
+// server/orderVerification.ts
+var PHONE_FALLBACK = "+49 491 997 55279";
+async function handleRequestCode(req, res) {
+  if (!await rateLimitByIp(req, res, "otp-req", 3, 6e5)) return;
+  if (!checkSameOrigin(req, res)) return;
+  const email = String(req.body.email ?? "").trim();
+  if (!isValidEmail(email)) {
+    res.status(400).json({ error: "Bitte gib eine g\xFCltige E-Mail-Adresse an." });
+    return;
+  }
+  if (isDisposableDomain(email)) {
+    res.status(400).json({ error: "Wegwerf-E-Mail-Adressen sind nicht erlaubt. Bitte nutze deine echte Adresse." });
+    return;
+  }
+  const cdKey = `otp-cd:${crypto3.createHash("sha256").update(email.toLowerCase()).digest("hex")}`;
+  const cd = await kvIncrFixedWindow(cdKey, 60);
+  if (cd !== null && cd > 1) {
+    res.status(429).json({ error: "Bitte warte kurz, bevor du einen neuen Code anforderst." });
+    return;
+  }
+  const code = generateCode();
+  await storeCode(email, code);
+  const sent = await sendCodeEmail(email, code);
+  if (!sent.ok) {
+    res.status(502).json({
+      error: `Verifizierung gerade nicht m\xF6glich. Bitte sp\xE4ter erneut versuchen oder telefonisch bestellen: ${PHONE_FALLBACK}.`
+    });
+    return;
+  }
+  res.json({ ok: true });
+}
+async function handleConfirmOrder(req, res) {
+  if (!await rateLimitByIp(req, res, "order-confirm", 10, 6e4)) return;
+  if (!checkSameOrigin(req, res)) return;
+  const { email, code, items, payment, customer } = req.body;
+  if (!isValidEmail(String(email ?? ""))) {
+    res.status(400).json({ error: "Ung\xFCltige E-Mail-Adresse." });
+    return;
+  }
+  if (payment !== "bar" && payment !== "karte") {
+    res.status(400).json({ error: "Ung\xFCltige Zahlungsart." });
+    return;
+  }
+  const verify = await verifyOrderCode(email, String(code ?? ""));
+  if (!verify.ok) {
+    res.status(400).json({ error: verify.error });
+    return;
+  }
+  const orderRef = `BS-${Math.floor(Math.random() * 9e3) + 1e3}`;
+  const result = await createPosOrder({
+    items,
+    paymentStatus: "OPEN",
+    paymentType: payment === "karte" ? "CARD" : "CASH",
+    customer,
+    orderRef
+  });
+  if (result.httpStatus) {
+    res.status(result.httpStatus).json({ error: result.error });
+    return;
+  }
+  res.json({ ok: result.ok, orderRef });
 }
 
 // server/googleReviews.ts
@@ -23326,6 +23521,8 @@ app.post("/api/create-sandbox-checkout", handleCreateCheckout);
 app.post("/api/webhooks/sumup", handleSumUpWebhook);
 app.get("/api/verify-checkout/:checkoutId", handleVerifyCheckout);
 app.post("/api/create-pos-order", handleCreatePosOrder);
+app.post("/api/order/request-code", handleRequestCode);
+app.post("/api/order/confirm", handleConfirmOrder);
 app.get("/api/google-reviews", async (_req, res) => {
   const result = await getGoogleReviewsNormalized();
   if (!result.ok) {

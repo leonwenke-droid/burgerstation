@@ -50,6 +50,10 @@ export default function Checkout({ preview }: { preview?: CheckoutPreviewConfig 
   const [agb, setAgb] = useState(preview?.agb ?? false);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [codeSent, setCodeSent]   = useState(false);
+  const [code, setCode]           = useState("");
+  const [verifying, setVerifying] = useState(false);
+  const [codeError, setCodeError] = useState<string | null>(null);
   const [checkoutId, setCheckoutId] = useState<string | null>(() =>
     sessionStorage.getItem("bs_checkout_id"),
   );
@@ -104,48 +108,14 @@ export default function Checkout({ preview }: { preview?: CheckoutPreviewConfig 
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       setForm((p) => ({ ...p, [f]: e.target.value }));
       // Clear checkout ID if form changes after widget was shown (stale checkout)
-      if (f !== "anmerkungen") setCheckoutId(null);
+      if (f !== "anmerkungen") {
+        setCheckoutId(null);
+        // A pending email code becomes stale if the customer edits their data.
+        if (codeSent) { setCodeSent(false); setCode(""); setCodeError(null); }
+      }
     };
 
   // ── Helpers ───────────────────────────────────────────────────────────────
-
-  /** Fire-and-forget POS push — never blocks the customer flow. */
-  async function sendPosOrder(
-    paymentStatus: "OPEN" | "PAID",
-    paymentType:   "CASH" | "CARD" | "ECOM",
-    ref:           string,
-  ) {
-    const posItems = items.map((i) => ({
-      variant_id: i.variant_id,
-      name:       i.name,
-      quantity:   i.quantity,
-      price:      i.price,
-      tax_rate:   7,
-    }));
-    try {
-      const res = await fetch("/api/create-pos-order", {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          items:         posItems,
-          paymentStatus,
-          paymentType,
-          orderRef:      ref,
-          customer: {
-            vorname:  form.vorname,
-            nachname: form.nachname,
-            telefon:  form.telefon,
-            strasse:  `${form.strasse} ${form.hausnummer}`,
-            ort:      `${form.plz} ${form.ort}`,
-          },
-        }),
-      });
-      const data = (await res.json()) as { ok: boolean; mode?: string };
-      console.log("[POS]", data.mode === "local-only" ? "📋 lokal geloggt" : "✅ POS-Bestellung erstellt", data);
-    } catch (err) {
-      console.warn("[POS] Nicht erreichbar:", err);
-    }
-  }
 
   function buildOrderedItems() {
     return items.map((i) =>
@@ -189,13 +159,36 @@ export default function Checkout({ preview }: { preview?: CheckoutPreviewConfig 
       subtotal:  fmt(subtotal),
     });
 
-    // ── Bar / Karte ───────────────────────────────────────────────────────
+    // ── Bar / Karte: E-Mail-Code anfordern (fail-closed) ──────────────────
     if (payment !== "online") {
-      const orderNum = `BS-${Math.floor(Math.random() * 9000) + 1000}`;
-      sessionStorage.setItem("bs_order_num", orderNum);
-      // Push to POS as OPEN (unpaid) → appears on iPad immediately
-      void sendPosOrder("OPEN", payment === "bar" ? "CASH" : "CARD", orderNum);
-      window.location.href = "/bestellen/danke";
+      setSubmitting(true);
+      try {
+        const res = await fetch("/api/order/request-code", {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify({ email: form.email }),
+        });
+        const data = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+        if (!res.ok || !data.ok) {
+          setFormError(
+            data.error ??
+              "Verifizierung gerade nicht möglich. Bitte telefonisch bestellen: +49 491 997 55279.",
+          );
+          return;
+        }
+        setCodeSent(true);
+        setCodeError(null);
+        setTimeout(
+          () => document.getElementById("code-section")?.scrollIntoView({ behavior: "smooth" }),
+          120,
+        );
+      } catch {
+        setFormError(
+          "Verifizierung gerade nicht möglich. Bitte telefonisch bestellen: +49 491 997 55279.",
+        );
+      } finally {
+        setSubmitting(false);
+      }
       return;
     }
 
@@ -270,6 +263,52 @@ export default function Checkout({ preview }: { preview?: CheckoutPreviewConfig 
     }
   };
 
+  const handleConfirmCode = async () => {
+    setVerifying(true);
+    setCodeError(null);
+    try {
+      const posItems = items.map((i) => ({
+        variant_id: i.variant_id,
+        name:       i.name,
+        quantity:   i.quantity,
+        price:      i.price,
+        tax_rate:   7,
+      }));
+      const res = await fetch("/api/order/confirm", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email:   form.email,
+          code,
+          items:   posItems,
+          payment: payment === "karte" ? "karte" : "bar",
+          customer: {
+            vorname:  form.vorname,
+            nachname: form.nachname,
+            telefon:  form.telefon,
+            strasse:  `${form.strasse} ${form.hausnummer}`,
+            ort:      `${form.plz} ${form.ort}`,
+          },
+        }),
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        orderRef?: string;
+        error?: string;
+      };
+      if (!res.ok || !data.ok) {
+        setCodeError(data.error ?? "Code ungültig. Bitte erneut versuchen.");
+        return;
+      }
+      sessionStorage.setItem("bs_order_num", data.orderRef ?? `BS-${Math.floor(Math.random() * 9000) + 1000}`);
+      window.location.href = "/bestellen/danke";
+    } catch {
+      setCodeError("Bestätigung fehlgeschlagen. Bitte erneut versuchen.");
+    } finally {
+      setVerifying(false);
+    }
+  };
+
   // ── Submit button label ───────────────────────────────────────────────────
 
   function submitLabel() {
@@ -284,7 +323,8 @@ export default function Checkout({ preview }: { preview?: CheckoutPreviewConfig 
       if (checkoutId) return "Zur Zahlung scrollen ↓";
       return "Kreditkarte freischalten →";
     }
-    return "Bestellung abschicken →";
+    if (codeSent) return "Code erneut senden";
+    return "Bestätigungscode anfordern →";
   }
 
   // ── Right-column info box ─────────────────────────────────────────────────
@@ -595,6 +635,39 @@ export default function Checkout({ preview }: { preview?: CheckoutPreviewConfig 
                   className="btn-pink w-full text-base disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-x-0 disabled:translate-y-0 disabled:shadow-[4px_4px_0_var(--bs-ink)]">
                   {submitLabel()}
                 </button>
+
+                {payment !== "online" && codeSent && (
+                  <div id="code-section" className="retro-card p-5 space-y-3 border-[3px] border-bs-teal">
+                    <p className="font-body font-bold text-sm text-bs-ink">
+                      Wir haben dir einen 6-stelligen Code an <strong>{form.email}</strong> geschickt.
+                    </p>
+                    <p className="text-xs text-bs-ink-v">
+                      Gib den Code ein, um deine Bestellung verbindlich abzuschicken.
+                      (Prüfe ggf. den Spam-Ordner.)
+                    </p>
+                    <input
+                      className={INPUT + " text-center text-2xl tracking-[0.5em] font-bold"}
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="one-time-code"
+                      maxLength={6}
+                      placeholder="______"
+                      value={code}
+                      onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    />
+                    {codeError && (
+                      <p className="text-sm text-red-700 font-body">{codeError}</p>
+                    )}
+                    <button
+                      type="button"
+                      onClick={handleConfirmCode}
+                      disabled={code.length !== 6 || verifying}
+                      className="btn-pink w-full text-base disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {verifying ? "Wird bestätigt…" : "Bestellung bestätigen →"}
+                    </button>
+                  </div>
+                )}
 
                 <p className="text-xs text-bs-ink-v text-center">
                   * Pflichtfelder · Demo-Modus · Keine echte Zahlung
