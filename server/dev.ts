@@ -3,6 +3,7 @@ import { getGoogleReviewsNormalized } from "./googleReviews";
 import { loadEnvLocal } from "./loadEnvLocal";
 import { handleCreateCheckout, handleSumUpWebhook, handleVerifyCheckout } from "./sumupHelpers";
 import { handleCreatePosOrder } from "./posHelpers";
+import { handleRequestCode, handleConfirmOrder } from "./orderVerification";
 import { handleStoreStatus, handleSetStoreOverride } from "./storeStatusHelper";
 import { handleSnapshot, handleCartSync, handleHeartbeat, handleDisconnect, trackActiveUser } from "./analyticsHelper";
 
@@ -24,6 +25,8 @@ async function main() {
   app.post("/api/webhooks/sumup", handleSumUpWebhook);
   app.get("/api/verify-checkout/:checkoutId", handleVerifyCheckout);
   app.post("/api/create-pos-order", handleCreatePosOrder);
+  app.post("/api/order/request-code", handleRequestCode);
+  app.post("/api/order/confirm",      handleConfirmOrder);
   // ─────────────────────────────────────────────────────────────────────────
 
   app.get("/api/google-reviews", async (_req, res) => {

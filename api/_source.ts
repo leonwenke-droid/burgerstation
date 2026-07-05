@@ -8,6 +8,7 @@
 import express from "express";
 import { handleCreateCheckout, handleSumUpWebhook, handleVerifyCheckout } from "../server/sumupHelpers";
 import { handleCreatePosOrder } from "../server/posHelpers";
+import { handleRequestCode, handleConfirmOrder } from "../server/orderVerification";
 import { handleStoreStatus, handleSetStoreOverride } from "../server/storeStatusHelper";
 import { handleSnapshot, handleCartSync, handleHeartbeat, handleDisconnect, trackActiveUser } from "../server/analyticsHelper";
 import { getGoogleReviewsNormalized } from "../server/googleReviews";
@@ -26,6 +27,8 @@ app.post("/api/create-sandbox-checkout",    handleCreateCheckout);
 app.post("/api/webhooks/sumup",           handleSumUpWebhook);
 app.get("/api/verify-checkout/:checkoutId", handleVerifyCheckout);
 app.post("/api/create-pos-order",         handleCreatePosOrder);
+app.post("/api/order/request-code",       handleRequestCode);
+app.post("/api/order/confirm",            handleConfirmOrder);
 
 app.get("/api/google-reviews", async (_req, res) => {
   const result = await getGoogleReviewsNormalized();
