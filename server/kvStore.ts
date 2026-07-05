@@ -26,6 +26,19 @@ async function upstashReq(command: unknown[]): Promise<unknown> {
   return data.result;
 }
 
+/** Runs several Redis commands in one round-trip via the Upstash pipeline endpoint. */
+async function upstashPipeline(commands: unknown[][]): Promise<unknown[]> {
+  const url   = process.env.UPSTASH_REDIS_REST_URL!;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN!;
+  const res   = await fetch(`${url}/pipeline`, {
+    method:  "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body:    JSON.stringify(commands),
+  });
+  const data = await res.json() as Array<{ result: unknown }>;
+  return data.map((d) => d.result);
+}
+
 export async function kvSet(key: string, value: string): Promise<void> {
   if (upstashEnabled()) {
     await upstashReq(["SET", key, value]);
@@ -48,4 +61,19 @@ export async function kvDel(key: string): Promise<void> {
   } else {
     mem.delete(key);
   }
+}
+
+/**
+ * Atomic fixed-window counter for rate limiting. Increments `key` and returns the
+ * new count, setting the window TTL on first increment (EXPIRE … NX). Returns
+ * `null` when Upstash is not configured — the caller then falls back to its own
+ * (in-memory) limiter.
+ */
+export async function kvIncrFixedWindow(key: string, ttlSeconds: number): Promise<number | null> {
+  if (!upstashEnabled()) return null;
+  const [count] = await upstashPipeline([
+    ["INCR", key],
+    ["EXPIRE", key, String(ttlSeconds), "NX"],
+  ]);
+  return Number(count);
 }

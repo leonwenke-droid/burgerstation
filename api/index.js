@@ -22476,6 +22476,58 @@ import path from "node:path";
 
 // server/security.ts
 import crypto from "node:crypto";
+
+// server/kvStore.ts
+var mem = /* @__PURE__ */ new Map();
+function upstashEnabled() {
+  return !!(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN);
+}
+async function upstashReq(command) {
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify(command)
+  });
+  const data = await res.json();
+  return data.result;
+}
+async function upstashPipeline(commands) {
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  const res = await fetch(`${url}/pipeline`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify(commands)
+  });
+  const data = await res.json();
+  return data.map((d) => d.result);
+}
+async function kvSet(key, value) {
+  if (upstashEnabled()) {
+    await upstashReq(["SET", key, value]);
+  } else {
+    mem.set(key, value);
+  }
+}
+async function kvGet(key) {
+  if (upstashEnabled()) {
+    const result = await upstashReq(["GET", key]);
+    return typeof result === "string" ? result : null;
+  }
+  return mem.get(key) ?? null;
+}
+async function kvIncrFixedWindow(key, ttlSeconds) {
+  if (!upstashEnabled()) return null;
+  const [count] = await upstashPipeline([
+    ["INCR", key],
+    ["EXPIRE", key, String(ttlSeconds), "NX"]
+  ]);
+  return Number(count);
+}
+
+// server/security.ts
 function timingSafeEqualStr(a, b) {
   const ab = Buffer.from(a);
   const bb = Buffer.from(b);
@@ -22527,7 +22579,7 @@ function checkSameOrigin(req, res) {
   return false;
 }
 var buckets = /* @__PURE__ */ new Map();
-function allowRequest(key, max, windowMs) {
+function allowRequestInMemory(key, max, windowMs) {
   const now = Date.now();
   if (buckets.size > 5e3) {
     buckets.forEach((b, k) => {
@@ -22545,13 +22597,30 @@ function allowRequest(key, max, windowMs) {
   bucket.count++;
   return { ok: true, retryAfter: 0 };
 }
-function rateLimitByIp(req, res, prefix, max, windowMs) {
-  const { ok, retryAfter } = allowRequest(`${prefix}:${getClientIp(req)}`, max, windowMs);
-  if (!ok) {
+async function rateLimitByIp(req, res, prefix, max, windowMs) {
+  const ip = getClientIp(req);
+  const windowSec = Math.ceil(windowMs / 1e3);
+  let allowed = true;
+  let retryAfter = windowSec;
+  try {
+    const windowIndex = Math.floor(Date.now() / windowMs);
+    const count = await kvIncrFixedWindow(`rl:${prefix}:${ip}:${windowIndex}`, windowSec);
+    if (count === null) {
+      const r = allowRequestInMemory(`${prefix}:${ip}`, max, windowMs);
+      allowed = r.ok;
+      retryAfter = r.retryAfter || windowSec;
+    } else {
+      allowed = count <= max;
+    }
+  } catch (err) {
+    console.warn("[Security] Rate-Limit-KV-Fehler \u2014 lasse Anfrage durch:", err);
+    allowed = true;
+  }
+  if (!allowed) {
     res.setHeader("Retry-After", String(retryAfter));
     res.status(429).json({ error: "Zu viele Anfragen. Bitte kurz warten und erneut versuchen." });
   }
-  return ok;
+  return allowed;
 }
 
 // server/sumupHelpers.ts
@@ -22645,7 +22714,7 @@ function appendOrderLog(entry) {
   }
 }
 async function handleCreateCheckout(req, res) {
-  if (!rateLimitByIp(req, res, "checkout", 15, 6e4)) return;
+  if (!await rateLimitByIp(req, res, "checkout", 15, 6e4)) return;
   if (!checkSameOrigin(req, res)) return;
   const { orderedItems, items: legacyItems, currency = "EUR" } = req.body;
   const raw = orderedItems ?? legacyItems;
@@ -22839,37 +22908,6 @@ function handleCartSync(req, res) {
     else cartSessions.set(sessionId, count);
   }
   res.json({ ok: true, totalCartItems: totalCartItems() });
-}
-
-// server/kvStore.ts
-var mem = /* @__PURE__ */ new Map();
-function upstashEnabled() {
-  return !!(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN);
-}
-async function upstashReq(command) {
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-    body: JSON.stringify(command)
-  });
-  const data = await res.json();
-  return data.result;
-}
-async function kvSet(key, value) {
-  if (upstashEnabled()) {
-    await upstashReq(["SET", key, value]);
-  } else {
-    mem.set(key, value);
-  }
-}
-async function kvGet(key) {
-  if (upstashEnabled()) {
-    const result = await upstashReq(["GET", key]);
-    return typeof result === "string" ? result : null;
-  }
-  return mem.get(key) ?? null;
 }
 
 // server/storeConfig.json
@@ -23081,7 +23119,7 @@ function sanitizePosItems(raw) {
   return { items: clean };
 }
 async function handleCreatePosOrder(req, res) {
-  if (!rateLimitByIp(req, res, "pos", 10, 6e4)) return;
+  if (!await rateLimitByIp(req, res, "pos", 10, 6e4)) return;
   if (!checkSameOrigin(req, res)) return;
   const body = req.body;
   const { paymentStatus, paymentType, customer, orderRef } = body;

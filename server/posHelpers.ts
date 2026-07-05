@@ -177,7 +177,7 @@ function sanitizePosItems(raw: unknown): { items?: PosOrderItem[]; error?: strin
 export async function handleCreatePosOrder(req: Request, res: Response) {
   // ── Anti-abuse guards ───────────────────────────────────────────────────────
   // 1) Rate limit per IP — blocks scripted order floods to the kitchen.
-  if (!rateLimitByIp(req, res, "pos", 10, 60_000)) return;
+  if (!(await rateLimitByIp(req, res, "pos", 10, 60_000))) return;
   // 2) Reject cross-site / off-origin browser requests.
   if (!checkSameOrigin(req, res)) return;
 

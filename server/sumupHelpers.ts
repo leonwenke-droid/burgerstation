@@ -186,7 +186,7 @@ function appendOrderLog(entry: object) {
 export async function handleCreateCheckout(req: Request, res: Response) {
   // Anti-abuse: each call creates a real SumUp checkout (API cost). Throttle per
   // IP and reject off-origin requests before touching SumUp.
-  if (!rateLimitByIp(req, res, "checkout", 15, 60_000)) return;
+  if (!(await rateLimitByIp(req, res, "checkout", 15, 60_000))) return;
   if (!checkSameOrigin(req, res)) return;
 
   const { orderedItems, items: legacyItems, currency = "EUR" } = req.body as CreateCheckoutBody;

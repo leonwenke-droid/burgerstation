@@ -7,6 +7,7 @@
  */
 import crypto from "node:crypto";
 import type { Request, Response } from "express";
+import { kvIncrFixedWindow } from "./kvStore";
 
 // ── Admin auth ──────────────────────────────────────────────────────────────
 
@@ -87,11 +88,12 @@ export function checkSameOrigin(req: Request, res: Response): boolean {
   return false;
 }
 
-// ── Rate limiting (in-memory, per instance) ─────────────────────────────────
+// ── Rate limiting ───────────────────────────────────────────────────────────
 //
-// NOTE: In-memory means per serverless instance on Vercel — it throttles a
-// single attacker hammering one instance but is not a global limit. For strict
-// cross-instance enforcement, back this with Upstash KV (INCR + EXPIRE).
+// Global fixed-window limiter backed by Upstash KV (shared across all Vercel
+// serverless instances). Falls back to a per-instance in-memory limiter when
+// Upstash is not configured (local dev). Fail-open on KV errors — a Redis
+// hiccup must never block a real order.
 
 interface Bucket {
   count: number;
@@ -99,8 +101,8 @@ interface Bucket {
 }
 const buckets = new Map<string, Bucket>();
 
-/** Returns { ok } — false when the caller exceeded `max` requests per `windowMs`. */
-export function allowRequest(
+/** Per-instance in-memory fixed window — used only when Upstash is unavailable. */
+function allowRequestInMemory(
   key: string,
   max: number,
   windowMs: number,
@@ -126,18 +128,43 @@ export function allowRequest(
   return { ok: true, retryAfter: 0 };
 }
 
-/** Convenience: rate-limit by client IP, writing a 429 on rejection. */
-export function rateLimitByIp(
+/**
+ * Rate-limit by client IP, writing a 429 on rejection. Returns true when allowed.
+ * Uses Upstash KV for a global limit; falls back to in-memory when KV is not
+ * configured; fails open if the KV call throws.
+ */
+export async function rateLimitByIp(
   req: Request,
   res: Response,
   prefix: string,
   max: number,
   windowMs: number,
-): boolean {
-  const { ok, retryAfter } = allowRequest(`${prefix}:${getClientIp(req)}`, max, windowMs);
-  if (!ok) {
+): Promise<boolean> {
+  const ip = getClientIp(req);
+  const windowSec = Math.ceil(windowMs / 1000);
+  let allowed = true;
+  let retryAfter = windowSec;
+
+  try {
+    const windowIndex = Math.floor(Date.now() / windowMs);
+    const count = await kvIncrFixedWindow(`rl:${prefix}:${ip}:${windowIndex}`, windowSec);
+    if (count === null) {
+      // No KV configured → per-instance fallback.
+      const r = allowRequestInMemory(`${prefix}:${ip}`, max, windowMs);
+      allowed = r.ok;
+      retryAfter = r.retryAfter || windowSec;
+    } else {
+      allowed = count <= max;
+    }
+  } catch (err) {
+    // Fail-open: never block a legitimate order because Redis is unreachable.
+    console.warn("[Security] Rate-Limit-KV-Fehler — lasse Anfrage durch:", err);
+    allowed = true;
+  }
+
+  if (!allowed) {
     res.setHeader("Retry-After", String(retryAfter));
     res.status(429).json({ error: "Zu viele Anfragen. Bitte kurz warten und erneut versuchen." });
   }
-  return ok;
+  return allowed;
 }
