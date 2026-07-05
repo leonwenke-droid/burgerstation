@@ -16,7 +16,8 @@ import { useMemo } from "react";
 import { Router } from "wouter";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/contexts/ThemeContext";
-import { CartProvider, type CartItem } from "@/contexts/CartContext";
+import { CartProvider, cartItemFromProduct, type CartItem } from "@/contexts/CartContext";
+import { requireProduct } from "@shared/products";
 import Home from "@/pages/Home";
 import Menu from "@/pages/Menu";
 import Checkout, { type CheckoutPreviewConfig } from "@/pages/Checkout";
@@ -66,14 +67,8 @@ function SiteShell({ children }: { children: ReactNode }) {
 }
 
 const PORTFOLIO_CART_ITEM: CartItem = {
-  id:         "7569a6cd-268f-4d16-b86f-09676f4dcfaa",
-  name:       "Double Smash",
-  sumup_name: "Double Smash",
-  sumup_sku:  "DBL-SMSH-001",
-  variant_id: "7569a6cd-268f-4d16-b86f-09676f4dcfaa",
-  category:   "food",
-  price:      9.4,
-  quantity:   1,
+  ...cartItemFromProduct(requireProduct("DBL-SMSH-002")),
+  quantity: 1,
 };
 
 const PORTFOLIO_CHECKOUT_PREVIEW: CheckoutPreviewConfig = {

@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { Request, Response } from "express";
+import { PRODUCTS, getProductBySku, requiresSumUpForDelivery } from "../shared/products";
 import { rateLimitByIp, checkSameOrigin } from "./security";
 
 // ─── Master-Katalog ────────────────────────────────────────────────────────────
@@ -10,28 +11,21 @@ import { rateLimitByIp, checkSameOrigin } from "./security";
 // Steuersätze (Lieferung, Deutschland):
 //   food  → 7%  (§ 12 Abs. 2 Nr. 1 UStG — Speisen)
 //   drink → 19% (§ 12 Abs. 1 UStG    — Getränke)
-export const SUMUP_CATALOG = [
-  {
-    sumup_catalog_id: "c0b10e52-2f19-4614-9633-76e4da4228c3",
-    variant_id:       "7569a6cd-268f-4d16-b86f-09676f4dcfaa",
-    sku:              "DBL-SMSH-001",
-    name:             "Double Smash",
-    category:         "food" as const,
-    price:            9.40,
-    tax_rate:         7.00,
-  },
-  {
-    sumup_catalog_id: "0e9f1a01-c675-40d8-b12a-6bbcdeccd21a",
-    variant_id:       "42194cc3-fe98-4a6d-b5fa-04d333730d96",
-    sku:              "LNG-CHI-002",
-    name:             "Long Chili Cheese",
-    category:         "food" as const,
-    price:            11.90,
-    tax_rate:         7.00,
-  },
-  // Vorlage für Speisen  (7%):  { sumup_catalog_id: "...", variant_id: "...", sku: "...", name: "...", category: "food"  as const, price: 0.00, tax_rate: 7.00  },
-  // Vorlage für Getränke (19%): { sumup_catalog_id: "...", variant_id: "...", sku: "...", name: "...", category: "drink" as const, price: 0.00, tax_rate: 19.00 },
-] as const;
+export const SUMUP_CATALOG = PRODUCTS.flatMap((product) =>
+  product.sumup
+    ? [
+        {
+          sumup_catalog_id: product.sumup.catalogId,
+          variant_id: product.sumup.variantId,
+          sku: product.sku,
+          name: product.name,
+          category: product.taxCategory,
+          price: product.price,
+          tax_rate: product.taxCategory === "drink" ? 19 : 7,
+        },
+      ]
+    : [],
+);
 
 // ─── Interfaces ───────────────────────────────────────────────────────────────
 
@@ -52,7 +46,7 @@ export interface OrderedItem {
 /** Resolved item after catalog lookup — all fields guaranteed. */
 interface ResolvedItem {
   variant_id?: string;
-  sku?:        string;
+  sku:         string;
   name:        string;
   quantity:    number;
   price:       number;
@@ -107,21 +101,25 @@ function resolveItems(ordered: OrderedItem[]): { items: ResolvedItem[]; error?: 
         tax_rate:   entry.tax_rate,
       });
     } else {
-      // Fallback path for items not yet in catalog
-      if (!o.name || typeof o.price !== "number" || o.price <= 0) {
-        return { items: [], error: "Fallback-Item muss name und price > 0 haben." };
+      // Non-SumUp products are still resolved from the shared SKU catalog so
+      // client-supplied names/prices can never replace canonical product data.
+      const product = o.sku ? getProductBySku(o.sku) : undefined;
+      if (!product) {
+        return { items: [], error: `Unbekannte oder fehlende SKU: "${o.sku ?? ""}".` };
       }
-      const category: "food" | "drink" = o.category ?? "food";
-      // Derive tax_rate from category (legal default for delivery in Germany).
-      // An explicit o.tax_rate override still takes precedence.
-      const tax_rate = o.tax_rate ?? (category === "drink" ? 19 : 7);
+      if (requiresSumUpForDelivery(product)) {
+        return {
+          items: [],
+          error: `"${product.name}" ist noch nicht für Online-Bestellungen freigeschaltet.`,
+        };
+      }
       resolved.push({
-        sku:      o.sku,
-        name:     o.name,
+        sku:      product.sku,
+        name:     product.name,
         quantity: o.quantity,
-        price:    o.price,
-        category,
-        tax_rate,
+        price:    product.price,
+        category: product.taxCategory,
+        tax_rate: product.taxCategory === "drink" ? 19 : 7,
       });
     }
   }

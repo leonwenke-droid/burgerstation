@@ -10,7 +10,7 @@ import {
   Phone,
   Smartphone,
 } from "lucide-react";
-import { ONLINE_ENABLED_VARIANTS } from "@/data/sumupCatalog";
+import { isCartItemDeliveryReady, isCartItemSumUpRequired, ONLINE_ENABLED_VARIANTS } from "@/data/sumupCatalog";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useCart } from "@/contexts/CartContext";
@@ -94,10 +94,15 @@ export default function Checkout({ preview }: { preview?: CheckoutPreviewConfig 
     [form],
   );
 
-  const uncataloguedItems = items.filter(
-    (i) => !i.variant_id || !ONLINE_ENABLED_VARIANTS.has(i.variant_id),
+  const sumupRequiredBlockedItems = items.filter((i) => !isCartItemDeliveryReady(i));
+  const sumupRequiredBlocked = sumupRequiredBlockedItems.length > 0;
+
+  const onlineOnlyBlockedItems = items.filter(
+    (i) =>
+      !isCartItemSumUpRequired(i) &&
+      (!i.variant_id || !ONLINE_ENABLED_VARIANTS.has(i.variant_id)),
   );
-  const onlinePaymentBlocked = uncataloguedItems.length > 0;
+  const onlinePaymentBlocked = sumupRequiredBlocked || onlineOnlyBlockedItems.length > 0;
 
   /** The SumUp widget should only mount once form is valid, online is selected, and a checkoutId exists. */
   const showSumUpWidget =
@@ -120,10 +125,10 @@ export default function Checkout({ preview }: { preview?: CheckoutPreviewConfig 
   function buildOrderedItems() {
     return items.map((i) =>
       i.variant_id
-        ? { variant_id: i.variant_id, quantity: i.quantity }
+        ? { variant_id: i.variant_id, sku: i.sku, quantity: i.quantity }
         : {
             name:     i.sumup_name ?? i.name,
-            sku:      i.sumup_sku,
+            sku:      i.sku,
             quantity: i.quantity,
             price:    i.price,
             category: i.category, // "food" → 7% MwSt. | "drink" → 19% MwSt.
@@ -145,6 +150,13 @@ export default function Checkout({ preview }: { preview?: CheckoutPreviewConfig 
     if (!isFormValid) {
       setFormError("Bitte fülle alle Pflichtfelder (Kontakt + Adresse) aus.");
       document.getElementById("checkout-form-top")?.scrollIntoView({ behavior: "smooth" });
+      return;
+    }
+
+    if (sumupRequiredBlocked) {
+      setFormError(
+        `Bestellung nicht möglich. Noch nicht freigeschaltet: ${sumupRequiredBlockedItems.map((i) => i.name).join(", ")}.`,
+      );
       return;
     }
 
@@ -195,7 +207,7 @@ export default function Checkout({ preview }: { preview?: CheckoutPreviewConfig 
     // ── Online: guard ─────────────────────────────────────────────────────
     if (onlinePaymentBlocked) {
       setFormError(
-        `Online-Zahlung nicht möglich. Noch nicht freigeschaltet: ${uncataloguedItems.map((i) => i.name).join(", ")}.`,
+        `Online-Zahlung nicht möglich. Noch nicht freigeschaltet: ${onlineOnlyBlockedItems.map((i) => i.name).join(", ")}.`,
       );
       return;
     }
@@ -218,7 +230,11 @@ export default function Checkout({ preview }: { preview?: CheckoutPreviewConfig 
         const data = (await res.json().catch(() => ({}))) as { error?: string };
         throw new Error(data.error ?? `Server-Fehler ${res.status}`);
       }
-      const data = (await res.json()) as { checkoutId?: string; error?: string };
+      const data = (await res.json()) as {
+        checkoutId?: string;
+        checkoutReference?: string;
+        error?: string;
+      };
       if (data.checkoutId) {
         sessionStorage.setItem("bs_checkout_id", data.checkoutId);
         // Save order context so SumUpPayment can push PAID status after success
@@ -226,6 +242,7 @@ export default function Checkout({ preview }: { preview?: CheckoutPreviewConfig 
           checkoutRef: data.checkoutReference ?? data.checkoutId,
           items: items.map((i) => ({
             variant_id: i.variant_id,
+            sku:        i.sku,
             name:       i.name,
             quantity:   i.quantity,
             price:      i.price,
@@ -264,11 +281,18 @@ export default function Checkout({ preview }: { preview?: CheckoutPreviewConfig 
   };
 
   const handleConfirmCode = async () => {
+    if (sumupRequiredBlocked) {
+      setCodeError(
+        `Bestellung nicht möglich. Noch nicht freigeschaltet: ${sumupRequiredBlockedItems.map((i) => i.name).join(", ")}.`,
+      );
+      return;
+    }
     setVerifying(true);
     setCodeError(null);
     try {
       const posItems = items.map((i) => ({
         variant_id: i.variant_id,
+        sku:        i.sku,
         name:       i.name,
         quantity:   i.quantity,
         price:      i.price,
@@ -346,6 +370,22 @@ export default function Checkout({ preview }: { preview?: CheckoutPreviewConfig 
       );
     }
 
+    // Form valid, delivery blocked (Smash Burger ohne SumUp)
+    if (sumupRequiredBlocked) {
+      return (
+        <div className="mt-5 pt-5 border-t-[3px] border-bs-ink/20 flex flex-col gap-2 py-2">
+          <div className="flex items-start gap-2 bg-red-50 border-2 border-red-300 rounded-xl px-3 py-2 text-xs text-red-800">
+            <AlertTriangle size={13} className="shrink-0 mt-0.5" />
+            <span>
+              <strong>Bestellung nicht möglich</strong> für:{" "}
+              {sumupRequiredBlockedItems.map((i) => i.name).join(", ")}.
+              Bitte entferne diese Artikel aus dem Warenkorb.
+            </span>
+          </div>
+        </div>
+      );
+    }
+
     // Form valid, non-online payment
     if (payment !== "online") {
       return (
@@ -365,7 +405,7 @@ export default function Checkout({ preview }: { preview?: CheckoutPreviewConfig 
       );
     }
 
-    // Online payment blocked
+    // Online payment blocked (non-burger items without SumUp)
     if (onlinePaymentBlocked) {
       return (
         <div className="mt-5 pt-5 border-t-[3px] border-bs-ink/20 flex flex-col gap-2 py-2">
@@ -373,7 +413,7 @@ export default function Checkout({ preview }: { preview?: CheckoutPreviewConfig 
             <AlertTriangle size={13} className="shrink-0 mt-0.5" />
             <span>
               <strong>Online-Zahlung nicht möglich</strong> für:{" "}
-              {uncataloguedItems.map((i) => i.name).join(", ")}.
+              {onlineOnlyBlockedItems.map((i) => i.name).join(", ")}.
               Bitte wähle Bar- oder Kartenzahlung.
             </span>
           </div>
@@ -548,7 +588,7 @@ export default function Checkout({ preview }: { preview?: CheckoutPreviewConfig 
                           label: "Online-Zahlung",
                           icon: <Smartphone size={16} />,
                           hint: onlinePaymentBlocked
-                            ? `Nicht verfügbar für: ${uncataloguedItems.map((i) => i.name).join(", ")}`
+                            ? `Nicht verfügbar für: ${onlineOnlyBlockedItems.map((i) => i.name).join(", ")}`
                             : "Karte, PayPal, Apple Pay & Google Pay",
                           disabled: onlinePaymentBlocked,
                         },
@@ -631,7 +671,7 @@ export default function Checkout({ preview }: { preview?: CheckoutPreviewConfig 
                 )}
 
                 <button type="submit"
-                  disabled={!agb || submitting || (storeStatus !== null && !storeStatus.isOpen)}
+                  disabled={!agb || submitting || sumupRequiredBlocked || (storeStatus !== null && !storeStatus.isOpen)}
                   className="btn-pink w-full text-base disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-x-0 disabled:translate-y-0 disabled:shadow-[4px_4px_0_var(--bs-ink)]">
                   {submitLabel()}
                 </button>
@@ -661,7 +701,7 @@ export default function Checkout({ preview }: { preview?: CheckoutPreviewConfig 
                     <button
                       type="button"
                       onClick={handleConfirmCode}
-                      disabled={code.length !== 6 || verifying}
+                      disabled={code.length !== 6 || verifying || sumupRequiredBlocked}
                       className="btn-pink w-full text-base disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {verifying ? "Wird bestätigt…" : "Bestellung bestätigen →"}

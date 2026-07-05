@@ -1,127 +1,247 @@
+import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { Phone, MapPin, Instagram, ChevronRight, Star, Clock, Flame } from "lucide-react";
+import { Phone, MapPin, Instagram, ChevronRight, Clock, Flame, Truck, ShoppingBag, Check, Plus, ClipboardList } from "lucide-react";
 import { Link } from "wouter";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import GoogleReviewsSection from "@/components/GoogleReviewsSection";
 import { RevealOnScroll } from "@/components/RevealOnScroll";
+import { cartItemFromProduct, useCart } from "@/contexts/CartContext";
+import { formatProductPrice, isSumUpLinked, requireProduct, requiresSumUpForDelivery, type Product } from "@shared/products";
 
 const PHONE = "tel:+4949199755279";
 const PHONE_DISPLAY = "0491 99 755 279";
 const MAPS = "https://www.google.com/maps/search/?api=1&query=Burger+Station+Bahnhofsring+30+26789+Leer";
 const INSTAGRAM = "https://instagram.com/burgerstationleer";
 
+// Product facts come from the shared catalog; this list contains presentation only.
 const BESTSELLERS = [
   {
-    name: "Double Smash",
-    price: "9,40",
-    desc: "Zwei knackig gesmashte Beef Patties, Cheddar, Pickles, Burger Sauce.",
-    badge: "Top Seller",
-    img: "/images/menu/double-smash.png",
-    plate: "DBL-SMSH-001",
+    ...requireProduct("DBL-SMSH-002"),
+    tag: "Cheesy",
+    plateLabel: "TOP SELLER",
     plateBg: "var(--bs-primary-f)",
   },
   {
-    name: "Long Chili Cheese",
-    price: "11,90",
-    desc: "Doppelt Beef, Chili Cheese und Jalapeños — würzig, intensiv, lang.",
-    badge: "Spicy",
-    img: "/images/menu/long-chili-cheese.png",
-    plate: "LNG-CHI-002",
+    ...requireProduct("LCC-SMSH-003"),
+    tag: "Jalapeños",
+    plateLabel: "SPICY PICK",
     plateBg: "var(--bs-peach)",
   },
   {
-    name: "BBQ Smash",
-    price: "9,90",
-    desc: "Bacon, Onion Rings, rauchige BBQ Sauce. Crunchy bis zum letzten Bissen.",
-    badge: "Smoky",
-    img: "/images/menu/bbq-smash.png",
-    plate: "BBQ-SMS-003",
+    ...requireProduct("BBQ-SMSH-004"),
+    tag: "Bacon",
+    plateLabel: "SMOKY",
     plateBg: "var(--bs-yellow)",
   },
   {
-    name: "Croissant Smash",
-    price: "11,40",
-    desc: "Buttriges Croissant trifft Double Beef. Unser Signature Move.",
-    badge: "Signature",
-    img: "/images/menu/croissant-smash.png",
-    plate: "CRS-SMS-004",
+    ...requireProduct("CRS-SMSH-005"),
+    tag: "Handmade",
+    plateLabel: "SIGNATURE",
     plateBg: "var(--bs-primary-f)",
   },
 ];
 
+/** Thick, tactile retro "add to cart" button used on the homepage bestseller cards. */
+function AddToCartButton({ item }: { item: Product }) {
+  const { addItem } = useCart();
+  const [added, setAdded] = useState(false);
+  const orderBlocked = requiresSumUpForDelivery(item) && !isSumUpLinked(item);
+
+  function handleAdd() {
+    if (orderBlocked) return;
+    addItem(cartItemFromProduct(item));
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1400);
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleAdd}
+      disabled={orderBlocked}
+      aria-label={orderBlocked ? `${item.name} bald online bestellbar` : `${item.name} in den Warenkorb legen`}
+      className={`press-scale w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-xl border-[3px] border-bs-ink font-body font-bold text-sm tracking-wide uppercase shadow-[3px_3px_0_var(--bs-ink)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all ${
+        orderBlocked
+          ? "bg-bs-cream text-bs-ink/40 cursor-not-allowed opacity-70 shadow-none translate-x-0 translate-y-0"
+          : added
+            ? "bg-bs-teal text-white"
+            : "bg-bs-yellow text-bs-ink"
+      }`}
+    >
+      {orderBlocked ? (
+        <>Bald online</>
+      ) : added ? (
+        <><Check size={16} /> Im Warenkorb</>
+      ) : (
+        <><Plus size={16} /> In den Warenkorb</>
+      )}
+    </button>
+  );
+}
+
+const REASONS = [
+  {
+    lines: ["Handmade", "Smash Burger"],
+    description: "Frisch gesmasht, heiß serviert. Kein TK-Standard, kein liebloser Burger.",
+  },
+  {
+    lines: ["100%", "Halal"],
+    description: "Klar kommuniziert, bewusst gewählt — ohne versteckte Kompromisse.",
+  },
+  {
+    lines: ["Fries", "& Shakes"],
+    description: "Crispy Fries, Cheese Fries, Sweet Potato Fries und dicke Shakes.",
+  },
+  {
+    lines: ["Retro", "Diner Vibes"],
+    description: "Checkerboard, Diner-Look und ein Laden, der im Kopf bleibt.",
+  },
+] as const;
+
+function ReasonItem({
+  lines,
+  description,
+}: {
+  lines: readonly [string, string];
+  description: string;
+}) {
+  return (
+    <article className="reason-item">
+      <div className="reason-sticker" aria-label={lines.join(" ")}>
+        <div className="reason-sticker-copy" aria-hidden="true">
+          <span className="reason-sticker-lead">{lines[0]}</span>
+          <span className="reason-sticker-detail">{lines[1]}</span>
+        </div>
+      </div>
+      <p className="reason-description">{description}</p>
+    </article>
+  );
+}
+
 export default function Home() {
   const reduce = useReducedMotion();
+  const [showStickyCta, setShowStickyCta] = useState(false);
+
+  useEffect(() => {
+    const heroActions = document.querySelector("[data-hero-actions]");
+    if (!heroActions || !("IntersectionObserver" in window)) {
+      setShowStickyCta(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowStickyCta(!entry.isIntersecting),
+      { threshold: 0.15 },
+    );
+
+    observer.observe(heroActions);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="min-h-screen bg-bs-cream text-bs-ink overflow-x-hidden">
       <Header />
 
       {/* ════════════════════ HERO ════════════════════ */}
-      <section id="top" className="relative overflow-hidden bg-bs-cream pt-10 pb-16 md:pt-16 md:pb-24">
+      <section id="top" className="hero-shell">
+        {/* Subtle halftone depth behind the whole hero */}
+        <div className="halftone absolute inset-0 pointer-events-none" aria-hidden="true"></div>
+
         <div className="container relative z-10">
-          <div className="flex flex-col md:flex-row items-center gap-10 md:gap-12">
+          <div className="hero-layout">
 
             {/* Left — Copy */}
-            <div className="flex-1 flex flex-col gap-6 z-20">
-              <div className="inline-flex items-center gap-2 bg-bs-primary-c border-2 border-bs-ink rounded-full px-4 py-2 text-label-caps shadow-[2px_2px_0_var(--bs-ink)] self-start -rotate-1">
-                SEIT MAI 2026 GEÖFFNET · LEER
+            <div className="hero-copy">
+              <div className="hero-label fade-in-up">
+                <Truck size={15} className="text-bs-teal shrink-0" aria-hidden="true" />
+                LIEFERUNG &amp; ABHOLUNG IN LEER
               </div>
 
-              <h1 className="text-display leading-[0.95]">
-                <span className="block text-4xl sm:text-5xl md:text-7xl lg:text-8xl text-bs-ink uppercase drop-shadow-[2px_2px_0px_#006a62] md:drop-shadow-[4px_4px_0px_#006a62]">
+              <h1 className="hero-title">
+                <span className="hero-title-line hero-title-ink fade-in-up stagger-1">
                   SMASH BURGER
                 </span>
-                <span className="block text-3xl md:text-5xl lg:text-6xl mt-2 uppercase">
-                  <span className="text-bs-peach drop-shadow-[4px_4px_0px_var(--bs-ink)] relative inline-block">
-                    <span className="absolute inset-0 blur-[24px] bg-bs-peach opacity-60 rounded-full" aria-hidden="true"></span>
-                    <span className="relative">IN LEER</span>
-                  </span>
+                <span className="hero-title-line hero-title-teal fade-in-up stagger-2">
+                  IN LEER
                 </span>
-                <span className="block text-xl md:text-2xl lg:text-3xl text-bs-ink-v mt-4 font-body italic font-medium normal-case tracking-normal">
-                  Halal · Handmade · Hot.
+                <span className="hero-subline fade-in-up stagger-3">
+                  Geliefert oder direkt im Diner.
                 </span>
               </h1>
 
-              <p className="text-lg md:text-xl text-bs-ink-v max-w-xl leading-relaxed">
-                Saftige Smash Patties, knusprige Fries und cremige Shakes — direkt am Bahnhofsring 30. Diner-Vibes, die sich abheben.
+              <p className="hero-description fade-in-up stagger-3">
+                Smash Burger, Fries &amp; Shakes — halal, handmade und heiß. Zu dir nach Hause oder direkt am Bahnhofsring 30.
               </p>
 
-              <div className="flex flex-wrap gap-3 pt-2">
-                <Link href="/menu" className="btn-pink">Menü ansehen</Link>
-                <a href={MAPS} target="_blank" rel="noopener noreferrer" className="btn-cyan">
-                  <MapPin size={18} /> Route starten
-                </a>
-                <a href={PHONE} className="btn-ghost-ink">
-                  <Phone size={18} /> Anrufen
-                </a>
+              <div className="hero-actions fade-in-up stagger-4" data-hero-actions>
+                <Link href="/menu" className="btn-pink hero-primary-action">
+                  <ShoppingBag size={18} /> Jetzt bestellen
+                </Link>
+                <div className="hero-secondary-actions">
+                  <a href={MAPS} target="_blank" rel="noopener noreferrer" className="btn-cyan">
+                    <MapPin size={18} /> Route
+                  </a>
+                  <a href={PHONE} className="btn-ghost-ink">
+                    <Phone size={18} /> Anrufen
+                  </a>
+                </div>
               </div>
 
-              <div className="flex flex-wrap gap-2 pt-2">
+              <div className="hero-trust fade-in-up stagger-5">
+                <span className="badge-neon badge-cyan-fill inline-flex items-center gap-1">
+                  <Truck size={12} /> Lieferung in Leer
+                </span>
                 <span className="badge-neon badge-pink-fill">100% Halal</span>
-                <span className="badge-neon badge-cyan-fill">Handmade Daily</span>
-                <span className="badge-neon badge-yellow-fill">American Retro Diner</span>
+                <span className="badge-neon badge-yellow-fill">Handmade Daily</span>
+                <span className="badge-neon bg-white text-bs-ink inline-flex items-center gap-1">
+                  <MapPin size={12} className="text-bs-teal" /> Bahnhofsring 30
+                </span>
               </div>
             </div>
 
-            {/* Right — Hero image */}
-            <div className="flex-1 relative flex justify-center items-center h-[320px] sm:h-[380px] md:h-[480px] lg:h-[520px] w-full">
-              {/* Peach glow backdrop */}
-              <div className="absolute inset-0 bg-bs-peach rounded-full blur-[100px] opacity-30 z-0" aria-hidden="true"></div>
-              {/* Circular framed image */}
-              <div className="relative z-10 w-64 h-64 md:w-[360px] md:h-[360px] lg:w-[440px] lg:h-[440px] rounded-full overflow-hidden border-4 border-bs-ink shadow-[0_0_40px_rgba(254,212,200,0.8)] hover:scale-105 transition-transform duration-500">
+            {/* Right — Hero image with layered diner depth */}
+            <div className="hero-visual fade-in-up stagger-2">
+              {/* Slow-spinning dashed diner-plate ring (depth, decorative) */}
+              <div
+                className="hero-plate-ring spin-slow"
+                aria-hidden="true"
+              ></div>
+              {/* Offset solid disc — hard-shadow depth in brand style */}
+              <div
+                className="hero-plate-backdrop"
+                aria-hidden="true"
+              ></div>
+              {/* Circular framed image — floats gently */}
+              <div className="hero-burger-frame float-anim">
                 <img
                   src="/images/menu/hero-burger.png"
-                  alt="Burger Station Smash Burger mit Käse, Bacon und frischem Salat"
+                  alt="Saftiger Double Smash Burger mit geschmolzenem Cheddar, Bacon und frischem Salat"
+                  width={440}
+                  height={440}
+                  fetchPriority="high"
                   className="w-full h-full object-contain"
                 />
               </div>
-              {/* Rotating price sticker */}
+
+              {/* Die-cut wobbling price sticker */}
               <div
-                className="absolute top-8 right-2 sm:right-4 md:right-8 z-20 w-24 h-24 md:w-28 md:h-28 bg-bs-yellow rounded-full border-[3px] border-bs-ink shadow-[4px_4px_0_var(--bs-ink)] flex flex-col items-center justify-center rotate-12"
+                className="hero-price sticker-wobble"
+                style={{ ["--wobble-base" as string]: "11deg" }}
               >
-                <span className="text-xs tracking-widest text-bs-ink font-bold uppercase">AB</span>
-                <span className="text-3xl md:text-4xl text-bs-ink font-display font-black leading-none">6,90</span>
-                <span className="text-xs tracking-widest mt-0.5 text-bs-ink font-bold uppercase">EURO</span>
+                {/* dashed die-cut inner ring */}
+                <span className="absolute inset-1.5 rounded-full border-2 border-dashed border-bs-ink/50" aria-hidden="true"></span>
+                <span className="text-[0.65rem] tracking-widest text-bs-ink font-bold uppercase leading-none">AB</span>
+                <span className="hero-price-value">6,90</span>
+                <span className="text-[0.65rem] tracking-widest mt-0.5 text-bs-ink font-bold uppercase leading-none">EURO</span>
+              </div>
+
+              {/* Mini "fresh smashed" sticker */}
+              <div
+                className="hero-fresh sticker-wobble"
+                style={{ ["--wobble-base" as string]: "-6deg", animationDelay: "0.6s" }}
+              >
+                <Flame size={13} className="text-bs-yellow" aria-hidden="true" /> Fresh Smashed
               </div>
             </div>
           </div>
@@ -133,14 +253,14 @@ export default function Home() {
 
       {/* ════════════════════ TICKER ════════════════════ */}
       <section
-        className="border-y-4 border-bs-ink overflow-hidden relative"
+        className="ticker-pausable border-y-4 border-bs-ink overflow-hidden relative"
         style={{
           backgroundImage: "linear-gradient(45deg,#006a62 25%,transparent 25%,transparent 75%,#006a62 75%,#006a62),linear-gradient(45deg,#006a62 25%,#eceabe 25%,#eceabe 75%,#006a62 75%,#006a62)",
           backgroundSize: "16px 16px",
         }}
-        aria-label="Ticker"
+        aria-hidden="true"
       >
-        <div className="bg-bs-surface-hi py-2.5 border-y-2 border-bs-ink shadow-[0_0_15px_rgba(64,224,208,0.4)]">
+        <div className="bg-bs-surface-hi py-2.5 border-y-2 border-bs-ink">
           <div className="ticker-track font-body font-black text-xl md:text-2xl tracking-[0.15em] text-bs-ink whitespace-nowrap">
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="flex items-center shrink-0">
@@ -180,8 +300,8 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {BESTSELLERS.map((b, i) => (
               <motion.div
-                key={i}
-                className="bg-white border-[3px] border-bs-ink rounded-xl flex flex-col shadow-[4px_4px_0_var(--bs-ink)] md:shadow-[8px_8px_0_var(--bs-ink)] relative group hover:-translate-y-1 transition-transform"
+                key={b.sku}
+                className="card-tilt bg-white border-[3px] border-bs-ink rounded-xl flex flex-col shadow-[4px_4px_0_var(--bs-ink)] md:shadow-[8px_8px_0_var(--bs-ink)] relative group"
                 {...(!reduce ? {
                   initial: { opacity: 0, y: 20 },
                   whileInView: { opacity: 1, y: 0 },
@@ -192,28 +312,33 @@ export default function Home() {
                 {/* Image area */}
                 <div className="h-56 border-b-[3px] border-bs-ink rounded-t-xl overflow-hidden relative bg-bs-pink-cream">
                   <img
-                    src={b.img}
+                    src={b.image}
                     alt={`${b.name} Smash Burger`}
-                    className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                    width={400}
+                    height={300}
+                    loading="lazy"
+                    className="w-full h-full object-contain transition-transform duration-500 ease-out group-hover:scale-[1.07] group-hover:-rotate-1"
                   />
-                  <div className="absolute top-3 left-3 -rotate-2">
-                    <span className="badge-neon badge-yellow-fill">{b.badge}</span>
+                  <div className="absolute top-3 left-3 -rotate-3">
+                    <span className="badge-neon badge-yellow-fill shadow-[2px_2px_0_var(--bs-ink)]">{b.badge}</span>
                   </div>
                 </div>
 
                 {/* Content */}
                 <div className="p-5 flex-1 flex flex-col gap-2 bg-white">
-                  <h3 className="text-subhead text-xl text-bs-ink">{b.name}</h3>
-                  <p className="text-sm text-bs-ink-v leading-relaxed flex-1">{b.desc}</p>
-                  <div className="flex items-center justify-between pt-3 mt-2">
-                    <span className="text-headline text-2xl text-bs-teal">{b.price}€</span>
-                    <Link
-                      href="/menu"
-                      className="w-11 h-11 rounded-full border-2 border-bs-ink bg-bs-primary-c flex items-center justify-center shadow-[2px_2px_0_var(--bs-ink)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all text-bs-ink"
-                      aria-label={`${b.name} im Menü ansehen`}
-                    >
-                      <ChevronRight size={18} />
-                    </Link>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="text-subhead text-xl text-bs-ink">{b.name}</h3>
+                    <span className="text-[0.65rem] font-body font-bold uppercase tracking-wider text-bs-teal border-2 border-bs-teal/40 rounded-full px-2 py-0.5">
+                      {b.tag}
+                    </span>
+                  </div>
+                  <p className="text-sm text-bs-ink-v leading-relaxed flex-1">{b.description}</p>
+                  <div className="flex items-center gap-3 pt-3 mt-1">
+                    {/* Price sticker */}
+                    <div className="shrink-0 bg-bs-yellow text-bs-ink border-2 border-bs-ink rounded-md px-3 py-1.5 shadow-[2px_2px_0_var(--bs-ink)] -rotate-1">
+                      <span className="font-body font-black text-lg tracking-wide tabular-nums">{formatProductPrice(b.price)} €</span>
+                    </div>
+                    <AddToCartButton item={b} />
                   </div>
                 </div>
 
@@ -222,7 +347,7 @@ export default function Home() {
                   className="w-full text-bs-ink text-label-caps text-[11px] border-t-[3px] border-bs-ink py-2 flex justify-center items-center tracking-[0.2em] font-bold uppercase rounded-b-xl shadow-[inset_0_2px_0_rgba(255,255,255,0.3)]"
                   style={{ background: b.plateBg }}
                 >
-                  {b.plate}
+                  {b.plateLabel}
                 </div>
               </motion.div>
             ))}
@@ -230,7 +355,48 @@ export default function Home() {
 
           <div className="text-center mt-10">
             <Link href="/menu" className="btn-pink">
-              Alle Menü-Optionen ansehen <ChevronRight size={18} />
+              <ShoppingBag size={18} /> Ganze Karte ansehen &amp; bestellen
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════════════ SO FUNKTIONIERT'S ════════════════════ */}
+      <section className="py-20 md:py-24 bg-bs-surface-hi border-y-[3px] border-bs-ink relative overflow-hidden">
+        <div className="halftone absolute inset-0 pointer-events-none" aria-hidden="true"></div>
+        <div className="container relative">
+          <RevealOnScroll>
+            <div className="text-center mb-14">
+              <span className="badge-neon badge-cyan-fill">SO EINFACH GEHT'S</span>
+              <h2 className="text-headline text-4xl sm:text-5xl md:text-6xl text-bs-ink mt-4 uppercase">
+                In 3 Schritten zum Burger.
+              </h2>
+              <p className="text-lg text-bs-ink-v mt-3 max-w-xl mx-auto leading-relaxed">
+                Online bestellen und liefern lassen, abholen — oder direkt im Diner genießen.
+              </p>
+            </div>
+          </RevealOnScroll>
+
+          <div className="grid md:grid-cols-3 gap-6 md:gap-8 max-w-5xl mx-auto">
+            {[
+              { n: "1", icon: <ClipboardList size={34} strokeWidth={2} aria-hidden="true" />, title: "Burger auswählen", desc: "Stöber durch die Karte und leg deine Favoriten in den Warenkorb." },
+              { n: "2", icon: <ShoppingBag size={34} strokeWidth={2} aria-hidden="true" />, title: "Bestellung abschicken", desc: "Adresse rein, Zahlart wählen, fertig — schnell und ohne Schnickschnack." },
+              { n: "3", icon: <Truck size={34} strokeWidth={2} aria-hidden="true" />, title: "Liefern lassen oder abholen", desc: "Wir liefern nach Leer & Umgebung — oder du holst frisch am Bahnhofsring ab." },
+            ].map((s, i) => (
+              <div key={i} className="card-tilt retro-card p-7 pt-9 text-center relative">
+                <div className="absolute -top-5 left-1/2 -translate-x-1/2 w-11 h-11 rounded-full bg-bs-teal text-white border-[3px] border-bs-ink flex items-center justify-center font-display font-black text-xl shadow-[3px_3px_0_var(--bs-ink)]">
+                  {s.n}
+                </div>
+                <div className="mb-3 flex justify-center text-bs-teal">{s.icon}</div>
+                <h3 className="text-subhead text-xl text-bs-ink mb-2">{s.title}</h3>
+                <p className="text-bs-ink-v leading-relaxed text-sm">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <Link href="/menu" className="btn-pink">
+              <ShoppingBag size={18} /> Jetzt bestellen
             </Link>
           </div>
         </div>
@@ -271,10 +437,10 @@ export default function Home() {
       </section>
 
       {/* ════════════════════ USPs ════════════════════ */}
-      <section className="py-20 md:py-24 bg-bs-surface-hi">
+      <section className="reason-section bg-bs-surface-hi">
         <div className="container">
           <RevealOnScroll>
-            <div className="text-center mb-14">
+            <div className="reason-heading text-center">
               <span className="badge-neon badge-cyan-fill">WARUM BURGER STATION?</span>
               <h2 className="text-headline text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-bs-ink mt-4 uppercase">
                 VIER GUTE GRÜNDE.
@@ -282,22 +448,13 @@ export default function Home() {
             </div>
           </RevealOnScroll>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { title: "Handmade", subtitle: "Smash Burger", desc: "Frisch gesmasht, heiß serviert. Nichts liegt rum." },
-              { title: "100%", subtitle: "Halal", desc: "Klar kommuniziert. Bewusst gewählt." },
-              { title: "Fries", subtitle: "& Shakes", desc: "Klassisch, sweet potato, beef & cheese. Plus dicke Shakes." },
-              { title: "Retro", subtitle: "Diner Vibes", desc: "US-Nummernschilder, Checkerboard, Vinyl. Ein Look, der auffällt." },
-            ].map((u, i) => (
-              <div key={i} className="text-center group">
-                <div
-                  className="w-32 h-32 mx-auto mb-5 rounded-full bg-white flex flex-col items-center justify-center shadow-[5px_5px_0_var(--bs-ink)] group-hover:rotate-6 transition-transform border-[3px] border-bs-ink"
-                >
-                  <span className="text-display text-2xl text-bs-teal leading-none">{u.title}</span>
-                  <span className="text-subhead text-base text-bs-ink leading-none mt-1">{u.subtitle}</span>
-                </div>
-                <p className="text-bs-ink-v leading-relaxed max-w-xs mx-auto">{u.desc}</p>
-              </div>
+          <div className="reason-grid">
+            {REASONS.map((reason) => (
+              <ReasonItem
+                key={reason.lines.join("-")}
+                lines={reason.lines}
+                description={reason.description}
+              />
             ))}
           </div>
         </div>
@@ -329,13 +486,19 @@ export default function Home() {
             <div className="grid grid-cols-2 gap-4">
               <img
                 src="/images/foodspot/foodspot-2.png"
-                alt="Burger Station Milkshake im Retro-Stil"
-                className="rounded-2xl border-2 border-bs-ink shadow-[4px_4px_0_var(--bs-ink)] aspect-square object-contain w-full bg-transparent"
+                alt="Cremiger Milkshake der Burger Station im Retro-Diner-Stil"
+                width={400}
+                height={400}
+                loading="lazy"
+                className="card-tilt rounded-2xl border-2 border-bs-ink shadow-[4px_4px_0_var(--bs-ink)] aspect-square object-contain w-full bg-transparent"
               />
               <img
                 src="/images/foodspot/foodspot-3.png"
                 alt="Burger Station Neon-Schild und Diner-Elemente"
-                className="rounded-2xl border-2 border-bs-ink shadow-[4px_4px_0_var(--bs-teal)] aspect-square object-contain w-full mt-8 bg-transparent"
+                width={400}
+                height={400}
+                loading="lazy"
+                className="card-tilt rounded-2xl border-2 border-bs-ink shadow-[4px_4px_0_var(--bs-teal)] aspect-square object-contain w-full mt-8 bg-transparent"
               />
             </div>
           </div>
@@ -359,7 +522,7 @@ export default function Home() {
                 icon: <svg viewBox="0 0 60 60" className="w-12 h-12" aria-hidden="true"><path d="M30 8 C18 8 12 18 12 26 C12 38 30 52 30 52 C30 52 48 38 48 26 C48 18 42 8 30 8 Z" fill="var(--bs-yellow)" stroke="var(--bs-ink)" strokeWidth="2.5" /><circle cx="30" cy="25" r="6" fill="var(--bs-teal)" /></svg>,
               },
             ].map((f, i) => (
-              <div key={i} className="retro-card p-6">
+              <div key={i} className="card-tilt retro-card p-6">
                 <div className="mb-4">{f.icon}</div>
                 <h3 className="text-subhead text-2xl text-bs-ink mb-2">{f.title}</h3>
                 <p className="text-bs-ink-v leading-relaxed">{f.desc}</p>
@@ -422,7 +585,10 @@ export default function Home() {
                   <img
                     src={p.src}
                     alt={p.alt}
-                    className="w-full h-full object-contain"
+                    width={300}
+                    height={300}
+                    loading="lazy"
+                    className="w-full h-full object-contain transition-transform duration-500 ease-out hover:scale-105"
                   />
                 </a>
               ))}
@@ -512,21 +678,21 @@ export default function Home() {
         <RevealOnScroll>
           <div className="container relative text-center max-w-3xl mx-auto">
             <Flame size={48} className="text-bs-teal mx-auto mb-4" aria-hidden="true" />
-            <h2 className="text-display text-5xl sm:text-6xl md:text-8xl text-bs-ink uppercase drop-shadow-[2px_2px_0px_#006a62] md:drop-shadow-[4px_4px_0px_#006a62]">
-              LUST AUF BURGER?
+            <h2 className="text-display text-4xl sm:text-6xl md:text-7xl text-bs-ink uppercase drop-shadow-[2px_2px_0px_#006a62] md:drop-shadow-[4px_4px_0px_#006a62]">
+              Bock auf Smash?
             </h2>
             <p className="text-xl text-bs-ink-v mt-6 leading-relaxed">
-              Ruf an. Komm vorbei. Folg uns. So einfach.
+              Bestell online und lass dir liefern — oder schau im Diner am Bahnhofsring 30 vorbei.
             </p>
             <div className="flex flex-wrap gap-3 justify-center mt-8">
-              <a href={PHONE} className="btn-pink pulse-pink">
-                <Phone size={18} /> {PHONE_DISPLAY}
-              </a>
+              <Link href="/menu" className="btn-pink">
+                <ShoppingBag size={18} /> Jetzt bestellen
+              </Link>
               <a href={MAPS} target="_blank" rel="noopener noreferrer" className="btn-cyan">
                 <MapPin size={18} /> Route starten
               </a>
-              <a href={INSTAGRAM} target="_blank" rel="noopener noreferrer" className="btn-ghost-ink">
-                <Instagram size={18} /> Instagram
+              <a href={PHONE} className="btn-ghost-ink">
+                <Phone size={18} /> {PHONE_DISPLAY}
               </a>
             </div>
           </div>
@@ -535,13 +701,15 @@ export default function Home() {
 
       <Footer />
 
-      {/* ════════════════════ STICKY MOBILE CTA ════════════════════ */}
-      <div className="sticky-cta">
-        <Link href="/menu" className="btn-pink btn-sm">Menü</Link>
+      {/* ════════════════════ STICKY MOBILE CTA — order-first ════════════════════ */}
+      <div className={`sticky-cta ${showStickyCta ? "is-visible" : ""}`} aria-hidden={!showStickyCta}>
+        <Link href="/menu" className="btn-pink btn-sm">
+          <ShoppingBag size={14} /> Bestellen
+        </Link>
         <a href={MAPS} target="_blank" rel="noopener noreferrer" className="btn-cyan btn-sm">
           <MapPin size={14} /> Route
         </a>
-        <a href={PHONE} className="btn-pink btn-sm pulse-pink">
+        <a href={PHONE} className="btn-ghost-ink btn-sm">
           <Phone size={14} /> Anruf
         </a>
       </div>

@@ -3,7 +3,7 @@ import { AlertTriangle, Loader2, Minus, Plus, ShoppingCart, Trash2, X } from "lu
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useCart } from "@/contexts/CartContext";
-import { ONLINE_ENABLED_VARIANTS } from "@/data/sumupCatalog";
+import { isCartItemDeliveryReady, isCartItemSumUpRequired, ONLINE_ENABLED_VARIANTS } from "@/data/sumupCatalog";
 
 const fmt = (n: number) => n.toFixed(2).replace(".", ",");
 
@@ -21,9 +21,15 @@ export default function CartDrawer() {
   const [, navigate] = useLocation();
   const reduce = useReducedMotion();
 
-  // Items that are not yet registered in the SumUp catalog
-  const uncataloguedItems = items.filter((i) => !i.variant_id || !ONLINE_ENABLED_VARIANTS.has(i.variant_id));
-  const allOnlineReady = uncataloguedItems.length === 0;
+  const sumupRequiredBlockedItems = items.filter((i) => !isCartItemDeliveryReady(i));
+  const sumupRequiredBlocked = sumupRequiredBlockedItems.length > 0;
+
+  const onlineOnlyBlockedItems = items.filter(
+    (i) =>
+      !isCartItemSumUpRequired(i) &&
+      (!i.variant_id || !ONLINE_ENABLED_VARIANTS.has(i.variant_id)),
+  );
+  const allOnlineReady = !sumupRequiredBlocked && onlineOnlyBlockedItems.length === 0;
 
   async function handleCheckout() {
     setCheckoutLoading(true);
@@ -32,10 +38,10 @@ export default function CartDrawer() {
       // Non-catalog items: send full details as fallback.
       const orderedItems = items.map((i) =>
         i.variant_id
-          ? { variant_id: i.variant_id, quantity: i.quantity }
+          ? { variant_id: i.variant_id, sku: i.sku, quantity: i.quantity }
           : {
               name:     i.sumup_name ?? i.name,
-              sku:      i.sumup_sku,
+              sku:      i.sku,
               quantity: i.quantity,
               price:    i.price,
               category: i.category, // "food" → 7% MwSt. | "drink" → 19% MwSt.
@@ -67,7 +73,7 @@ export default function CartDrawer() {
         initial: { x: "100%" },
         animate: { x: 0 },
         exit: { x: "100%" },
-        transition: { type: "spring", damping: 30, stiffness: 300 },
+        transition: { type: "spring" as const, damping: 30, stiffness: 300 },
       };
 
   const fade = reduce
@@ -206,13 +212,23 @@ export default function CartDrawer() {
                     </span>
                   </div>
 
-                  {!allOnlineReady && (
+                  {sumupRequiredBlocked && (
+                    <div className="flex items-start gap-2 bg-red-50 border-2 border-red-300 rounded-xl px-3 py-2 text-xs text-red-800">
+                      <AlertTriangle size={13} className="shrink-0 mt-0.5" />
+                      <span>
+                        <strong>Bestellung nicht möglich</strong> für:{" "}
+                        {sumupRequiredBlockedItems.map((i) => i.name).join(", ")}.
+                      </span>
+                    </div>
+                  )}
+
+                  {!sumupRequiredBlocked && !allOnlineReady && (
                     <div className="flex items-start gap-2 bg-amber-50 border-2 border-amber-300 rounded-xl px-3 py-2 text-xs text-amber-800">
                       <AlertTriangle size={13} className="shrink-0 mt-0.5" />
                       <span>
                         <strong>Online-Zahlung nicht möglich</strong> für:{" "}
-                        {uncataloguedItems.map((i) => i.name).join(", ")}.
-                        Bitte im SumUp-Dashboard einrichten.
+                        {onlineOnlyBlockedItems.map((i) => i.name).join(", ")}.
+                        Bar- oder Kartenzahlung bei Lieferung ist weiterhin möglich.
                       </span>
                     </div>
                   )}
@@ -220,7 +236,7 @@ export default function CartDrawer() {
                   <button
                     type="button"
                     onClick={handleCheckout}
-                    disabled={checkoutLoading}
+                    disabled={checkoutLoading || sumupRequiredBlocked}
                     className="btn-pink flex items-center justify-center gap-2 w-full disabled:opacity-70 disabled:cursor-not-allowed disabled:translate-x-0 disabled:translate-y-0 disabled:shadow-[4px_4px_0_var(--bs-ink)]"
                   >
                     {checkoutLoading ? (

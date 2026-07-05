@@ -20,6 +20,7 @@
  */
 
 import type { Request, Response } from "express";
+import { PRODUCTS, getProductBySku, requiresSumUpForDelivery } from "../shared/products";
 import { recordOrder } from "./analyticsHelper";
 import { rateLimitByIp, checkSameOrigin } from "./security";
 import { isStoreOpen } from "./storeStatusHelper";
@@ -27,20 +28,27 @@ import { isStoreOpen } from "./storeStatusHelper";
 // ── Product ID mapping ────────────────────────────────────────────────────────
 // Keyed by SumUp variant_id → The Good Till product_id
 // Fill in the goodtill_product_id values from the POS dashboard.
-const GOODTILL_PRODUCTS: Record<string, { product_id: string; name: string; price: number; tax_rate: number }> = {
-  "7569a6cd-268f-4d16-b86f-09676f4dcfaa": {
-    product_id: "GOODTILL_ID_DOUBLE_SMASH",   // ← replace with real ID from POS dashboard
-    name:       "Double Smash",
-    price:      9.40,
-    tax_rate:   7,
-  },
-  "42194cc3-fe98-4a6d-b5fa-04d333730d96": {
-    product_id: "GOODTILL_ID_LONG_CHILI",     // ← replace with real ID from POS dashboard
-    name:       "Long Chili Cheese",
-    price:      11.90,
-    tax_rate:   7,
-  },
-};
+const GOODTILL_PRODUCTS: Record<
+  string,
+  { product_id: string; sku: string; name: string; price: number; tax_rate: number }
+> = Object.fromEntries(
+  PRODUCTS.flatMap((product) =>
+    product.sumup?.posProductId
+      ? [
+          [
+            product.sumup.variantId,
+            {
+              product_id: product.sumup.posProductId,
+              sku: product.sku,
+              name: product.name,
+              price: product.price,
+              tax_rate: product.taxCategory === "drink" ? 19 : 7,
+            },
+          ],
+        ]
+      : [],
+  ),
+);
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -49,6 +57,7 @@ type PosPaymentType   = "CASH" | "CARD" | "ECOM";
 
 export interface PosOrderItem {
   variant_id?: string;   // maps to GOODTILL_PRODUCTS for price/id lookup
+  sku:         string;
   name:        string;
   quantity:    number;
   price:       number;
@@ -134,25 +143,26 @@ function sanitizePosItems(raw: unknown): { items?: PosOrderItem[]; error?: strin
       // Trusted path — price/tax/name come from the server catalog, never the client.
       clean.push({
         variant_id: entry.variant_id,
+        sku:        catalog.sku,
         name:       catalog.name,
         quantity,
         price:      catalog.price,
         tax_rate:   catalog.tax_rate,
       });
     } else {
-      // Non-catalog item (free-text) — bounds-check the client values.
-      const name = typeof entry.name === "string" ? entry.name.trim().slice(0, 120) : "";
-      const price = Number(entry.price);
-      if (!name) return { error: "Position ohne Namen." };
-      if (!Number.isFinite(price) || price <= 0 || price > MAX_UNIT_PRICE) {
-        return { error: `Ungültiger Preis für "${name}".` };
+      const product = typeof entry.sku === "string" ? getProductBySku(entry.sku) : undefined;
+      if (!product) return { error: `Unbekannte oder fehlende SKU: "${entry.sku ?? ""}".` };
+      if (requiresSumUpForDelivery(product)) {
+        return {
+          error: `"${product.name}" ist noch nicht für Online-Bestellungen freigeschaltet.`,
+        };
       }
-      const taxRate = Number(entry.tax_rate);
       clean.push({
-        name,
+        sku: product.sku,
+        name: product.name,
         quantity,
-        price,
-        tax_rate: Number.isFinite(taxRate) && taxRate >= 0 && taxRate <= 25 ? taxRate : 7,
+        price: product.price,
+        tax_rate: product.taxCategory === "drink" ? 19 : 7,
       });
     }
   }
@@ -234,7 +244,7 @@ export async function createPosOrder(body: CreatePosOrderBody): Promise<PosResul
       timestamp: new Date().toISOString(),
       total:     items.reduce((s, i) => s + i.price * i.quantity, 0),
       status:    paymentStatus,
-      items:     items.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price })),
+      items:     items.map((i) => ({ sku: i.sku, name: i.name, quantity: i.quantity, price: i.price })),
       customer:  customer ? `${customer.vorname} ${customer.nachname}` : undefined,
       phone:     customer?.telefon,
     });
@@ -300,7 +310,7 @@ export async function createPosOrder(body: CreatePosOrderBody): Promise<PosResul
       timestamp: new Date().toISOString(),
       total:     totalAmount,
       status:    paymentStatus,
-      items:     items.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price })),
+      items:     items.map((i) => ({ sku: i.sku, name: i.name, quantity: i.quantity, price: i.price })),
       customer:  customer ? `${customer.vorname} ${customer.nachname}` : undefined,
       phone:     customer?.telefon,
     });

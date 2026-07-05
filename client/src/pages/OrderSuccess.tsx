@@ -7,7 +7,7 @@ import { useCart } from "@/contexts/CartContext";
 
 interface StoredPosOrder {
   checkoutRef: string;
-  items: { variant_id?: string; name: string; quantity: number; price: number; tax_rate: number }[];
+  items: { variant_id?: string; sku: string; name: string; quantity: number; price: number; tax_rate: number }[];
   customer: { vorname: string; nachname: string; telefon: string; strasse: string; ort: string };
 }
 

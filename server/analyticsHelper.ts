@@ -16,7 +16,7 @@ export interface OrderRecord {
   timestamp: string;
   total:     number;
   status:    "PAID" | "OPEN";
-  items:     Array<{ name: string; quantity: number; price: number }>;
+  items:     Array<{ sku: string; name: string; quantity: number; price: number }>;
   customer?: string;
   phone?:    string;
 }
@@ -46,17 +46,19 @@ const SESSION_TTL_MS = 45_000; // 45 seconds — matches frontend 30 s heartbeat
 
 function pruneStale(): void {
   const cutoff = Date.now() - SESSION_TTL_MS;
-  for (const [id, ts] of activeSessions) {
+  activeSessions.forEach((ts, id) => {
     if (ts < cutoff) {
       activeSessions.delete(id);
       cartSessions.delete(id); // ghost cart gone too
     }
-  }
+  });
 }
 
 function totalCartItems(): number {
   let n = 0;
-  for (const c of cartSessions.values()) n += c;
+  cartSessions.forEach((count) => {
+    n += count;
+  });
   return n;
 }
 

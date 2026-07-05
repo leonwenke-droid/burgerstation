@@ -22,6 +22,8 @@ import OrderSuccess from "./pages/OrderSuccess";
 import AdminSettings from "./pages/AdminSettings";
 import BurgerStationPortfolioMockups from "./portfolio/BurgerStationPortfolioMockups";
 
+const CheckoutRoute = () => <Checkout />;
+
 function ScrollToTop() {
   const [location] = useLocation();
   useEffect(() => {
@@ -94,7 +96,7 @@ function Router() {
         <Route path="/datenschutz" component={Datenschutz} />
         <Route path="/agb" component={AGB} />
         <Route path="/widerrufsbelehrung" component={Widerruf} />
-        <Route path="/bestellen/checkout" component={Checkout} />
+        <Route path="/bestellen/checkout" component={CheckoutRoute} />
         <Route path="/bestellen/danke" component={ThankYou} />
         <Route path="/order-success" component={OrderSuccess} />
         <Route path="/admin" component={AdminSettings} />

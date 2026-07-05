@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import type { Product } from "@shared/products";
 
 // Stable session ID for analytics (not tied to auth — just identifies this browser tab)
 function getSessionId(): string {
@@ -10,17 +11,29 @@ function getSessionId(): string {
 
 export interface CartItem {
   id: string;
+  /** Internal article number. Stored in cart/order payloads, never rendered in customer UI. */
+  sku: string;
   name: string;
   /** Exact name as registered in the SumUp item catalogue (dashboard). Falls back to `name` if omitted. */
   sumup_name?: string;
-  /** SumUp Artikelnummer (SKU) as shown in the dashboard, e.g. "DBL-SMSH-001". */
-  sumup_sku?: string;
   /** SumUp Variant-ID from the official product CSV export. When present, price is resolved server-side from SUMUP_CATALOG. */
   variant_id?: string;
   /** Tax category for VAT calculation (delivery, Germany): food → 7% | drink → 19%. */
-  category?: "food" | "drink";
+  category: "food" | "drink";
   price: number;
   quantity: number;
+}
+
+export function cartItemFromProduct(product: Product): Omit<CartItem, "quantity"> {
+  return {
+    id: product.sku,
+    sku: product.sku,
+    name: product.name,
+    sumup_name: product.name,
+    variant_id: product.sumup?.variantId,
+    category: product.taxCategory,
+    price: product.price,
+  };
 }
 
 interface CartContextType {

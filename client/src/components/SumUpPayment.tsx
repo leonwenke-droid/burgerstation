@@ -12,6 +12,7 @@ interface SumUpMountConfig {
   locale?: string;
   country?: string;
   showFooter?: boolean;
+  showAmount?: boolean;
   showEmail?: boolean;
   email?: string;
   amount?: string;
@@ -78,7 +79,7 @@ export default function SumUpPayment({ checkoutId, amount, email }: SumUpPayment
       if (raw) {
         const posOrder = JSON.parse(raw) as {
           checkoutRef: string;
-          items: { variant_id?: string; name: string; quantity: number; price: number; tax_rate: number }[];
+          items: { variant_id?: string; sku: string; name: string; quantity: number; price: number; tax_rate: number }[];
           customer: { vorname: string; nachname: string; telefon: string; strasse: string; ort: string };
         };
         sessionStorage.setItem("bs_order_ref", posOrder.checkoutRef);
