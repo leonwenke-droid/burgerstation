@@ -26,23 +26,23 @@ import { rateLimitByIp, checkSameOrigin } from "./security";
 import { isStoreOpen } from "./storeStatusHelper";
 
 // ── Product ID mapping ────────────────────────────────────────────────────────
-// Keyed by SumUp variant_id → The Good Till product_id
-// Fill in the goodtill_product_id values from the POS dashboard.
-const GOODTILL_PRODUCTS: Record<
+// All SumUp-linked variants (prices resolved server-side). posProductId is optional
+// until the item exists in The Good Till / KassenPOS Pro catalogue.
+const SUMUP_VARIANTS: Record<
   string,
-  { product_id: string; sku: string; name: string; price: number; tax_rate: number }
+  { sku: string; name: string; price: number; tax_rate: number; posProductId?: string }
 > = Object.fromEntries(
   PRODUCTS.flatMap((product) =>
-    product.sumup?.posProductId
+    product.sumup?.variantId
       ? [
           [
             product.sumup.variantId,
             {
-              product_id: product.sumup.posProductId,
               sku: product.sku,
               name: product.name,
               price: product.price,
               tax_rate: product.taxCategory === "drink" ? 19 : 7,
+              posProductId: product.sumup.posProductId,
             },
           ],
         ]
@@ -121,7 +121,7 @@ const MAX_ORDER_TOTAL = 1000; // € — sanity ceiling for the whole order
  * catalog items (known variant_id) are ALWAYS taken from the server-side catalog,
  * so a manipulated client price is ignored. Non-catalog items are bounds-checked.
  */
-function sanitizePosItems(raw: unknown): { items?: PosOrderItem[]; error?: string } {
+export function sanitizePosItems(raw: unknown): { items?: PosOrderItem[]; error?: string } {
   if (!Array.isArray(raw) || raw.length === 0) {
     return { error: "items must be a non-empty array" };
   }
@@ -138,17 +138,18 @@ function sanitizePosItems(raw: unknown): { items?: PosOrderItem[]; error?: strin
       return { error: `Ungültige Menge für "${entry.name ?? entry.variant_id}".` };
     }
 
-    const catalog = entry.variant_id ? GOODTILL_PRODUCTS[entry.variant_id] : undefined;
-    if (catalog) {
-      // Trusted path — price/tax/name come from the server catalog, never the client.
+    const sumupEntry = entry.variant_id ? SUMUP_VARIANTS[entry.variant_id] : undefined;
+    if (sumupEntry) {
       clean.push({
         variant_id: entry.variant_id,
-        sku:        catalog.sku,
-        name:       catalog.name,
+        sku:        sumupEntry.sku,
+        name:       sumupEntry.name,
         quantity,
-        price:      catalog.price,
-        tax_rate:   catalog.tax_rate,
+        price:      sumupEntry.price,
+        tax_rate:   sumupEntry.tax_rate,
       });
+    } else if (entry.variant_id) {
+      return { error: `Unbekannte variant_id: "${entry.variant_id}".` };
     } else {
       const product = typeof entry.sku === "string" ? getProductBySku(entry.sku) : undefined;
       if (!product) return { error: `Unbekannte oder fehlende SKU: "${entry.sku ?? ""}".` };
@@ -257,9 +258,11 @@ export async function createPosOrder(body: CreatePosOrderBody): Promise<PosResul
     const token = await getToken(baseUrl);
 
     const lineItems = items.map((item) => {
-      const catalogEntry = item.variant_id ? GOODTILL_PRODUCTS[item.variant_id] : null;
+      const posProductId = item.variant_id
+        ? SUMUP_VARIANTS[item.variant_id]?.posProductId
+        : undefined;
       return {
-        product_id: catalogEntry?.product_id ?? null,  // null = free-text item
+        product_id: posProductId ?? null,  // null = free-text item until Good Till ID is set
         name:       item.name,
         quantity:   item.quantity,
         price:      item.price,
