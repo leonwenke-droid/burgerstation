@@ -4,6 +4,9 @@ import { kvSetEx, kvGet, kvDel } from "./kvStore";
 const CODE_TTL_SEC = 600;   // 10 Minuten
 const MAX_ATTEMPTS = 5;
 
+/** Fixed OTP when RESEND_API_KEY is not set (local/staging test without mail provider). */
+export const DEV_OTP_CODE = "123456";
+
 // Bekannte Wegwerf-/Trash-Mail-Domains (kostenlose Sperrliste, erweiterbar).
 const DISPOSABLE_DOMAINS = new Set([
   "mailinator.com", "10minutemail.com", "guerrillamail.com", "guerrillamail.info",
@@ -36,6 +39,9 @@ export function isDisposableDomain(email: string): boolean {
 }
 
 export function generateCode(): string {
+  if (!process.env.RESEND_API_KEY) {
+    return DEV_OTP_CODE;
+  }
   return String(crypto.randomInt(0, 1_000_000)).padStart(6, "0");
 }
 
@@ -85,9 +91,11 @@ export async function verifyOrderCode(
 export async function sendCodeEmail(email: string, code: string): Promise<{ ok: boolean }> {
   const apiKey = process.env.RESEND_API_KEY;
 
-  // Kein Key (lokal / noch nicht eingerichtet): Code in die Konsole loggen.
+  // Kein Key (lokal / noch nicht eingerichtet): fester Testcode, kein Versand.
   if (!apiKey) {
-    console.log(`[Email] (DEV — kein RESEND_API_KEY) Bestätigungscode für ${email}: ${code}`);
+    console.log(
+      `[Email] (DEV — kein RESEND_API_KEY) Bestätigungscode für ${email}: ${DEV_OTP_CODE}`,
+    );
     return { ok: true };
   }
 

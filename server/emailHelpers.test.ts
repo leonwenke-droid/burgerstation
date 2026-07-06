@@ -10,6 +10,7 @@ import {
 beforeEach(() => {
   delete process.env.UPSTASH_REDIS_REST_URL;
   delete process.env.UPSTASH_REDIS_REST_TOKEN;
+  delete process.env.RESEND_API_KEY;
 });
 
 describe("isValidEmail", () => {
@@ -33,11 +34,17 @@ describe("isDisposableDomain", () => {
 });
 
 describe("generateCode", () => {
-  it("returns a 6-digit numeric string", () => {
-    for (let i = 0; i < 50; i++) {
-      const c = generateCode();
+  it("returns fixed dev code when Resend is not configured", () => {
+    expect(generateCode()).toBe("123456");
+  });
+
+  it("returns a random 6-digit string when Resend is configured", () => {
+    process.env.RESEND_API_KEY = "re_test";
+    const codes = new Set(Array.from({ length: 20 }, () => generateCode()));
+    for (const c of codes) {
       expect(c).toMatch(/^\d{6}$/);
     }
+    expect(codes.size).toBeGreaterThan(1);
   });
 });
 

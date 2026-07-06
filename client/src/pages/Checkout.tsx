@@ -570,7 +570,7 @@ export default function Checkout({ preview }: { preview?: CheckoutPreviewConfig 
                     <div className="mt-2">
                       <input type="datetime-local" disabled
                         className={INPUT + " opacity-50 cursor-not-allowed"} />
-                      <p className="text-xs text-bs-ink-v mt-1">Demo: Zeitwahl noch nicht aktiv.</p>
+                      <p className="text-xs text-bs-ink-v mt-1">Zeitwahl folgt in Kürze.</p>
                     </div>
                   )}
                 </div>
@@ -710,7 +710,7 @@ export default function Checkout({ preview }: { preview?: CheckoutPreviewConfig 
                 )}
 
                 <p className="text-xs text-bs-ink-v text-center">
-                  * Pflichtfelder · Demo-Modus · Keine echte Zahlung
+                  * Pflichtfelder
                 </p>
               </div>
             </div>
@@ -734,11 +734,7 @@ export default function Checkout({ preview }: { preview?: CheckoutPreviewConfig 
               </div>
 
               {/* Totals */}
-              <div className="border-t-2 border-dashed border-bs-ink/20 pt-3 space-y-2">
-                <div className="flex justify-between text-sm text-bs-ink-v">
-                  <span>Lieferung</span>
-                  <span>Auf Anfrage</span>
-                </div>
+              <div className="border-t-2 border-dashed border-bs-ink/20 pt-3">
                 <div className="flex justify-between items-center">
                   <span className="font-body font-bold text-bs-ink">Gesamt</span>
                   <span className="text-headline text-2xl text-bs-teal tabular-nums">
@@ -747,14 +743,7 @@ export default function Checkout({ preview }: { preview?: CheckoutPreviewConfig 
                 </div>
               </div>
 
-              {/* Info */}
-              <div className="mt-4 bg-bs-yellow/30 border-2 border-bs-yellow rounded-xl p-3">
-                <p className="text-xs text-bs-ink-v leading-relaxed">
-                  🛵 Wir liefern in Leer und Umgebung. Nach der Bestellung melden wir uns per{" "}
-                  <strong className="text-bs-ink">WhatsApp oder Anruf</strong> zur Bestätigung.
-                </p>
-              </div>
-              <div className="mt-3 flex items-center gap-2 text-xs text-bs-ink-v">
+              <div className="mt-4 flex items-center gap-2 text-xs text-bs-ink-v">
                 <Phone size={12} className="shrink-0" />
                 <span>+49 491 997 55279</span>
               </div>
